@@ -1,10 +1,10 @@
-import Header from "@/components/Header";
+
 import ProductSection from "@/components/ProductsSection";
 import CategorySection from "@/components/CategorySection";
 export default function Home() {
   return (
     <>
-      <Header/>
+      
 
       <CategorySection/>
       <ProductSection/>

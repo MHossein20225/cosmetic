@@ -1,27 +1,17 @@
 import { ArrowUpRight } from "lucide-react";
+import type { CategoryCardProps } from "@/data/types";
+import Image from "next/image";
 
-export interface Category {
-  id: string;
-  title: string;
-  description: string;
-  count: string;
-  image: string;
-}
-
-interface CategoryCardProps {
-  category: Category;
-  index?: number;
-}
-
-export default function CategoryCard({ category, index }: CategoryCardProps) {
+export default function CategoryCard({ category }: CategoryCardProps) {
   return (
     <article className="group relative flex flex-col bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-1">
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-rose-50">
-        <img
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-          alt={category.title}
+        <Image
           src={category.image}
-          loading="lazy"
+          alt={category.title}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full">
@@ -47,11 +37,6 @@ export default function CategoryCard({ category, index }: CategoryCardProps) {
             <span>Discover</span>
             <ArrowUpRight size={14} />
           </a>
-          {typeof index === "number" && (
-            <span className="text-gray-300 text-xs">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-          )}
         </div>
       </div>
     </article>
