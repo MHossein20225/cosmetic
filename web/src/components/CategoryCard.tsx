@@ -8,7 +8,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-rose-50">
         <Image
           src={category.image}
-          alt={category.title}
+          alt={category.name}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
@@ -23,7 +23,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
       <div className="p-6 flex flex-col flex-1 justify-between">
         <div>
           <h3 className="font-serif text-xl text-gray-900 tracking-tight group-hover:text-amber-800 transition-colors">
-            {category.title}
+            {category.name}
           </h3>
           <p className="text-sm text-gray-500 mt-2 leading-relaxed">
             {category.description}

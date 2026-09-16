@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { User, Search, ShoppingBag, Menu, X, Flower } from "lucide-react";
 import { NAV_LINKS } from "@/data/data";
-import { usePathname } from "next/navigation";
+import NavLinkItem from "./NavLinkItems";
 
 
 export default function Header() {
-  const pathName = usePathname()
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -22,17 +21,7 @@ export default function Header() {
 
         <nav className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className={`text-xs font-medium uppercase tracking-wider transition-colors ${
-                link.href === pathName
-                  ? "text-amber-800"
-                  : "text-gray-700 hover:text-amber-800"
-              }`}
-            >
-              {link.label}
-            </a>
+            <NavLinkItem key={link.href} link={link}/>
           ))}
         </nav>
 
@@ -76,19 +65,12 @@ export default function Header() {
         }`}
       >
         <div className="flex flex-col gap-1 px-6 pb-4 pt-2 border-t border-rose-200/60 bg-rose-50/95">
-          {NAV_LINKS.map((link, i) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={() => setIsMenuOpen(false)}
-              className={`py-2.5 text-sm font-medium uppercase tracking-wider transition-colors ${
-                i === 0
-                  ? "text-amber-800"
-                  : "text-gray-700 hover:text-amber-800"
-              }`}
-            >
-              {link.label}
-            </a>
+          {NAV_LINKS.map((link) => (
+            <NavLinkItem
+              key={link.href}
+              link={link}
+              onClickFn={() => setIsMenuOpen(false)}
+            />
           ))}
         </div>
       </nav>

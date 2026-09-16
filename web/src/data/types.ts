@@ -1,6 +1,8 @@
+import { MouseEventHandler } from "react";
+
 export interface Category {
     id: string;  
-    title: string;
+    name: string;
     description: string;
     count: string;
     image: string;
@@ -12,13 +14,11 @@ export interface CategoryCardProps {
 
 
 export interface Product {
-  id: string;
+  id: number;
   category: string;
-  title: string;
+  name: string;
+  description: string
   price: number;
-  oldPrice: number | null;
-  rating: number;
-  reviews: number;
   image: string;
 }
 export interface ProductCardProps {
@@ -27,4 +27,9 @@ export interface ProductCardProps {
 export interface NavLink {
     label: string;
     readonly href: string;
+}
+
+export interface NavLinkProps {
+    link: NavLink;
+    onClickFn?: MouseEventHandler;
 }
