@@ -24,3 +24,7 @@ export interface Product {
 export interface ProductCardProps {
     product: Product
 }
+export interface NavLink {
+    label: string;
+    readonly href: string;
+}

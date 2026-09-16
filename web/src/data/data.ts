@@ -1,4 +1,4 @@
-import type { Product, Category } from "@/data/types";
+import type { Product, Category, NavLink } from "@/data/types";
 export const PRODUCTS: Product[] = [
   {
     id: "botanical-gold-oil",
@@ -75,4 +75,12 @@ export const CATEGORIES: Category[] = [
     count: "10 Formulas",
     image: "/nonProduct.jpg",
   },
+];
+
+
+ export const NAV_LINKS: NavLink[] = [
+  { label: "Home", href: "/" },
+  { label: "Shop", href: "/products" },
+  { label: "Brands", href: "/Brands" },
+  { label: "About us", href: "/AboutUs" },
 ];
