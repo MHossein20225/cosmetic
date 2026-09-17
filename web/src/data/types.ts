@@ -1,7 +1,8 @@
+import { BRANDS } from '@/data/data';
 import { MouseEventHandler } from "react";
 
 export interface Category {
-    id: string;  
+    id: number;  
     name: string;
     description: string;
     count: string;
@@ -32,4 +33,20 @@ export interface NavLink {
 export interface NavLinkProps {
     link: NavLink;
     onClickFn?: MouseEventHandler;
+}
+
+export interface CartItem {
+    id: number,
+    name: string,
+    category: string,
+    description: string
+    price: number,
+    qty: number,
+    image: string,
+}
+
+export interface Brand {
+    id: number;
+    name: string;
+    image: string;
 }

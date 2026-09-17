@@ -1,4 +1,4 @@
-import type { Product, Category, NavLink } from "@/data/types";
+import type { Product, Category, NavLink, CartItem } from "@/data/types";
 export const PRODUCTS: Product[] = [
   {
     id: 1,
@@ -67,7 +67,7 @@ export const PRODUCTS: Product[] = [
 ];
 export const CATEGORIES: Category[] = [
   {
-    id: "skincare",
+    id: 1,
     name: "Skincare",
     description:
       "Hydrating serums, botanical oils, and gentle cleansing balms formulated for deep barrier restoration.",
@@ -75,7 +75,7 @@ export const CATEGORIES: Category[] = [
     image: "/nonProduct.jpg",
   },
   {
-    id: "makeup",
+    id: 2,
     name: "Makeup",
     description:
       "Featherlight tints, sheer luminizers, and dewy flush balms that enhance innate complexion.",
@@ -83,7 +83,7 @@ export const CATEGORIES: Category[] = [
     image: "/nonProduct.jpg",
   },
   {
-    id: "fragrance",
+    id: 3,
     name: "Fragrance",
     description:
       "Subtle botanical notes, warm cedarwood undertones, and ethereal hints of morning dewy rose.",
@@ -91,7 +91,7 @@ export const CATEGORIES: Category[] = [
     image: "/nonProduct.jpg",
   },
   {
-    id: "bath-body",
+    id: 4,
     name: "Bath & Body",
     description:
       "Silkening body washes and whipped body soufflés infused with skin-loving botanical squalane.",
@@ -104,6 +104,70 @@ export const CATEGORIES: Category[] = [
  export const NAV_LINKS: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/products" },
-  { label: "Brands", href: "/Brands" },
-  { label: "About us", href: "/AboutUs" },
+  { label: "Brands", href: "/brands" },
+  { label: "About us", href: "/about_us" },
+];
+
+export const CART_ITEMS: CartItem[] = [
+  {
+    id: 1,
+    name: "Dew Elixir Facial Oil",
+    category: "Botanical Elixir",
+    description: "Size: 30ml / 1.0 fl. oz • Cold-pressed Squalane & Rosehip",
+    price: 68,
+    qty: 1,
+    image: "/nonImage.jpg",
+  },
+  {
+    id: 2,
+    name: "Petal Lip & Cheek Balm",
+    category: "Nourishing Tint",
+    description: "Shade: Peony flush • Shea Butter & Hibiscus extract",
+    price: 32,
+    qty: 1,
+    image: "/nonImage.jpg",
+  },
+];
+
+export const BRANDS = [
+  {
+    id: 1,
+    name: "LUMIÈRE",
+    image: "/nonProduct.jpg",
+  },
+  {
+    id: 2,
+    name: "AURELIA",
+    image: "/nonProduct.jpg",
+  },
+  {
+    id: 3,
+    name: "ÉLAN",
+    image: "/nonProduct.jpg",
+  },
+  {
+    id: 4,
+    name: "VELVET",
+    image: "/nonProduct.jpg",
+  },
+  {
+    id: 5,
+    name: "NOIR",
+    image: "/nonProduct.jpg",
+  },
+  {
+    id: 6,
+    name: "MAISON ROSE",
+    image: "/nonProduct.jpg",
+  },
+  {
+    id: 7,
+    name: "ATELIER",
+    image: "/nonProduct.jpg",
+  },
+  {
+    id: 8,
+    name: "SÉRUM",
+    image: "/nonProduct.jpg",
+  },
 ];
