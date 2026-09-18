@@ -4,6 +4,7 @@ import { useState } from "react";
 import { User, Search, ShoppingBag, Menu, X, Flower } from "lucide-react";
 import { NAV_LINKS } from "@/data/data";
 import NavLinkItem from "./NavLinkItems";
+import Link from "next/link";
 
 
 export default function Header() {
@@ -32,7 +33,8 @@ export default function Header() {
           >
             <Search size={20} />
           </button>
-          <button
+          <Link
+            href="/cart"
             aria-label="Cart"
             className="relative text-gray-700 hover:text-amber-800 transition-colors"
           >
@@ -40,7 +42,7 @@ export default function Header() {
             <span className="absolute -top-2 -right-2 bg-amber-800 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
               2
             </span>
-          </button>
+          </Link>
           <button
             aria-label="Account"
             className="w-8 h-8 rounded-full overflow-hidden bg-rose-200 flex justify-center items-center flex-shrink-0"
