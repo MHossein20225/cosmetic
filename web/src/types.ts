@@ -1,4 +1,4 @@
-// types/index.ts
+
 
 export type Role = "CUSTOMER" | "ADMIN";
 
@@ -22,6 +22,7 @@ export interface Session {
 export interface Category {
   id: number;
   name: string;
+  image: string
 }
 
 export interface Product {
@@ -31,7 +32,7 @@ export interface Product {
   price: number;
   discount: number;
   stock: number;
-  imageUrl: string | null;
+  imageUrl: string;
   categoryId: number;
   createdAt: Date;
   updatedAt: Date;
