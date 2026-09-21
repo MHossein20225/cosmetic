@@ -13,7 +13,7 @@ export default function Products() {
         <ProductsView
           title="All Products"
           description="Every ritual, every category — the complete collection."
-          products={products}
+          products={products ?? []}
         />
       )}
     </>

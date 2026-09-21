@@ -1,4 +1,3 @@
-import { BRANDS } from '@/data/data';
 import { MouseEventHandler } from "react";
 
 export interface Category {
@@ -18,10 +17,20 @@ export interface Product {
   id: number;
   category: string;
   name: string;
-  description: string
+  description: string;
   price: number;
   image: string;
 }
+
+export interface ProductCardProduct {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl?: string;
+  image?: string;
+}
+
 export interface ProductCardProps {
     product: Product
 }
@@ -39,7 +48,7 @@ export interface CartItem {
     id: number,
     name: string,
     category: string,
-    description: string
+    description: string;
     price: number,
     qty: number,
     image: string,

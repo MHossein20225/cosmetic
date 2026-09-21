@@ -1,4 +1,3 @@
-import CategoryCard from "./CategoryCard";
 export default function CategorySection() {
     return(
         <section className="w-full max-w-[1360px] mx-auto px-6 py-16 md:py-24">

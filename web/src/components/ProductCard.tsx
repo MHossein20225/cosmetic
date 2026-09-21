@@ -1,6 +1,6 @@
-import type { Product } from "@/types";
+import type { ProductCardProduct } from "@/data/types";
 import Image from "next/image";
-export default function ProductCard({ product }: {product: Product}) {
+export default function ProductCard({ product }: {product: ProductCardProduct}) {
   return (
     <article
   key={product.id}
@@ -8,7 +8,7 @@ export default function ProductCard({ product }: {product: Product}) {
 >
   <div className="relative w-full aspect-[4/5] bg-[#fcf1ef] rounded-lg overflow-hidden flex items-center justify-center">
     <Image
-      src={product.imageUrl}
+      src={product.imageUrl ?? product.image ?? "/nonProduct.jpg"}
       alt={product.name}
       fill
       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"

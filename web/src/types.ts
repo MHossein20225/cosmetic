@@ -1,5 +1,3 @@
-
-
 export type Role = "CUSTOMER" | "ADMIN";
 
 export interface User {
@@ -22,7 +20,7 @@ export interface Session {
 export interface Category {
   id: number;
   name: string;
-  image: string
+  image: string;
 }
 
 export interface Product {
@@ -37,6 +35,7 @@ export interface Product {
   createdAt: Date;
   updatedAt: Date;
 }
+
 export interface UserWithSessions extends User {
   sessions: Session[];
 }
@@ -48,6 +47,7 @@ export interface ProductWithCategory extends Product {
 export interface CategoryWithProducts extends Category {
   products: Product[];
 }
+
 export interface CreateProductInput {
   name: string;
   description: string;
@@ -57,4 +57,5 @@ export interface CreateProductInput {
   imageUrl?: string;
   categoryId: number;
 }
+
 export type SafeUser = Omit<User, "password">;

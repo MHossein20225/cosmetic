@@ -1,6 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
 import { PRODUCTS as products } from "@/data/data";
-import Image from "next/image";
 import ProductCard from "./ProductCard";
 
 export default function ProductSection(){

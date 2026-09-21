@@ -101,7 +101,7 @@ export const CATEGORIES: Category[] = [
 ];
 
 
- export const NAV_LINKS: NavLink[] = [
+export const NAV_LINKS: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/products" },
   { label: "Brands", href: "/brands" },
