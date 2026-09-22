@@ -15,7 +15,7 @@ export async function getProduct(id: number): Promise<Product> {
   return response.json();
 }
 export async function getCategoriedProducts(category: string): Promise<Product[]> {
-  const response = await fetch(`/api/products/${category}`);
+  const response = await fetch(`/api/product/category/${category}`);
   if (!response.ok) {
     throw new Error("محصولات این دسته دریافت نشد");
   }

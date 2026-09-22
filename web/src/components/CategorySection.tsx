@@ -1,4 +1,14 @@
+'use client'
+
+import { useCategories } from "@/hooks/categoryHooks"
+import CategoryCard from "./CategoryCard"
+import Link from "next/link"
+
 export default function CategorySection() {
+  const {categories, isLoading} = useCategories()
+  if(isLoading){
+    return "دسته بندی ها درحال دریافت است ...."
+  }
     return(
         <section className="w-full max-w-[1360px] mx-auto px-6 py-16 md:py-24">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-3 border-b border-gray-200">
@@ -16,9 +26,11 @@ export default function CategorySection() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* {categories.map((category) => (
-              <CategoryCard key={category.id} category={category} />
-            ))} */}
+            {categories && categories.map((category) => (
+              <Link key={category.id} href={`/products/${category.name}`}>
+                <CategoryCard key={category.id} category={category} />
+              </Link>
+            ))}
           </div>
         </section>
     )

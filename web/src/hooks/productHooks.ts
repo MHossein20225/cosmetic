@@ -1,6 +1,6 @@
 'use client'
 import { useQuery } from "@tanstack/react-query";
-import { getProducts, getProduct, getCategoriedProducts } from "./productRequests";
+import { getProducts, getProduct, getCategoriedProducts } from "../lib/productRequests";
 import type { Product } from "@/types";
 
 export function useProducts() {
@@ -26,5 +26,5 @@ export function useCategoriedProducts(category: string | undefined) {
     queryFn: () => getCategoriedProducts(category as string),
     enabled: category !== undefined,
   });
-  return { products: data, isLoading, isError, error };
+  return { categoriedProduct: data, isLoading, isError, error };
 }

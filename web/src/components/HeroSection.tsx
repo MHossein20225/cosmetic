@@ -1,17 +1,15 @@
-import Image from "next/image";
-
 export default function HeroSection() {
     return (
         <section className="relative flex min-h-[70vh] w-full items-center justify-center overflow-hidden bg-[#f7f3ee] px-6 py-24 sm:min-h-[75vh] sm:px-10 lg:min-h-[80vh] lg:px-16">
         {/* Background */}
         <div className="absolute inset-0">
-          <Image
+          {/* <Image
             src=""
             alt=""
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="h-full w-full object-cover"
-          />
+          /> */}
 
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/30" />

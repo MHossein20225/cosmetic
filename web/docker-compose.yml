@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cosmetic
+      POSTGRES_PASSWORD: cosmetic_dev_password
+      POSTGRES_DB: cosmetic_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - cosmetic_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cosmetic -d cosmetic_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://cosmetic:cosmetic_dev_password@db:5432/cosmetic_db?schema=public"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  cosmetic_pgdata:

@@ -19,20 +19,13 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  discount: number;
   image: string;
 }
 
-export interface ProductCardProduct {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl?: string;
-  image?: string;
-}
 
 export interface ProductCardProps {
-    product: Product
+    product: Product | undefined
 }
 export interface NavLink {
     label: string;
