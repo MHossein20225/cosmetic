@@ -4,20 +4,21 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  try {
-    const { id } = await params;
-    const product = await prisma.product.findUnique({
-      where: { id: Number(id) },
-      include:{category: true}
-    });
+  const { id } = await params;
 
-    if (!product) {
-      return Response.json({ error: "محصول پیدا نشد" }, { status: 404 });
-    }
+  const product = await prisma.product.findUnique({
+    where: { id: Number(id) },
+    include: {
+      category: true,
+    },
+  });
 
-    return Response.json(product);
-  } catch (error) {
-    console.error(error);
-    return Response.json({ error: "Failed to fetch product" }, { status: 500 });
+  if (!product) {
+    return Response.json(
+      { error: "محصول پیدا نشد" },
+      { status: 404 },
+    );
   }
+
+  return Response.json(product);
 }

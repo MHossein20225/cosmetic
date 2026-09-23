@@ -13,12 +13,12 @@ export default function Header() {
   return (
     <header className="w-full bg-rose-50/60 sticky top-0 z-50 backdrop-blur-md">
       <div className="max-w-[1360px] mx-auto px-6 py-4 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <span className="w-9 h-9 rounded-full bg-rose-200 flex items-center justify-center">
             <span className="text-amber-800 text-lg"><Flower/></span>
           </span>
           <span className="font-serif text-xl text-gray-900">Store Name</span>
-        </a>
+        </Link>
 
         <nav className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map((link) => (

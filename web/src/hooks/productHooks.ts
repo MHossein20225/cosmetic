@@ -13,7 +13,7 @@ export function useProducts() {
 
 export function useProduct(id: number | undefined) {
   const { data, isLoading, isError, error } = useQuery<Product>({
-    queryKey: ["products", id],
+    queryKey: ["product", id],
     queryFn: () => getProduct(id as number),
     enabled: id !== undefined,
   });

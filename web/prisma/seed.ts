@@ -24,7 +24,7 @@ async function main() {
         price: 2999,
         discount: 10,
         stock: 50,
-        imageUrl: '/images/vitamin-c-serum.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: skincare.id
       },
       {
@@ -33,7 +33,7 @@ async function main() {
         price: 2499,
         discount: 0,
         stock: 80,
-        imageUrl: '/images/hyaluronic-moisturizer.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: skincare.id
       },
       {
@@ -42,7 +42,7 @@ async function main() {
         price: 1899,
         discount: 15,
         stock: 60,
-        imageUrl: '/images/niacinamide-serum.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: skincare.id
       },
       {
@@ -51,7 +51,7 @@ async function main() {
         price: 1499,
         discount: 0,
         stock: 100,
-        imageUrl: '/images/foaming-cleanser.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: skincare.id
       },
 
@@ -62,7 +62,7 @@ async function main() {
         price: 1599,
         discount: 0,
         stock: 120,
-        imageUrl: '/images/matte-lipstick.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: makeup.id
       },
       {
@@ -71,7 +71,7 @@ async function main() {
         price: 3299,
         discount: 5,
         stock: 70,
-        imageUrl: '/images/foundation.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: makeup.id
       },
       {
@@ -80,7 +80,7 @@ async function main() {
         price: 1299,
         discount: 0,
         stock: 150,
-        imageUrl: '/images/mascara.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: makeup.id
       },
       {
@@ -89,7 +89,7 @@ async function main() {
         price: 3599,
         discount: 20,
         stock: 40,
-        imageUrl: '/images/eyeshadow-palette.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: makeup.id
       },
 
@@ -100,7 +100,7 @@ async function main() {
         price: 1999,
         discount: 0,
         stock: 65,
-        imageUrl: '/images/argan-oil-serum.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: haircare.id
       },
       {
@@ -109,7 +109,7 @@ async function main() {
         price: 1799,
         discount: 10,
         stock: 90,
-        imageUrl: '/images/repairing-shampoo.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: haircare.id
       },
 
@@ -120,7 +120,7 @@ async function main() {
         price: 4999,
         discount: 0,
         stock: 30,
-        imageUrl: '/images/floral-perfume.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: fragrance.id
       },
       {
@@ -129,7 +129,7 @@ async function main() {
         price: 1299,
         discount: 0,
         stock: 100,
-        imageUrl: '/images/citrus-mist.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: fragrance.id
       },
 
@@ -140,7 +140,7 @@ async function main() {
         price: 999,
         discount: 0,
         stock: 45,
-        imageUrl: '/images/jade-roller.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: skincareTools.id
       },
       {
@@ -149,7 +149,7 @@ async function main() {
         price: 2799,
         discount: 25,
         stock: 55,
-        imageUrl: '/images/brush-set.jpg',
+        imageUrl: '/images/nonProduct.jpg',
         categoryId: skincareTools.id
       }
     ]

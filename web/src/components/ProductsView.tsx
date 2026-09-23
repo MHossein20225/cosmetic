@@ -45,7 +45,7 @@ export default function ProductsView({
           <p className="text-sm text-gray-500 mt-2 max-w-xl">{description}</p>
         )}
         <p className="text-sm text-gray-500 mt-2">
-          {products.length} {products.length === 1 ? "product" : "products"}
+          {products?.length} {products?.length === 1 ? "product" : "products"}
         </p>
       </div>
 

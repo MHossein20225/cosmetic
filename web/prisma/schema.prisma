@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -15,22 +14,17 @@ model User {
   email     String    @unique
   password  String
   role      Role      @default(CUSTOMER)
-  sessions  Session[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-}
-
-enum Role {
-  CUSTOMER
-  ADMIN
+  sessions  Session[]
 }
 
 model Session {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Product {
@@ -42,13 +36,18 @@ model Product {
   stock       Int      @default(0)
   imageUrl    String?
   categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  category    Category @relation(fields: [categoryId], references: [id])
 }
 
 model Category {
   id       Int       @id @default(autoincrement())
   name     String    @unique
   products Product[]
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
 }
