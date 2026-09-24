@@ -126,7 +126,7 @@ export default function ProductPage({
           <div className="relative w-full aspect-[4/5] bg-rose-50 rounded-lg overflow-hidden shadow-sm group">
             <Image
               src={product.imageUrl}
-              alt={product.imageUrl}
+              alt={product.name}
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 58vw"

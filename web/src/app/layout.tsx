@@ -26,6 +26,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // const session = await getSession();
+  // const user = session ? { id: session.user.id, name: session.user.name } : null;
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="[font-family:var(--font-geist-sans)] bg-rose-50/40 text-gray-900 antialiased min-h-screen flex flex-col selection:bg-rose-200 selection:text-gray-900">

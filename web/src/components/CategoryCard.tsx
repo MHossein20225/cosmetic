@@ -7,7 +7,7 @@ export default function CategoryCard({ category }: { category: Category }) {
     <article className="group relative flex flex-col h-full bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-1">
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-rose-50">
         <Image
-          src={category.image || "/nonProduct.jpg"}
+          src={category.image || "/images/nonProduct.jpg"}
           alt={category.name}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"

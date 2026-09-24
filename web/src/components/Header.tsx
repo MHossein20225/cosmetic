@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { User, Search, ShoppingBag, Menu, X, Flower } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, Flower } from "lucide-react";
 import { NAV_LINKS } from "@/data";
 import NavLinkItem from "./NavLinkItems";
 import Link from "next/link";
-
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,16 +12,18 @@ export default function Header() {
   return (
     <header className="w-full bg-rose-50/60 sticky top-0 z-50 backdrop-blur-md">
       <div className="max-w-[1360px] mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="#" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <span className="w-9 h-9 rounded-full bg-rose-200 flex items-center justify-center">
-            <span className="text-amber-800 text-lg"><Flower/></span>
+            <span className="text-amber-800 text-lg">
+              <Flower size={18} />
+            </span>
           </span>
           <span className="font-serif text-xl text-gray-900">Store Name</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map((link) => (
-            <NavLinkItem key={link.href} link={link}/>
+            <NavLinkItem key={link.href} link={link} />
           ))}
         </nav>
 
@@ -33,6 +34,7 @@ export default function Header() {
           >
             <Search size={20} />
           </button>
+
           <Link
             href="/cart"
             aria-label="Cart"
@@ -43,12 +45,21 @@ export default function Header() {
               2
             </span>
           </Link>
-          <button
-            aria-label="Account"
-            className="w-8 h-8 rounded-full overflow-hidden bg-rose-200 flex justify-center items-center flex-shrink-0"
-          >
-            <User size={16} className="text-amber-800" />
-          </button>
+
+          <div className="hidden sm:flex items-center gap-3 text-xs font-medium uppercase tracking-wider">
+            <Link
+              href="/login"
+              className="text-gray-700 hover:text-amber-800 transition-colors"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="bg-amber-800 text-white px-3 py-2 rounded hover:bg-amber-900 transition-colors"
+            >
+              Register
+            </Link>
+          </div>
 
           <button
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
@@ -74,6 +85,23 @@ export default function Header() {
               onClickFn={() => setIsMenuOpen(false)}
             />
           ))}
+
+          <div className="flex flex-col gap-1 pt-2 mt-2 border-t border-rose-200/60">
+            <Link
+              href="/login"
+              onClick={() => setIsMenuOpen(false)}
+              className="py-2.5 text-sm font-medium uppercase tracking-wider text-gray-700"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              onClick={() => setIsMenuOpen(false)}
+              className="py-2.5 text-sm font-medium uppercase tracking-wider text-amber-800"
+            >
+              Register
+            </Link>
+          </div>
         </div>
       </nav>
     </header>

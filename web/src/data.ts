@@ -16,7 +16,7 @@ export const CART_ITEMS: CartItem[] = [
     description: "Size: 30ml / 1.0 fl. oz • Cold-pressed Squalane & Rosehip",
     price: 68,
     qty: 1,
-    image: "/nonImage.jpg",
+    image: "/images/nonProduct.jpg",
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ export const CART_ITEMS: CartItem[] = [
     description: "Shade: Peony flush • Shea Butter & Hibiscus extract",
     price: 32,
     qty: 1,
-    image: "/nonImage.jpg",
+    image: "/images/nonProduct.jpg",
   },
 ];
 
@@ -33,41 +33,41 @@ export const BRANDS: Brand[] = [
   {
     id: 1,
     name: "LUMIÈRE",
-    image: "/nonProduct.jpg",
+    image: "/images/nonProduct.jpg",
   },
   {
     id: 2,
     name: "AURELIA",
-    image: "/nonProduct.jpg",
+    image: "/images/nonProduct.jpg",
   },
   {
     id: 3,
     name: "ÉLAN",
-    image: "/nonProduct.jpg",
+    image: "/images/nonProduct.jpg",
   },
   {
     id: 4,
     name: "VELVET",
-    image: "/nonProduct.jpg",
+    image: "/images/nonProduct.jpg",
   },
   {
     id: 5,
     name: "NOIR",
-    image: "/nonProduct.jpg",
+    image: "/images/nonProduct.jpg",
   },
   {
     id: 6,
     name: "MAISON ROSE",
-    image: "/nonProduct.jpg",
+    image: "/images/nonProduct.jpg",
   },
   {
     id: 7,
     name: "ATELIER",
-    image: "/nonProduct.jpg",
+    image: "/images/nonProduct.jpg",
   },
   {
     id: 8,
     name: "SÉRUM",
-    image: "/nonProduct.jpg",
+    image: "/images/nonProduct.jpg",
   },
 ];

@@ -41,7 +41,7 @@ export default function Cart() {
                 key={cart.id}
                 className="bg-white p-4 sm:p-5 rounded-xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 transition-all duration-300"
               >
-                <div className="w-24 h-32 sm:w-28 sm:h-36 rounded-lg bg-[#fcf1ef] overflow-hidden shrink-0">
+                <div className="relative w-24 h-32 sm:w-28 sm:h-36 rounded-lg bg-[#fcf1ef] overflow-hidden shrink-0">
                   <Image
                     src={cart.image}
                     alt={cart.name}
