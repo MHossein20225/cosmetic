@@ -19,50 +19,9 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import { useProduct } from "@/hooks/productHooks";
+import { useCategoriedProducts, useProduct } from "@/hooks/productHooks";
 
-const GALLERY_IMAGES = [
-  {
-    src: "/nonProduct.jpg",
-    alt: "Product image",
-  },
-  {
-    src: "/nonProduct.jpg",
-    alt: "Product detail",
-  },
-  {
-    src: "/nonProduct.jpg",
-    alt: "Product texture",
-  },
-  {
-    src: "/nonProduct.jpg",
-    alt: "Product ingredients",
-  },
-];
 
-const RELATED_PRODUCTS = [
-  {
-    step: "Step 1",
-    category: "Hydrating Mist",
-    title: "Petal Hydro Mist",
-    price: 44,
-    image: "/nonProduct.jpg",
-  },
-  {
-    step: "Step 3",
-    category: "Cellular Recovery",
-    title: "Velvet Barrier Crème",
-    price: 74,
-    image: "/nonProduct.jpg",
-  },
-  {
-    step: "Ritual Tool",
-    category: "Sculpting Stone",
-    title: "Blush Quartz Gua Sha",
-    price: 36,
-    image: "/nonProduct.jpg",
-  },
-];
 
 export default function ProductPage({
   params,
@@ -70,7 +29,6 @@ export default function ProductPage({
   params: Promise<{ id: string }>;
 }) {
   const [quantity, setQuantity] = useState(1);
-  const [activeImage, setActiveImage] = useState(0);
   const [justAdded, setJustAdded] = useState(false);
 
   const { id } = use(params);
@@ -80,6 +38,8 @@ export default function ProductPage({
     isLoading,
     error,
   } = useProduct(Number(id));
+
+  const { categoriedProducts } = useCategoriedProducts(product?.category.name)
 
   function handleQtyChange(delta: number) {
     setQuantity((qty) => Math.min(10, Math.max(1, qty + delta)));
@@ -127,6 +87,7 @@ export default function ProductPage({
   }
 
   const total = product.price * quantity;
+  const categoryName = product.category?.name;
 
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-8 md:py-12">
@@ -142,7 +103,7 @@ export default function ProductPage({
         <ChevronRight size={12} />
 
         <Link
-          href={`/products?category=${product.category.id}`}
+          href={`/products/${product.category.name}`}
           className="hover:text-amber-800 transition-colors"
         >
           {product.category.name}
@@ -462,7 +423,7 @@ export default function ProductPage({
 
               <p className="text-sm text-gray-500 leading-relaxed mt-3">
                 Standard shipping is available on all
-                orders. Please check your store's shipping
+                orders. Please check your store&apos;s shipping
                 and return policy for details.
               </p>
             </div>
@@ -496,35 +457,31 @@ export default function ProductPage({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {RELATED_PRODUCTS.map((relatedProduct) => (
+          {(categoriedProducts ?? []).map((product) => (
             <div
-              key={relatedProduct.title}
+              key={product.id}
               className="bg-rose-50 rounded-lg p-4 flex flex-col group transition-all duration-300 hover:shadow-md"
             >
               <div className="relative aspect-[4/5] bg-white rounded overflow-hidden mb-4">
                 <Image
-                  src={relatedProduct.image}
-                  alt={relatedProduct.title}
+                  src={product.imageUrl}
+                  alt={product.name}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-
-                <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-sm text-[10px] uppercase text-gray-900">
-                  {relatedProduct.step}
-                </span>
               </div>
 
               <span className="text-xs uppercase tracking-wider text-gray-500 mb-1">
-                {relatedProduct.category}
+                {categoryName}
               </span>
 
               <h3 className="font-serif text-lg text-gray-900 mb-2">
-                {relatedProduct.title}
+                {product.name}
               </h3>
 
               <span className="text-base font-semibold text-gray-900 mt-auto">
-                ${relatedProduct.price.toFixed(2)}
+                ${product.price.toFixed(2)}
               </span>
             </div>
           ))}

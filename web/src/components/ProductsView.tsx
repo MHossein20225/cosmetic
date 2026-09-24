@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
-import type { Product } from "@/data/types";
+import type { Product } from "@/types";
 
 interface ProductsViewProps {
   title: string;

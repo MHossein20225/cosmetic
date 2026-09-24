@@ -11,7 +11,7 @@ interface CategoriedProductProps {
 
 export default function CategoriedProduct({ params }: CategoriedProductProps) {
   const { category } = use(params);
-  const { categoriedProduct, isLoading } = useCategoriedProducts(category);
+  const { categoriedProducts, isLoading } = useCategoriedProducts(category);
 
   if (isLoading) {
     return <Loading />;
@@ -20,7 +20,7 @@ export default function CategoriedProduct({ params }: CategoriedProductProps) {
   return (
     <ProductsView
       title={`${category} Products`}
-      products={categoriedProduct}
+      products={categoriedProducts ?? []}
       categoryLabel={category}
     />
   );

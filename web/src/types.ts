@@ -1,3 +1,5 @@
+import type { MouseEventHandler } from "react";
+
 export type Role = "CUSTOMER" | "ADMIN";
 
 export interface User {
@@ -32,12 +34,8 @@ export interface Product {
   stock: number;
   imageUrl: string;
   categoryId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface UserWithSessions extends User {
-  sessions: Session[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ProductWithCategory extends Product {
@@ -53,9 +51,35 @@ export interface CreateProductInput {
   description: string;
   price: number;
   discount?: number;
-  stock?: number;
+  stock: number;
   imageUrl?: string;
   categoryId: number;
 }
 
 export type SafeUser = Omit<User, "password">;
+
+export interface NavLink {
+  label: string;
+  readonly href: string;
+}
+
+export interface NavLinkProps {
+  link: NavLink;
+  onClickFn?: MouseEventHandler;
+}
+
+export interface CartItem {
+  id: number;
+  name: string;
+  category: string;
+  description: string;
+  price: number;
+  qty: number;
+  image: string;
+}
+
+export interface Brand {
+  id: number;
+  name: string;
+  image: string;
+}

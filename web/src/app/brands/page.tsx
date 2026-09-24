@@ -1,4 +1,4 @@
-import { BRANDS } from "@/data/data";
+import { BRANDS } from "@/data";
 import Image from "next/image";
 
 export default function BrandsPage() {

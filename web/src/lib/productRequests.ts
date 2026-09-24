@@ -1,4 +1,4 @@
-import type { Product } from "@/types";
+import type { Product, ProductWithCategory } from "@/types";
 
 export async function getProducts(): Promise<Product[]> {
   const response = await fetch("/api/product");
@@ -7,7 +7,7 @@ export async function getProducts(): Promise<Product[]> {
   }
   return response.json();
 }
-export async function getProduct(id: number): Promise<Product> {
+export async function getProduct(id: number): Promise<ProductWithCategory> {
   const response = await fetch(`/api/product/${id}`);
   if (!response.ok) {
     throw new Error("محصول یافت نشد");

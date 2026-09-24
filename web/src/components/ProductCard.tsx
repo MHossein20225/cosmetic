@@ -1,4 +1,4 @@
-import type { Product } from "@/data/types";
+import type { Product } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
 export default function ProductCard({
@@ -11,9 +11,10 @@ export default function ProductCard({
       <article className="group flex flex-col bg-white rounded-xl p-3 sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
         <div className="relative w-full aspect-[4/5] bg-[#fcf1ef] rounded-lg overflow-hidden flex items-center justify-center">
           <Image
-            src={product.imageUrl ?? product.imageUrl ?? "/nonProduct.jpg"}
+            src={product.imageUrl || "/nonProduct.jpg"}
             alt={product.name}
             fill
+            loading="eager"
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />

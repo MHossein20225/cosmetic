@@ -5,7 +5,7 @@ import {
   Trash,
 } from "lucide-react";
 import Image from "next/image";
-import { CART_ITEMS } from "@/data/data";
+import { CART_ITEMS } from "@/data";
 
 
 

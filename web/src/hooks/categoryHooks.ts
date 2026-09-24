@@ -15,5 +15,5 @@ export function useCategory(id: number | undefined){
         queryKey: ["categories", id],
         queryFn: () => getCategory(id as number)
     })
-    return { categorغ: data, isLoading, isError, error };
+    return { category: data, isLoading, isError, error };
 }

@@ -1,4 +1,4 @@
-import { NavLinkProps } from "@/data/types";
+import { NavLinkProps } from "@/types";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 

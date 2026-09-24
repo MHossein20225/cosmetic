@@ -1,7 +1,7 @@
 'use client'
 import { useQuery } from "@tanstack/react-query";
 import { getProducts, getProduct, getCategoriedProducts } from "../lib/productRequests";
-import type { Product } from "@/types";
+import type { Product, ProductWithCategory } from "@/types";
 
 export function useProducts() {
   const { data, isLoading, isError, error } = useQuery<Product[]>({
@@ -12,7 +12,7 @@ export function useProducts() {
 }
 
 export function useProduct(id: number | undefined) {
-  const { data, isLoading, isError, error } = useQuery<Product>({
+  const { data, isLoading, isError, error } = useQuery<ProductWithCategory>({
     queryKey: ["product", id],
     queryFn: () => getProduct(id as number),
     enabled: id !== undefined,
@@ -26,5 +26,5 @@ export function useCategoriedProducts(category: string | undefined) {
     queryFn: () => getCategoriedProducts(category as string),
     enabled: category !== undefined,
   });
-  return { categoriedProduct: data, isLoading, isError, error };
+  return { categoriedProducts: data, isLoading, isError, error };
 }

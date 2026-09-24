@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { User, Search, ShoppingBag, Menu, X, Flower } from "lucide-react";
-import { NAV_LINKS } from "@/data/data";
+import { NAV_LINKS } from "@/data";
 import NavLinkItem from "./NavLinkItems";
 import Link from "next/link";
 
@@ -13,7 +13,7 @@ export default function Header() {
   return (
     <header className="w-full bg-rose-50/60 sticky top-0 z-50 backdrop-blur-md">
       <div className="max-w-[1360px] mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="#" className="flex items-center gap-2">
           <span className="w-9 h-9 rounded-full bg-rose-200 flex items-center justify-center">
             <span className="text-amber-800 text-lg"><Flower/></span>
           </span>
