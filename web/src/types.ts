@@ -1,4 +1,5 @@
 import type { MouseEventHandler } from "react";
+import z from "zod";
 
 export type Role = "CUSTOMER" | "ADMIN";
 
@@ -83,3 +84,10 @@ export interface Brand {
   name: string;
   image: string;
 }
+
+
+export const userSchema = z.object({
+  name: z.string().min(3, "نام باید حداقل 3 حرف باشد"),
+  email: z.string().email("ایمیل معتبر نیست"),
+  password: z.string().min(6, "رمز باید بیشتر از 6 حرف باشد"),
+});

@@ -1,17 +1,17 @@
 "use client";
 import { useCreateUser } from "@/hooks/userHooks";
+import { User, userSchema } from "@/types";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import z from "zod";
+import { useState } from "react";
 
-const createUserSchema = z.object({
-  name: z.string().min(3),
-  email: z.string().email(),
-  password: z.string().min(6),
-});
+
 
 export default function Register() {
   const { userMutate, isSuccess, isPending, isError, error } = useCreateUser();
+  const [inputError, setInputError] = useState<
+    Partial<Pick<User, "name" | "email" | "password">>
+  >({});
 
   function submitHandle(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,17 +24,23 @@ export default function Register() {
       password: data.get("password"),
     };
 
-    const result = createUserSchema.safeParse(user);
+    const result = userSchema.safeParse(user);
 
     if (!result.success) {
-      console.log(result.error);
+      const errors = result.error.flatten().fieldErrors;
+
+      setInputError({
+        name: errors.name?.[0],
+        email: errors.email?.[0],
+        password: errors.password?.[0],
+      });
       return;
     }
 
     userMutate(result.data);
 
-    if(isSuccess){
-      redirect("/login")
+    if (isSuccess) {
+      redirect("/login");
     }
   }
   return (
@@ -57,10 +63,12 @@ export default function Register() {
           <input
             id="name"
             name="name"
-            type="text"
-            required
+            type="text"          
             className="bg-white px-4 py-2.5 rounded border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-amber-800"
           />
+          <span className="text-xs text-gray-400">
+            {inputError && inputError.name}
+          </span>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -77,6 +85,9 @@ export default function Register() {
             required
             className="bg-white px-4 py-2.5 rounded border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-amber-800"
           />
+          <span className="text-xs text-gray-400">
+            {inputError && inputError.email}
+          </span>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -90,11 +101,12 @@ export default function Register() {
             id="password"
             name="password"
             type="password"
-            required
             minLength={8}
             className="bg-white px-4 py-2.5 rounded border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-amber-800"
           />
-          <span className="text-xs text-gray-400">At least 8 characters</span>
+          <span className="text-xs text-gray-400">
+            {inputError && inputError.password}
+          </span>
         </div>
 
         <button
