@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function LoginPage() {
+export default function Login() {
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-16 md:py-24 flex flex-col items-center">
       <h1 className="font-serif text-3xl text-gray-900 mb-8">Welcome Back</h1>

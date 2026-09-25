@@ -1,6 +1,7 @@
 "use client";
 import { useCreateUser } from "@/hooks/userHooks";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import z from "zod";
 
 const createUserSchema = z.object({
@@ -9,7 +10,7 @@ const createUserSchema = z.object({
   password: z.string().min(6),
 });
 
-export default function RegisterPage() {
+export default function Register() {
   const { userMutate, isSuccess, isPending, isError, error } = useCreateUser();
 
   function submitHandle(e: React.FormEvent<HTMLFormElement>) {
@@ -31,6 +32,10 @@ export default function RegisterPage() {
     }
 
     userMutate(result.data);
+
+    if(isSuccess){
+      redirect("/login")
+    }
   }
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-16 md:py-24 flex flex-col items-center">

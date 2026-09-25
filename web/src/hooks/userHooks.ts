@@ -1,11 +1,7 @@
-import { createUser } from "@/lib/userRequests";
-import { useMutation } from "@tanstack/react-query";
-
-type CreateUserInput = {
-  name: string;
-  email: string;
-  password: string;
-};
+import { authUser, createUser, logInUser } from "@/lib/userRequests";
+import { User } from "@/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { email } from "zod";
 
 export function useCreateUser() {
   const {
@@ -15,8 +11,9 @@ export function useCreateUser() {
     error,
     isPending,
   } = useMutation({
-    mutationKey: ["user"],
-    mutationFn: (user: CreateUserInput) => createUser(user),
+    mutationKey: ["user", "register"],
+    mutationFn: (user: Pick<User, "name" | "email" | "password">) =>
+      createUser(user),
   });
 
   return {
@@ -25,5 +22,43 @@ export function useCreateUser() {
     isSuccess,
     error,
     isPending,
+  };
+}
+
+export function useLogInUser() {
+  const {
+    mutate: logInMutate,
+    isSuccess,
+    isError,
+    isPending,
+  } = useMutation({
+    mutationKey: ["user", "login"],
+    mutationFn: (user: Pick<User, "email" | "password">) => logInUser(user),
+  });
+
+  return {
+    logInMutate,
+    isError,
+    isSuccess,
+    isPending,
+  };
+}
+
+export function useAuthUser() {
+  const {
+    data: user,
+    isSuccess,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: authUser,
+  });
+
+  return {
+    user,
+    isSuccess,
+    isLoading,
+    isError,
   };
 }
