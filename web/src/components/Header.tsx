@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Search, ShoppingBag, Menu, X, Flower } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, Flower, User } from "lucide-react";
 import { NAV_LINKS } from "@/data";
 import NavLinkItem from "./NavLinkItems";
 import Link from "next/link";
+import { useAuthUser } from "@/hooks/userHooks";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuthUser();
 
   return (
     <header className="w-full bg-rose-50/60 sticky top-0 z-50 backdrop-blur-md">
@@ -46,20 +48,24 @@ export default function Header() {
             </span>
           </Link>
 
-          <div className="hidden sm:flex items-center gap-3 text-xs font-medium uppercase tracking-wider">
-            <Link
-              href="/login"
-              className="text-gray-700 hover:text-amber-800 transition-colors"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="bg-amber-800 text-white px-3 py-2 rounded hover:bg-amber-900 transition-colors"
-            >
-              Register
-            </Link>
-          </div>
+          {user ? (
+            <User />
+          ) : (
+            <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wider">
+              <Link
+                href="/login"
+                className="text-gray-700 hover:text-amber-800 transition-colors"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="bg-amber-800 text-white px-3 py-2 rounded hover:bg-amber-900 transition-colors"
+              >
+                Register
+              </Link>
+            </div>
+          )}
 
           <button
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
@@ -85,23 +91,6 @@ export default function Header() {
               onClickFn={() => setIsMenuOpen(false)}
             />
           ))}
-
-          <div className="flex flex-col gap-1 pt-2 mt-2 border-t border-rose-200/60">
-            <Link
-              href="/login"
-              onClick={() => setIsMenuOpen(false)}
-              className="py-2.5 text-sm font-medium uppercase tracking-wider text-gray-700"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => setIsMenuOpen(false)}
-              className="py-2.5 text-sm font-medium uppercase tracking-wider text-amber-800"
-            >
-              Register
-            </Link>
-          </div>
         </div>
       </nav>
     </header>

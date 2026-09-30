@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/userRequests";
+import { getCurrentUser } from "@/lib/session";
 
 export async function GET() {
   const user = await getCurrentUser();

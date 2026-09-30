@@ -10,6 +10,7 @@ export default function CategoryCard({ category }: { category: Category }) {
           src={category.image || "/images/nonProduct.jpg"}
           alt={category.name}
           fill
+          loading="eager"
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />

@@ -2,13 +2,14 @@
 import { useCreateUser } from "@/hooks/userHooks";
 import { User, userSchema } from "@/types";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 
 
 export default function Register() {
-  const { userMutate, isSuccess, isPending, isError, error } = useCreateUser();
+  const router = useRouter();
+  const { userMutate, isPending } = useCreateUser();
   const [inputError, setInputError] = useState<
     Partial<Pick<User, "name" | "email" | "password">>
   >({});
@@ -37,11 +38,9 @@ export default function Register() {
       return;
     }
 
-    userMutate(result.data);
-
-    if (isSuccess) {
-      redirect("/login");
-    }
+    userMutate(result.data, {
+      onSuccess: () => router.push("/login"),
+    });
   }
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-16 md:py-24 flex flex-col items-center">

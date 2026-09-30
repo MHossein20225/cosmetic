@@ -20,8 +20,8 @@ import {
 } from "lucide-react";
 
 import { useCategoriedProducts, useProduct } from "@/hooks/productHooks";
-
-
+import { useAuthUser } from "@/hooks/userHooks";
+import { useAddToCart } from "@/hooks/cartHooks";
 
 export default function ProductPage({
   params,
@@ -33,13 +33,13 @@ export default function ProductPage({
 
   const { id } = use(params);
 
-  const {
-    product,
-    isLoading,
-    error,
-  } = useProduct(Number(id));
+  const { product, isLoading, error } = useProduct(Number(id));
 
-  const { categoriedProducts } = useCategoriedProducts(product?.category.name)
+  const { categoriedProducts } = useCategoriedProducts(product?.category.name);
+
+  const { user } = useAuthUser()
+
+  const {addToCartMutate, isPending} = useAddToCart()
 
   function handleQtyChange(delta: number) {
     setQuantity((qty) => Math.min(10, Math.max(1, qty + delta)));
@@ -48,33 +48,25 @@ export default function ProductPage({
   function handleAddToBag() {
     setJustAdded(true);
 
+    addToCartMutate({ productId: Number(id), quantity })
+
     setTimeout(() => {
       setJustAdded(false);
     }, 1800);
   }
-
-  /*
-   * Loading
-   */
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500 text-sm">
-          Loading product...
-        </div>
+        <div className="text-gray-500 text-sm">Loading product...</div>
       </div>
     );
   }
 
-  /*
-   * Error / product doesn't exist
-   */
+
   if (error || !product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-serif text-gray-900">
-          Product not found
-        </h1>
+        <h1 className="text-2xl font-serif text-gray-900">Product not found</h1>
 
         <Link
           href="/products"
@@ -93,15 +85,10 @@ export default function ProductPage({
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-8 md:py-12">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-gray-500 text-xs uppercase tracking-wider mb-6 flex-wrap">
-        <Link
-          href="/"
-          className="hover:text-amber-800 transition-colors"
-        >
+        <Link href="/" className="hover:text-amber-800 transition-colors">
           Home
         </Link>
-
         <ChevronRight size={12} />
-
         <Link
           href={`/products/${product.category.name}`}
           className="hover:text-amber-800 transition-colors"
@@ -111,18 +98,11 @@ export default function ProductPage({
 
         <ChevronRight size={12} />
 
-        <span className="text-gray-900">
-          {product.name}
-        </span>
+        <span className="text-gray-900">{product.name}</span>
       </nav>
 
-      {/* Main product section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        {/* =====================================================
-            GALLERY
-        ====================================================== */}
         <div className="lg:col-span-7 flex flex-col gap-4">
-          {/* Main image */}
           <div className="relative w-full aspect-[4/5] bg-rose-50 rounded-lg overflow-hidden shadow-sm group">
             <Image
               src={product.imageUrl}
@@ -178,10 +158,7 @@ export default function ProductPage({
           {/* Trust badges */}
           <div className="mt-2 grid grid-cols-3 gap-2 sm:gap-3 p-4 bg-rose-50 rounded-lg text-center">
             <div className="flex flex-col items-center gap-1">
-              <Sprout
-                size={20}
-                className="text-amber-800"
-              />
+              <Sprout size={20} className="text-amber-800" />
 
               <span className="text-[11px] sm:text-xs font-medium uppercase tracking-wider text-gray-900">
                 100% Botanical
@@ -193,10 +170,7 @@ export default function ProductPage({
             </div>
 
             <div className="flex flex-col items-center gap-1">
-              <ShieldCheck
-                size={20}
-                className="text-amber-800"
-              />
+              <ShieldCheck size={20} className="text-amber-800" />
 
               <span className="text-[11px] sm:text-xs font-medium uppercase tracking-wider text-gray-900">
                 Dermatologist Tested
@@ -208,10 +182,7 @@ export default function ProductPage({
             </div>
 
             <div className="flex flex-col items-center gap-1">
-              <Recycle
-                size={20}
-                className="text-amber-800"
-              />
+              <Recycle size={20} className="text-amber-800" />
 
               <span className="text-[11px] sm:text-xs font-medium uppercase tracking-wider text-gray-900">
                 Infinite Glass
@@ -244,9 +215,7 @@ export default function ProductPage({
                   strokeWidth={0}
                 />
 
-                <span className="text-sm font-semibold">
-                  4.9
-                </span>
+                <span className="text-sm font-semibold">4.9</span>
 
                 <a
                   href="#reviews"
@@ -266,9 +235,7 @@ export default function ProductPage({
                 ${product.price.toFixed(2)}
               </span>
 
-              <span className="text-xs text-gray-500">
-                Tax included
-              </span>
+              <span className="text-xs text-gray-500">Tax included</span>
             </div>
           </div>
 
@@ -284,9 +251,7 @@ export default function ProductPage({
                 {product.discount}% OFF
               </span>
 
-              <span className="text-sm text-gray-500">
-                Limited time offer
-              </span>
+              <span className="text-sm text-gray-500">Limited time offer</span>
             </div>
           )}
 
@@ -322,39 +287,46 @@ export default function ProductPage({
                 </button>
               </div>
 
-              {/* Add to cart */}
-              <button
-                type="button"
-                onClick={handleAddToBag}
-                className={`flex-1 min-w-[180px] py-3 px-4 rounded text-xs font-medium uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] ${
-                  justAdded
-                    ? "bg-rose-200 text-amber-900"
-                    : "bg-amber-800 text-white hover:bg-amber-900"
-                }`}
-              >
-                {justAdded ? (
-                  <>
-                    <Check size={18} />
-                    Added to Bag
-                  </>
-                ) : (
-                  <>
-                    <ShoppingBag size={18} />
-                    Add to Bag — ${total.toFixed(2)}
-                  </>
-                )}
-              </button>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={handleAddToBag}
+                  className={`flex-1 min-w-[180px] py-3 px-4 rounded text-xs font-medium uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] ${
+                    justAdded && isPending
+                      ? "bg-rose-200 text-amber-900"
+                      : "bg-amber-800 text-white hover:bg-amber-900"
+                  }`}
+                >
+                  {justAdded ? (
+                    <>
+                      <Check size={18} />
+                      Added to Bag
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag size={18} />
+                      Add to Bag — ${total.toFixed(2)}
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleAddToBag}
+                  className={
+                    "flex-1 min-w-[180px] py-3 px-4 rounded text-xs font-medium uppercase tracking-wider bg-amber-800 text-white hover:bg-amber-900 transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.99]"
+                  }
+                >
+                  you have to log in
+                </button>
+              )}
             </div>
 
             <div className="flex items-center justify-center gap-2 mt-1 text-gray-500 text-xs">
-              <Leaf
-                size={14}
-                className="text-amber-800"
-              />
+              <Leaf size={14} className="text-amber-800" />
 
               <span>
-                Complimentary signature organic samples
-                with every order
+                Complimentary signature organic samples with every order
               </span>
             </div>
           </div>
@@ -371,10 +343,7 @@ export default function ProductPage({
                   Product Details
                 </span>
 
-                <ChevronDown
-                  size={18}
-                  className="text-gray-500"
-                />
+                <ChevronDown size={18} className="text-gray-500" />
               </button>
 
               <p className="text-sm text-gray-500 leading-relaxed mt-3">
@@ -392,16 +361,12 @@ export default function ProductPage({
                   The Daily Ritual
                 </span>
 
-                <ChevronDown
-                  size={18}
-                  className="text-gray-500"
-                />
+                <ChevronDown size={18} className="text-gray-500" />
               </button>
 
               <p className="text-sm text-gray-500 leading-relaxed mt-3">
-                Use the product according to its intended
-                purpose. Follow the product instructions
-                provided with your order.
+                Use the product according to its intended purpose. Follow the
+                product instructions provided with your order.
               </p>
             </div>
 
@@ -415,16 +380,12 @@ export default function ProductPage({
                   Shipping & Returns
                 </span>
 
-                <ChevronDown
-                  size={18}
-                  className="text-gray-500"
-                />
+                <ChevronDown size={18} className="text-gray-500" />
               </button>
 
               <p className="text-sm text-gray-500 leading-relaxed mt-3">
-                Standard shipping is available on all
-                orders. Please check your store&apos;s shipping
-                and return policy for details.
+                Standard shipping is available on all orders. Please check your
+                store&apos;s shipping and return policy for details.
               </p>
             </div>
           </div>
@@ -451,15 +412,15 @@ export default function ProductPage({
             className="text-xs font-medium uppercase tracking-wider text-amber-800 hover:text-amber-900 transition-colors inline-flex items-center gap-1"
           >
             Explore All Products
-
             <ArrowRight size={14} />
           </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {(categoriedProducts ?? []).map((product) => (
-            <div
+            <Link
               key={product.id}
+              href={`/product/${product.id}`}
               className="bg-rose-50 rounded-lg p-4 flex flex-col group transition-all duration-300 hover:shadow-md"
             >
               <div className="relative aspect-[4/5] bg-white rounded overflow-hidden mb-4">
@@ -467,6 +428,7 @@ export default function ProductPage({
                   src={product.imageUrl}
                   alt={product.name}
                   fill
+                  loading="eager"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
@@ -483,7 +445,7 @@ export default function ProductPage({
               <span className="text-base font-semibold text-gray-900 mt-auto">
                 ${product.price.toFixed(2)}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

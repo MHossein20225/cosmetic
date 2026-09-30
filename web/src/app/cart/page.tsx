@@ -1,3 +1,4 @@
+'use client'
 import {
   Check,
   Minus,
@@ -6,10 +7,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { CART_ITEMS } from "@/data";
+import { useCart } from "@/hooks/cartHooks";
+import type { Product } from "@/types";
 
 
 
 export default function Cart() {
+  const {cart, isLoading} = useCart()
   return (
     <main className="w-full min-h-screen pt-20 bg-[#fff8f6]">
       <div className="max-w-[1360px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
@@ -36,16 +40,18 @@ export default function Cart() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           {/* Left: Cart Items */}
           <div className="lg:col-span-8 flex flex-col gap-5">
-            {CART_ITEMS.map((cart) => (
+            {cart &&
+              cart.items.map((item: { id: string; productId: number; quantity: number; unitPrice: number; product: Product }) => (
               <div
-                key={cart.id}
+                key={item.product.id}
                 className="bg-white p-4 sm:p-5 rounded-xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 transition-all duration-300"
               >
                 <div className="relative w-24 h-32 sm:w-28 sm:h-36 rounded-lg bg-[#fcf1ef] overflow-hidden shrink-0">
                   <Image
-                    src={cart.image}
-                    alt={cart.name}
+                    src={item.product.imageUrl}
+                    alt={item.product.name}
                     fill
+                    loading="eager"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />
@@ -54,17 +60,17 @@ export default function Cart() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <span className="font-sans text-[11px] font-semibold uppercase tracking-widest text-[#8b4e40]">
-                        {cart.category}
+                        {item.product.categoryId}
                       </span>
                       <h2 className="font-serif text-lg sm:text-xl text-[#1f1b1a] mt-1">
-                        {cart.name}
+{item.product.name}
                       </h2>
                       <p className="font-sans text-xs sm:text-sm text-[#534340] mt-0.5">
-                        {cart.description}
+                        {item.product.description}
                       </p>
                     </div>
                     <button
-                      aria-label={`Remove ${cart.name}`}
+                      aria-label={`Remove ${item.product.name}`}
                       className="text-[#85736f] hover:text-[#b44a4a] transition-colors p-1 rounded shrink-0"
                       type="button"
                     >
@@ -85,7 +91,7 @@ export default function Cart() {
                         </span>
                       </button>
                       <span className="w-10 text-center font-sans text-sm font-semibold text-[#1f1b1a] select-none">
-                        {cart.qty}
+                        {item.quantity}
                       </span>
                       <button
                         aria-label="Increase quantity"
@@ -98,7 +104,7 @@ export default function Cart() {
                       </button>
                     </div>
                     <span className="font-sans text-base sm:text-lg font-semibold text-[#1f1b1a]">
-                      ${cart.price.toFixed(2)}
+                      ${item.product.price.toFixed(2)}
                     </span>
                   </div>
                 </div>

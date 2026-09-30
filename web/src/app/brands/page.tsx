@@ -32,6 +32,7 @@ export default function BrandsPage() {
                   src={brand.image}
                   alt={brand.name}
                   fill
+                  loading="eager"
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                 />

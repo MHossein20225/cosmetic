@@ -21,6 +21,7 @@ export default function CategoriedProduct({ params }: CategoriedProductProps) {
     <ProductsView
       title={`${category} Products`}
       products={categoriedProducts ?? []}
+      description={`${category} Products`}
       categoryLabel={category}
     />
   );

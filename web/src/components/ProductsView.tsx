@@ -49,7 +49,7 @@ export default function ProductsView({
         </p>
       </div>
 
-      {products.length === 0 ? (
+      {products?.length === 0 ? (
         <p className="text-gray-500 text-sm py-12 text-center">
           No products found.
         </p>

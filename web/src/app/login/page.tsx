@@ -1,13 +1,23 @@
-import { User } from "@/generated/prisma/client";
-import { userSchema } from "@/types";
+"use client";
+import { useCreateCart } from "@/hooks/cartHooks";
+import { useLogInUser } from "@/hooks/userHooks";
+import { User, userSchema } from "@/types";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Login() {
+  const router = useRouter();
   const [inputError, setInputError] = useState<
-      Partial<Pick<User, "email" | "password">>
-    >({})
-  function submitHandle(e: React.SubmitEvent<HTMLFormElement>) {
+    Partial<Pick<User, "email" | "password">>
+  >({});
+
+  const { logInMutate, isPending, isError } = useLogInUser();
+  const { createCartMutate } = useCreateCart();
+
+  function submitHandle(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
     const formData = new FormData(e.currentTarget);
 
     const data = {
@@ -15,7 +25,7 @@ export default function Login() {
       password: formData.get("password"),
     };
 
-    const result = userSchema.omit({name: true}).safeParse(data);
+    const result = userSchema.omit({ name: true }).safeParse(data);
 
     if (!result.success) {
       const errors = result.error.flatten().fieldErrors;
@@ -26,6 +36,13 @@ export default function Login() {
       });
       return;
     }
+
+    logInMutate(result.data, {
+      onSuccess: () => {
+        createCartMutate();
+        router.push("/");
+      },
+    });
   }
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-16 md:py-24 flex flex-col items-center">
@@ -45,7 +62,7 @@ export default function Login() {
           <input
             id="email"
             name="email"
-            type="email"
+            type="text"
             className="bg-white px-4 py-2.5 rounded border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-amber-800"
           />
           <span className="text-xs text-gray-400">
@@ -71,11 +88,15 @@ export default function Login() {
           </span>
         </div>
 
+        {
+          isError && "ایمیل یا رمز اشتباه است"
+        }
+
         <button
           type="submit"
           className="w-full bg-amber-800 text-white py-3 rounded text-xs font-medium uppercase tracking-wider hover:bg-amber-900 transition-colors"
         >
-          Log In
+          {isPending ? "wait..." : "Log In"}
         </button>
 
         <p className="text-sm text-gray-500 text-center">

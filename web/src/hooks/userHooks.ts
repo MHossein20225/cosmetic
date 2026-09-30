@@ -1,7 +1,6 @@
 import { authUser, createUser, logInUser } from "@/lib/userRequests";
 import { User } from "@/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { email } from "zod";
 
 export function useCreateUser() {
   const {
