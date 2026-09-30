@@ -1,16 +1,31 @@
 import { prisma } from "@/lib/prisma";
+import { userSchema } from "@/types";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const result = userSchema.safeParse(body)
 
-    const hashedPassword = await bcrypt.hash(body.password, 6);
+    if (!result.success) {
+      return Response.json(
+        {
+          error: "اطلاعات وارد شده معتبر نیست",
+          details: result.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
+
+    const { name, email, password } = result.data;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     await prisma.user.create({
       data: {
-        name: body.name,
-        email: body.email,
+        name: name,
+        email: email,
         password: hashedPassword,
       },
     });

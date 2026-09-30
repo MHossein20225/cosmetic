@@ -1,14 +1,31 @@
 import { prisma } from "@/lib/prisma";
+import { userSchema } from "@/types";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 
+
 export async function POST(req: Request) {
   try {
-    const data = await req.json();
+    const body = await req.json();
+
+    const result = userSchema.omit({name: true,}).safeParse(body)
+
+    if (!result.success) {
+      return Response.json(
+        {
+          error: "اطلاعات وارد شده معتبر نیست",
+          details: result.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
+
+    const { email, password } = result.data;
 
     const user = await prisma.user.findUnique({
       where: {
-        email: data.email,
+        email: email,
       },
     });
 
@@ -19,7 +36,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const confirmPassword = await bcrypt.compare(data.password, user.password);
+    const confirmPassword = await bcrypt.compare(password, user.password);
 
     if (!confirmPassword) {
       return Response.json(

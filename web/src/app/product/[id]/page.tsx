@@ -37,9 +37,9 @@ export default function ProductPage({
 
   const { categoriedProducts } = useCategoriedProducts(product?.category.name);
 
-  const { user } = useAuthUser()
+  const { user } = useAuthUser();
 
-  const {addToCartMutate, isPending} = useAddToCart()
+  const { addToCartMutate, isPending } = useAddToCart();
 
   function handleQtyChange(delta: number) {
     setQuantity((qty) => Math.min(10, Math.max(1, qty + delta)));
@@ -48,7 +48,7 @@ export default function ProductPage({
   function handleAddToBag() {
     setJustAdded(true);
 
-    addToCartMutate({ productId: Number(id), quantity })
+    addToCartMutate({ productId: Number(id), quantity });
 
     setTimeout(() => {
       setJustAdded(false);
@@ -61,7 +61,6 @@ export default function ProductPage({
       </div>
     );
   }
-
 
   if (error || !product) {
     return (
@@ -310,15 +309,17 @@ export default function ProductPage({
                   )}
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleAddToBag}
-                  className={
-                    "flex-1 min-w-[180px] py-3 px-4 rounded text-xs font-medium uppercase tracking-wider bg-amber-800 text-white hover:bg-amber-900 transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.99]"
-                  }
-                >
-                  you have to log in
-                </button>
+                <Link href="/login">
+                  <button
+                    type="button"
+                    onClick={handleAddToBag}
+                    className={
+                      "flex-1 min-w-[180px] py-3 px-4 rounded text-xs font-medium uppercase tracking-wider bg-amber-800 text-white hover:bg-amber-900 transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.99]"
+                    }
+                  >
+                    you have to log in
+                  </button>
+                </Link>
               )}
             </div>
 
