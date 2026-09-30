@@ -22,6 +22,12 @@ import {
 import { useCategoriedProducts, useProduct } from "@/hooks/productHooks";
 import { useAuthUser } from "@/hooks/userHooks";
 import { useAddToCart } from "@/hooks/cartHooks";
+import {
+  getProductPrice,
+  getStockLabel,
+  hasDiscount,
+  isOutOfStock,
+} from "@/lib/pricing";
 
 export default function ProductPage({
   params,
@@ -33,7 +39,11 @@ export default function ProductPage({
 
   const { id } = use(params);
 
-  const { product, isLoading, error } = useProduct(Number(id));
+  const productId = Number(id);
+
+  const { product, isLoading, error } = useProduct(
+    Number.isInteger(productId) && productId > 0 ? productId : undefined
+  );
 
   const { categoriedProducts } = useCategoriedProducts(product?.category.name);
 
@@ -42,18 +52,35 @@ export default function ProductPage({
   const { addToCartMutate, isPending } = useAddToCart();
 
   function handleQtyChange(delta: number) {
-    setQuantity((qty) => Math.min(10, Math.max(1, qty + delta)));
+    setQuantity((qty) =>
+      Math.min(product?.stock ?? 10, Math.max(1, qty + delta))
+    );
   }
 
   function handleAddToBag() {
     setJustAdded(true);
 
-    addToCartMutate({ productId: Number(id), quantity });
+    addToCartMutate({ productId, quantity });
 
     setTimeout(() => {
       setJustAdded(false);
     }, 1800);
   }
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <h1 className="text-2xl font-serif text-gray-900">Product not found</h1>
+
+        <Link
+          href="/products"
+          className="text-sm text-amber-800 hover:text-amber-900"
+        >
+          Back to products
+        </Link>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -77,8 +104,10 @@ export default function ProductPage({
     );
   }
 
-  const total = product.price * quantity;
+  const total = getProductPrice(product) * quantity;
   const categoryName = product.category?.name;
+  const discounted = hasDiscount(product.discount);
+  const outOfStock = isOutOfStock(product.stock);
 
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-8 md:py-12">
@@ -231,11 +260,34 @@ export default function ProductPage({
 
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl text-gray-900">
-                ${product.price.toFixed(2)}
+                ${getProductPrice(product).toFixed(2)}
               </span>
+
+              {discounted && (
+                <span className="text-base text-gray-400 line-through">
+                  ${product.price.toFixed(2)}
+                </span>
+              )}
 
               <span className="text-xs text-gray-500">Tax included</span>
             </div>
+          </div>
+
+          {/* Stock */}
+          <div className="flex items-center gap-2">
+            <span
+              className={`w-2 h-2 rounded-full ${
+                outOfStock ? "bg-red-500" : "bg-green-600"
+              }`}
+            />
+
+            <span
+              className={`text-sm ${
+                outOfStock ? "text-red-600" : "text-gray-500"
+              }`}
+            >
+              {getStockLabel(product.stock)}
+            </span>
           </div>
 
           {/* Description */}
@@ -244,13 +296,19 @@ export default function ProductPage({
           </p>
 
           {/* Discount */}
-          {product.discount > 0 && (
-            <div className="flex items-center gap-2">
+          {discounted && (
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="bg-rose-100 text-rose-800 px-3 py-1 rounded-full text-xs font-semibold">
                 {product.discount}% OFF
               </span>
 
-              <span className="text-sm text-gray-500">Limited time offer</span>
+              <span className="text-sm text-gray-500">
+                You save ${(product.price - getProductPrice(product)).toFixed(2)}
+              </span>
+
+              <span className="text-sm text-gray-500">
+                Limited time offer
+              </span>
             </div>
           )}
 
@@ -266,8 +324,9 @@ export default function ProductPage({
                 <button
                   type="button"
                   aria-label="Decrease quantity"
+                  disabled={quantity <= 1}
                   onClick={() => handleQtyChange(-1)}
-                  className="w-9 h-9 rounded flex items-center justify-center text-gray-900 hover:bg-white transition-colors"
+                  className="w-9 h-9 rounded flex items-center justify-center text-gray-900 hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                 >
                   <Minus size={16} />
                 </button>
@@ -279,14 +338,24 @@ export default function ProductPage({
                 <button
                   type="button"
                   aria-label="Increase quantity"
+                  disabled={outOfStock || quantity >= product.stock}
                   onClick={() => handleQtyChange(1)}
-                  className="w-9 h-9 rounded flex items-center justify-center text-gray-900 hover:bg-white transition-colors"
+                  className="w-9 h-9 rounded flex items-center justify-center text-gray-900 hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                 >
                   <Plus size={16} />
                 </button>
               </div>
 
-              {user ? (
+              {outOfStock ? (
+                <button
+                  type="button"
+                  disabled
+                  className="flex-1 min-w-[180px] py-3 px-4 rounded text-xs font-medium uppercase tracking-wider bg-gray-300 text-gray-600 transition-all flex items-center justify-center gap-2 cursor-not-allowed"
+                >
+                  <ShoppingBag size={18} />
+                  Out of stock
+                </button>
+              ) : user ? (
                 <button
                   type="button"
                   onClick={handleAddToBag}
@@ -444,7 +513,7 @@ export default function ProductPage({
               </h3>
 
               <span className="text-base font-semibold text-gray-900 mt-auto">
-                ${product.price.toFixed(2)}
+                ${getProductPrice(product).toFixed(2)}
               </span>
             </Link>
           ))}

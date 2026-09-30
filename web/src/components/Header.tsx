@@ -34,12 +34,13 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4 sm:gap-5">
-          <button
+          <Link
+            href="/products"
             aria-label="Search"
             className="text-gray-700 hover:text-amber-800 transition-colors"
           >
             <Search size={20} />
-          </button>
+          </Link>
 
           <Link
             href="/cart"
