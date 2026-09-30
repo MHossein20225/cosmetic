@@ -6,14 +6,21 @@ import {
   Trash,
 } from "lucide-react";
 import Image from "next/image";
-import { CART_ITEMS } from "@/data";
-import { useCart } from "@/hooks/cartHooks";
+import Loading from "@/components/Loading";
+import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/cartHooks";
 import type { Product } from "@/types";
 
 
 
 export default function Cart() {
-  const {cart, isLoading} = useCart()
+  const { items, count, subtotal, isLoading } = useCart();
+  const { updateCartItemMutate } = useUpdateCartItem();
+  const { removeCartItemMutate } = useRemoveCartItem();
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <main className="w-full min-h-screen pt-20 bg-[#fff8f6]">
       <div className="max-w-[1360px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
@@ -24,7 +31,7 @@ export default function Cart() {
               Your Bag
             </h1>
             <span className="font-sans text-sm text-[#534340] italic">
-              ({CART_ITEMS.length} items)
+              ({count} {count === 1 ? "item" : "items"})
             </span>
           </div>
           <a
@@ -40,8 +47,14 @@ export default function Cart() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           {/* Left: Cart Items */}
           <div className="lg:col-span-8 flex flex-col gap-5">
-            {cart &&
-              cart.items.map((item: { id: string; productId: number; quantity: number; unitPrice: number; product: Product }) => (
+            {items.length === 0 ? (
+              <div className="bg-white rounded-xl shadow-sm p-10 text-center">
+                <p className="font-sans text-sm text-[#534340]">
+                  Your bag is empty.
+                </p>
+              </div>
+            ) : (
+            items.map((item: { id: string; productId: number; quantity: number; unitPrice: number; product: Product }) => (
               <div
                 key={item.product.id}
                 className="bg-white p-4 sm:p-5 rounded-xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 transition-all duration-300"
@@ -71,6 +84,7 @@ export default function Cart() {
                     </div>
                     <button
                       aria-label={`Remove ${item.product.name}`}
+                      onClick={() => removeCartItemMutate(item.product.id)}
                       className="text-[#85736f] hover:text-[#b44a4a] transition-colors p-1 rounded shrink-0"
                       type="button"
                     >
@@ -83,7 +97,14 @@ export default function Cart() {
                     <div className="flex items-center bg-[#fcf1ef] rounded-lg p-1">
                       <button
                         aria-label="Decrease quantity"
-                        className="w-8 h-8 flex items-center justify-center text-[#1f1b1a] hover:bg-white rounded transition-colors"
+                        disabled={item.quantity <= 1}
+                        onClick={() =>
+                          updateCartItemMutate({
+                            productId: item.product.id,
+                            quantity: item.quantity - 1,
+                          })
+                        }
+                        className="w-8 h-8 flex items-center justify-center text-[#1f1b1a] hover:bg-white rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         type="button"
                       >
                         <span className="material-symbols-outlined text-base">
@@ -95,6 +116,12 @@ export default function Cart() {
                       </span>
                       <button
                         aria-label="Increase quantity"
+                        onClick={() =>
+                          updateCartItemMutate({
+                            productId: item.product.id,
+                            quantity: item.quantity + 1,
+                          })
+                        }
                         className="w-8 h-8 flex items-center justify-center text-[#1f1b1a] hover:bg-white rounded transition-colors"
                         type="button"
                       >
@@ -104,12 +131,13 @@ export default function Cart() {
                       </button>
                     </div>
                     <span className="font-sans text-base sm:text-lg font-semibold text-[#1f1b1a]">
-                      ${item.product.price.toFixed(2)}
+                      ${(item.unitPrice * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 </div>
               </div>
-            ))}
+            ))
+            )}
 
             {/* Gift Card */}
           </div>
@@ -131,6 +159,9 @@ export default function Cart() {
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center font-sans text-sm text-[#534340]">
                   <span>Subtotal</span>
+                  <span className="font-sans text-sm font-semibold text-[#1f1b1a]">
+                    ${subtotal.toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center font-sans text-sm text-[#534340]">
                   <span>Estimated Sales Tax</span>
@@ -160,7 +191,9 @@ export default function Cart() {
               <div className="flex justify-between items-baseline">
                 <span className="font-serif text-xl text-[#1f1b1a]">Total</span>
                 <div className="text-right">
-                  <span className="font-serif text-2xl text-[#1f1b1a]"></span>
+                  <span className="font-serif text-2xl text-[#1f1b1a]">
+                    ${subtotal.toFixed(2)}
+                  </span>
                   <p className="font-sans text-[11px] text-[#85736f] mt-0.5">
                     Including tax &amp; duties
                   </p>
