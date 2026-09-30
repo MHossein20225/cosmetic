@@ -5,11 +5,13 @@ import { Search, ShoppingBag, Menu, X, Flower, User } from "lucide-react";
 import { NAV_LINKS } from "@/data";
 import NavLinkItem from "./NavLinkItems";
 import Link from "next/link";
-import { useAuthUser } from "@/hooks/userHooks";
+import { useAuthUser, useLogOut } from "@/hooks/userHooks";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user } = useAuthUser();
+  const { logOutMutate, isPending: isLoggingOut } = useLogOut();
 
   return (
     <header className="w-full bg-rose-50/60 sticky top-0 z-50 backdrop-blur-md">
@@ -49,7 +51,42 @@ export default function Header() {
           </Link>
 
           {user ? (
-            <User />
+            <div
+              className="relative"
+              onMouseEnter={() => setIsUserMenuOpen(true)}
+              onMouseLeave={() => setIsUserMenuOpen(false)}
+            >
+              <button
+                aria-label="Account menu"
+                aria-expanded={isUserMenuOpen}
+                onClick={() => setIsUserMenuOpen((open) => !open)}
+                className="text-gray-700 hover:text-amber-800 transition-colors"
+              >
+                <User size={20} />
+              </button>
+
+              {isUserMenuOpen && (
+                <div className="absolute right-0 top-full pt-2 z-50">
+                  <div className="w-48 bg-white rounded-xl shadow-lg border border-rose-100 py-2">
+                    <span className="block px-4 py-2 text-sm font-medium text-gray-900 truncate">
+                      {user.name}
+                    </span>
+                    <span className="block px-4 pb-2 text-xs text-gray-500 truncate">
+                      {user.email}
+                    </span>
+                    <div className="border-t border-rose-100 my-1" />
+                    <button
+                      type="button"
+                      onClick={() => logOutMutate()}
+                      disabled={isLoggingOut}
+                      className="w-full text-left px-4 py-2 text-sm text-rose-700 hover:bg-rose-50 transition-colors"
+                    >
+                      {isLoggingOut ? "Logging out..." : "Log Out"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wider">
               <Link

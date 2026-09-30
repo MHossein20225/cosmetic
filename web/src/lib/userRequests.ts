@@ -42,3 +42,15 @@ export async function authUser() {
 
   return response.json();
 }
+
+export async function logOutUser() {
+  const response = await fetch("/api/user/logout", {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error("خطا در خروج از حساب");
+  }
+
+  return response.json();
+}

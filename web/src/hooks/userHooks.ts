@@ -1,6 +1,6 @@
-import { authUser, createUser, logInUser } from "@/lib/userRequests";
+import { authUser, createUser, logInUser, logOutUser } from "@/lib/userRequests";
 import { User } from "@/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useCreateUser() {
   const {
@@ -59,5 +59,29 @@ export function useAuthUser() {
     isSuccess,
     isLoading,
     isError,
+  };
+}
+
+export function useLogOut() {
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: logOutMutate,
+    isPending,
+  } = useMutation({
+    mutationKey: ["user", "logout"],
+    mutationFn: logOutUser,
+    onSuccess: () => {
+      queryClient.setQueryData(["user"], null);
+      queryClient.setQueryData(["cart"], null);
+      queryClient.invalidateQueries({
+        queryKey: ["cart"],
+      });
+    },
+  });
+
+  return {
+    logOutMutate,
+    isPending,
   };
 }
