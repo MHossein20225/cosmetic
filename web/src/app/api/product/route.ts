@@ -40,6 +40,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const result = createProductSchema.safeParse(body);
 
+    
+
     if (!result.success) {
       return Response.json(
         { error: "یک از وروردی ها یا اشتباه است یا وارد نشده" },
@@ -47,7 +49,17 @@ export async function POST(req: Request) {
       );
     }
 
-    const product = await prisma.product.create({ data: result.data });
+    const {name, description, price, discount, stock, imageUrl, categoryId} = result.data
+
+    const product = await prisma.product.create({ data: {
+      name,
+      description,
+      price: price - (price * discount) / 100,
+      discount,
+      stock,
+      imageUrl,
+      categoryId
+    } });
     return Response.json(product, { status: 201 });
   } catch (error) {
     console.error(error);

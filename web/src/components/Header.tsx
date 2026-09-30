@@ -6,12 +6,14 @@ import { NAV_LINKS } from "@/data";
 import NavLinkItem from "./NavLinkItems";
 import Link from "next/link";
 import { useAuthUser, useLogOut } from "@/hooks/userHooks";
+import { useCart } from "@/hooks/cartHooks";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user } = useAuthUser();
   const { logOutMutate, isPending: isLoggingOut } = useLogOut();
+  const { count: cartCount } = useCart();
 
   return (
     <header className="w-full bg-rose-50/60 sticky top-0 z-50 backdrop-blur-md">
@@ -45,9 +47,11 @@ export default function Header() {
             className="relative text-gray-700 hover:text-amber-800 transition-colors"
           >
             <ShoppingBag size={20} />
-            <span className="absolute -top-2 -right-2 bg-amber-800 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-              2
-            </span>
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-amber-800 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
           </Link>
 
           {user ? (
