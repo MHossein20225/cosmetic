@@ -52,9 +52,9 @@ export default function ProductPage({
   const { addToCartMutate, isPending } = useAddToCart();
 
   function handleQtyChange(delta: number) {
-    setQuantity((qty) =>
-      Math.min(product?.stock ?? 10, Math.max(1, qty + delta))
-    );
+    const maxQty = Math.max(1, product?.stock ?? 10);
+
+    setQuantity((qty) => Math.min(maxQty, Math.max(1, qty + delta)));
   }
 
   function handleAddToBag() {
