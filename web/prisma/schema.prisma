@@ -84,7 +84,7 @@ model Order {
   totalPrice    Int
   status        Status      @default(QUEUE)
   createdAt     DateTime    @default(now())
-  deliveryTime  DateTime
+  deliveryTime  DateTime    @default(now())
 }
 
 model OrderItem {
