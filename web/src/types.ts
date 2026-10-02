@@ -2,6 +2,7 @@ import type { MouseEventHandler } from "react";
 import z from "zod";
 
 export type Role = "CUSTOMER" | "ADMIN";
+export type Status = "QUEUE" | "PREPARED" | "DELIVERIED";
 
 export interface User {
   id: string;
@@ -110,6 +111,26 @@ export interface Brand {
   image: string;
 }
 
+export interface Order {
+  id: string;
+  userId: string;
+  items: OrderItem[];
+  recipientName: string;
+  phoneNumber: string;
+  address: string;
+  totalPrice: number;
+  status: Status;
+  createdAt: Date;
+  deliveryTime: Date;
+}
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  productId: number;
+  quantity: number;
+  unitPrice: number;
+}
 
 export const userSchema = z.object({
   name: z.string().min(3, "نام باید حداقل 3 حرف باشد"),

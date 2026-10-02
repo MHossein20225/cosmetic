@@ -17,6 +17,7 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   sessions  Session[]
+  orders    Order[]
   cart      Cart?
 }
 
@@ -29,18 +30,19 @@ model Session {
 }
 
 model Product {
-  id          Int        @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
   description String
   price       Int
-  discount    Int        @default(0)
-  stock       Int        @default(0)
+  discount    Int         @default(0)
+  stock       Int         @default(0)
   imageUrl    String?
   categoryId  Int
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  category    Category   @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  category    Category    @relation(fields: [categoryId], references: [id])
   cartItems   CartItem[]
+  orderItems  OrderItem[]
 }
 
 model Category {
@@ -59,16 +61,46 @@ model Cart {
 }
 
 model CartItem {
-  id         String   @id @default(cuid())
-  cartId     String
-  cart       Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  productId  Int
-  product    Product  @relation(fields: [productId], references: [id])
-  quantity   Int      @default(1)
-  unitPrice  Int
-  addedAt    DateTime @default(now())
+  id        String   @id @default(cuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(1)
+  unitPrice Int
+  addedAt   DateTime @default(now())
 
   @@unique([cartId, productId])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items         OrderItem[]
+  recipientName String
+  phoneNumber   String
+  address       String
+  totalPrice    Int
+  status        Status      @default(QUEUE)
+  createdAt     DateTime    @default(now())
+  deliveryTime  DateTime
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Int
+}
+
+enum Status {
+  QUEUE
+  PREPARED
+  DELIVERING
 }
 
 enum Role {
