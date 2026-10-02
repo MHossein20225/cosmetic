@@ -8,7 +8,7 @@ import {
 import Image from "next/image";
 import Loading from "@/components/Loading";
 import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/cartHooks";
-import type { Product } from "@/types";
+import type { CartItem, Product } from "@/types";
 
 
 
@@ -54,7 +54,7 @@ export default function Cart() {
                 </p>
               </div>
             ) : (
-            items.map((item: { id: string; productId: number; quantity: number; unitPrice: number; product: Product }) => (
+            items.map((item: CartItem) => (
               <div
                 key={item.product.id}
                 className="bg-white p-4 sm:p-5 rounded-xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 transition-all duration-300"

@@ -96,11 +96,12 @@ export interface NavLinkProps {
 export interface CartItem {
   id: number;
   name: string;
-  category: string;
-  description: string;
-  price: number;
-  qty: number;
-  image: string;
+  cartId: string;
+  productId: string;
+  unitPrice: number;
+  quantity: number;
+  product: Product;
+  addedAt: Date;
 }
 
 export interface Brand {
