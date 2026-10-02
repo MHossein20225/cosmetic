@@ -43,6 +43,30 @@ export interface ProductWithCategory extends Product {
   category: Category;
 }
 
+export type ProductSort =
+  | "featured"
+  | "newest"
+  | "price-asc"
+  | "price-desc"
+  | "discount-desc"
+  | "name-asc";
+
+export interface SearchProductsParams {
+  search?: string;
+  sort?: ProductSort;
+  page?: number;
+  limit?: number;
+  category?: string;
+}
+
+export interface SearchProductsResult {
+  products: Product[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export interface CategoryWithProducts extends Category {
   products: Product[];
 }

@@ -1,14 +1,28 @@
 'use client'
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import Loading from "@/components/Loading";
 import ProductsView from "@/components/ProductsView";
-import { useProducts } from "@/hooks/productHooks";
+import { useSearchProducts } from "@/hooks/productHooks";
+import type { ProductSort, SearchProductsParams } from "@/types";
 
 export default function Products() {
-  const { products, isLoading, isError } = useProducts();
+  const [params, setParams] = useState<SearchProductsParams>({
+    page: 1,
+    limit: 12,
+  });
+
+  const { products, result, isLoading, isFetching, isError } = useSearchProducts(params);
+
+  const handleParamsChange = useCallback(
+    (next: { search?: string; sort?: ProductSort; page?: number }) => {
+      setParams((current) => ({ ...current, ...next }));
+    },
+    []
+  );
 
   if (isLoading) {
-    return <Loading />;
+    return <Loading/>;
   }
 
   if (isError) {
@@ -37,6 +51,10 @@ export default function Products() {
       title="All Products"
       description="Every ritual, every category — the complete collection."
       products={products ?? []}
+      result={result}
+      sort={params.sort}
+      isFetching={isFetching}
+      onParamsChange={handleParamsChange}
     />
   );
 }

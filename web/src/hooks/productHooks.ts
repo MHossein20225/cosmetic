@@ -1,10 +1,10 @@
 'use client'
-import { useQuery } from "@tanstack/react-query";
-import { getProducts, getProduct, getCategoriedProducts } from "../lib/productRequests";
-import type { Product, ProductWithCategory } from "@/types";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { getProducts, getProduct, getCategoriedProducts, searchProducts } from "../lib/productRequests";
+import type { SearchProductsParams } from "@/types";
 
 export function useProducts() {
-  const { data, isLoading, isError, error } = useQuery<Product[]>({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
   });
@@ -12,7 +12,7 @@ export function useProducts() {
 }
 
 export function useProduct(id: number | undefined) {
-  const { data, isLoading, isError, error } = useQuery<ProductWithCategory>({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["product", id],
     queryFn: () => getProduct(id as number),
     enabled: id !== undefined,
@@ -21,10 +21,26 @@ export function useProduct(id: number | undefined) {
 }
 
 export function useCategoriedProducts(category: string | undefined) {
-  const { data, isLoading, isError, error } = useQuery<Product[]>({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["products", category],
     queryFn: () => getCategoriedProducts(category as string),
     enabled: category !== undefined,
   });
   return { categoriedProducts: data, isLoading, isError, error };
+}
+
+export function useSearchProducts(params: SearchProductsParams) {
+  const { data, isLoading, isFetching, isError, error } = useQuery({
+    queryKey: ["products", "search", params],
+    queryFn: () => searchProducts(params),
+    placeholderData: keepPreviousData,
+  });
+  return {
+    products: data?.products,
+    result: data,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+  };
 }

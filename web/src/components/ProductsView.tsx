@@ -1,97 +1,54 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
-import { getProductPrice } from "@/lib/pricing";
-import type { Product } from "@/types";
+import type { ProductSort, SearchProductsResult } from "@/types";
 
 interface ProductsViewProps {
   title: string;
   description?: string;
-  products: Product[];
+  products: SearchProductsResult["products"];
+  result?: SearchProductsResult;
+  sort?: ProductSort;
   categoryLabel?: string;
+  isFetching?: boolean;
+  onParamsChange: (params: { search?: string; sort?: ProductSort; page?: number }) => void;
 }
 
-const PER_PAGE = 12;
-
-const SORT_OPTIONS = [
+const SORT_OPTIONS: { value: ProductSort; label: string }[] = [
   { value: "featured", label: "Featured" },
   { value: "newest", label: "Newest" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
   { value: "discount-desc", label: "Biggest Discount" },
   { value: "name-asc", label: "Name: A to Z" },
-] as const;
-
-type SortOption = (typeof SORT_OPTIONS)[number]["value"];
+];
 
 export default function ProductsView({
   title,
   description,
   products,
+  result,
+  sort,
   categoryLabel,
+  isFetching,
+  onParamsChange,
 }: ProductsViewProps) {
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("featured");
-  const [page, setPage] = useState(1);
 
-  const filteredProducts = useMemo(() => {
-    const query = search.trim().toLowerCase();
+  const total = result?.total ?? 0;
+  const page = result?.page ?? 1;
+  const totalPages = result?.totalPages ?? 1;
 
-    const matched = query
-      ? products.filter(
-          (product) =>
-            product.name.toLowerCase().includes(query) ||
-            product.description.toLowerCase().includes(query)
-        )
-      : products;
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      onParamsChange({ search, page: 1 });
+    }, 300);
 
-    const sorted = [...matched];
-
-    switch (sortBy) {
-      case "newest":
-        sorted.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        break;
-      case "price-asc":
-        sorted.sort((a, b) => getProductPrice(a) - getProductPrice(b));
-        break;
-      case "price-desc":
-        sorted.sort((a, b) => getProductPrice(b) - getProductPrice(a));
-        break;
-      case "discount-desc":
-        sorted.sort((a, b) => b.discount - a.discount);
-        break;
-      case "name-asc":
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      default:
-        break;
-    }
-
-    return sorted;
-  }, [products, search, sortBy]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PER_PAGE));
-  const currentPage = Math.min(page, totalPages);
-  const visibleProducts = filteredProducts.slice(
-    (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
-  );
-
-  function handleSearchChange(value: string) {
-    setSearch(value);
-    setPage(1);
-  }
-
-  function handleSortChange(value: SortOption) {
-    setSortBy(value);
-    setPage(1);
-  }
+    return () => clearTimeout(timeout);
+  }, [search, onParamsChange]);
 
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-8 md:py-12">
@@ -132,7 +89,7 @@ export default function ProductsView({
 
           <input
             value={search}
-            onChange={(event) => handleSearchChange(event.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Search products"
             aria-label="Search products"
             className="w-full bg-white pl-11 pr-10 py-2.5 text-sm text-gray-900 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-amber-800"
@@ -143,7 +100,7 @@ export default function ProductsView({
             <button
               type="button"
               aria-label="Clear search"
-              onClick={() => handleSearchChange("")}
+              onClick={() => setSearch("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-800 transition-colors"
             >
               <X size={16} />
@@ -152,9 +109,12 @@ export default function ProductsView({
         </div>
 
         <select
-          value={sortBy}
+          value={sort ?? "featured"}
           onChange={(event) =>
-            handleSortChange(event.target.value as SortOption)
+            onParamsChange({
+              sort: event.target.value as ProductSort,
+              page: 1,
+            })
           }
           aria-label="Sort products"
           className="bg-white px-4 py-2.5 text-sm text-gray-900 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-amber-800"
@@ -168,18 +128,18 @@ export default function ProductsView({
       </div>
 
       <p className="text-sm text-gray-500 mb-6">
-        {filteredProducts.length}{" "}
-        {filteredProducts.length === 1 ? "product" : "products"}
+        {total} {total === 1 ? "product" : "products"}
         {search && ` matching "${search}"`}
+        {isFetching && <span className="ml-2 text-gray-400">updating...</span>}
       </p>
 
-      {filteredProducts.length === 0 ? (
+      {products.length === 0 ? (
         <p className="text-gray-500 text-sm py-12 text-center">
           No products found.
         </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {visibleProducts.map((product) => (
+          {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
@@ -190,8 +150,8 @@ export default function ProductsView({
           <button
             type="button"
             aria-label="Previous page"
-            disabled={currentPage === 1}
-            onClick={() => setPage(currentPage - 1)}
+            disabled={page <= 1}
+            onClick={() => onParamsChange({ page: page - 1 })}
             className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:border-amber-800 hover:text-amber-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-700"
           >
             <ChevronLeft size={16} />
@@ -201,10 +161,10 @@ export default function ProductsView({
             <button
               key={index}
               type="button"
-              onClick={() => setPage(index + 1)}
-              aria-current={currentPage === index + 1 ? "page" : undefined}
+              onClick={() => onParamsChange({ page: index + 1 })}
+              aria-current={page === index + 1 ? "page" : undefined}
               className={`w-9 h-9 text-sm font-medium rounded-lg border transition-colors ${
-                currentPage === index + 1
+                page === index + 1
                   ? "bg-amber-800 text-white border-amber-800"
                   : "border-gray-200 text-gray-700 hover:border-amber-800 hover:text-amber-800"
               }`}
@@ -216,8 +176,8 @@ export default function ProductsView({
           <button
             type="button"
             aria-label="Next page"
-            disabled={currentPage === totalPages}
-            onClick={() => setPage(currentPage + 1)}
+            disabled={page >= totalPages}
+            onClick={() => onParamsChange({ page: page + 1 })}
             className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:border-amber-800 hover:text-amber-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-700"
           >
             <ChevronRight size={16} />
