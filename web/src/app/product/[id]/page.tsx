@@ -28,6 +28,7 @@ import {
   hasDiscount,
   isOutOfStock,
 } from "@/lib/pricing";
+import { toast } from "sonner";
 
 export default function ProductPage({
   params,
@@ -60,7 +61,13 @@ export default function ProductPage({
   function handleAddToBag() {
     setJustAdded(true);
 
-    addToCartMutate({ productId, quantity });
+    addToCartMutate(
+      { productId, quantity },
+      {
+        onSuccess: () => toast.success("محصول با موفقیت اضافه شد"),
+        onError: () => toast.error("با خطا مواجه شد"),
+      },
+    );
 
     setTimeout(() => {
       setJustAdded(false);
