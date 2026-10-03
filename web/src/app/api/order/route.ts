@@ -2,15 +2,30 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { orderSchema } from "@/types";
 
+export async function GET() {
+  try {
+    const user = await getCurrentUser();
+    if (user?.role !== "ADMIN") {
+      return Response.json({ error: "دسترسی غیر مجاز" }, { status: 401 });
+    }
+    const orders = prisma.order.findMany({
+      include: { items: { include: { product: true } } },
+    });
+    if ((await orders).length === 0) {
+      return Response.json({ error: "سفارشی پیدا نشد" }, { status: 400 });
+    }
+    return orders;
+  } catch (error) {
+    return Response.json({ error: "سفارشی دریافت نشد" }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
 
     if (!user) {
-      return Response.json(
-        { error: "ثبت نام نیاز است" },
-        { status: 401 }
-      );
+      return Response.json({ error: "ثبت نام نیاز است" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -22,15 +37,11 @@ export async function POST(req: Request) {
         {
           error: result.error.flatten().fieldErrors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const {
-      recipientName,
-      phoneNumber,
-      address,
-    } = result.data;
+    const { recipientName, phoneNumber, address } = result.data;
 
     const cart = await prisma.cart.findUnique({
       where: {
@@ -46,17 +57,11 @@ export async function POST(req: Request) {
     });
 
     if (!cart) {
-      return Response.json(
-        { error: "سبد خرید پیدا نشد" },
-        { status: 404 }
-      );
+      return Response.json({ error: "سبد خرید پیدا نشد" }, { status: 404 });
     }
 
     if (cart.items.length === 0) {
-      return Response.json(
-        { error: "سبد خرید خالی است" },
-        { status: 400 }
-      );
+      return Response.json({ error: "سبد خرید خالی است" }, { status: 400 });
     }
 
     let totalPrice = 0;
@@ -67,20 +72,17 @@ export async function POST(req: Request) {
           {
             error: `موجودی ${item.product.name} کافی نیست`,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       const discountedPrice =
-        item.product.price -
-        (item.product.price * item.product.discount) / 100;
+        item.product.price - (item.product.price * item.product.discount) / 100;
 
       totalPrice += discountedPrice * item.quantity;
     }
 
-    const deliveryTime = new Date(
-      Date.now() + 1000 * 60 * 60 * 24 * 3
-    );
+    const deliveryTime = new Date(Date.now() + 1000 * 60 * 60 * 24 * 3);
 
     const order = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
@@ -124,12 +126,6 @@ export async function POST(req: Request) {
         });
       }
 
-      await tx.cartItem.deleteMany({
-        where: {
-          cartId: cart.id,
-        },
-      });
-
       return newOrder;
     });
 
@@ -138,14 +134,9 @@ export async function POST(req: Request) {
         message: "سفارش با موفقیت ثبت شد",
         order,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
-    console.error(error);
-
-    return Response.json(
-      { error: "ثبت سفارش انجام نشد" },
-      { status: 500 }
-    );
+    return Response.json({ error: "ثبت سفارش انجام نشد" }, { status: 500 });
   }
 }

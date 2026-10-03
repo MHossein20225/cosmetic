@@ -142,5 +142,4 @@ export const orderSchema = z.object({
   recipientName: z.string().min(3, "نام حداقل باید 3 حرف باشد"),
   phoneNumber: z.string().startsWith("09").max(11, "شماره معتبر نیست"),
   address: z.string().min(1, "آدرس را وارد کنید"),
-  totalPrice: z.number().min(1)
 });

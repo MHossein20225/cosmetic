@@ -1,4 +1,9 @@
-import { authUser, createUser, logInUser, logOutUser } from "@/lib/userRequests";
+import {
+  authUser,
+  createUser,
+  logInUser,
+  logOutUser,
+} from "@/lib/userRequests";
 import { User } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -65,10 +70,7 @@ export function useAuthUser() {
 export function useLogOut() {
   const queryClient = useQueryClient();
 
-  const {
-    mutate: logOutMutate,
-    isPending,
-  } = useMutation({
+  const { mutate: logOutMutate, isPending } = useMutation({
     mutationKey: ["user", "logout"],
     mutationFn: logOutUser,
     onSuccess: () => {
