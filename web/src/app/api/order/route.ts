@@ -27,11 +27,8 @@ export async function POST(req: Request) {
     if (!user) {
       return Response.json({ error: "ثبت نام نیاز است" }, { status: 401 });
     }
-
     const body = await req.json();
-
     const result = orderSchema.safeParse(body);
-
     if (!result.success) {
       return Response.json(
         {
@@ -40,9 +37,7 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-
     const { recipientName, phoneNumber, address } = result.data;
-
     const cart = await prisma.cart.findUnique({
       where: {
         userId: user.id,
@@ -55,17 +50,13 @@ export async function POST(req: Request) {
         },
       },
     });
-
     if (!cart) {
       return Response.json({ error: "سبد خرید پیدا نشد" }, { status: 404 });
     }
-
     if (cart.items.length === 0) {
       return Response.json({ error: "سبد خرید خالی است" }, { status: 400 });
     }
-
     let totalPrice = 0;
-
     for (const item of cart.items) {
       if (item.quantity > item.product.stock) {
         return Response.json(
@@ -75,15 +66,11 @@ export async function POST(req: Request) {
           { status: 400 },
         );
       }
-
       const discountedPrice =
         item.product.price - (item.product.price * item.product.discount) / 100;
-
       totalPrice += discountedPrice * item.quantity;
     }
-
     const deliveryTime = new Date(Date.now() + 1000 * 60 * 60 * 24 * 3);
-
     const order = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
         data: {
@@ -93,13 +80,11 @@ export async function POST(req: Request) {
           address,
           totalPrice,
           deliveryTime,
-
           items: {
             create: cart.items.map((item) => {
               const unitPrice =
                 item.product.price -
                 (item.product.price * item.product.discount) / 100;
-
               return {
                 productId: item.productId,
                 quantity: item.quantity,
@@ -112,7 +97,6 @@ export async function POST(req: Request) {
           items: true,
         },
       });
-
       for (const item of cart.items) {
         await tx.product.update({
           where: {
@@ -125,10 +109,8 @@ export async function POST(req: Request) {
           },
         });
       }
-
       return newOrder;
     });
-
     return Response.json(
       {
         message: "سفارش با موفقیت ثبت شد",

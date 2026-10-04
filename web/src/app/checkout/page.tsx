@@ -3,10 +3,39 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check, ChevronRight, MapPin } from "lucide-react";
 import { useCart } from "@/hooks/cartHooks";
-import { CartItem } from "@/types";
+import { CartItem, orderSchema } from "@/types";
+import { useCreateOrder } from "@/hooks/orderHooks";
+import { redirect } from "next/navigation";
+import { toast } from "sonner";
 
 export default function Checkout() {
   const { isLoading, items, subtotal, count } = useCart();
+  const { orderMutate, isPending } = useCreateOrder();
+
+  async function submitHandle(e: React.SubmitEvent<HTMLFormElement>) {
+    const formData = new FormData(e.currentTarget);
+
+    const order = {
+      recipientName: formData.get("recipientName"),
+      address: formData.get("address"),
+      phoneNumber: formData.get("phoneNumber"),
+    };
+
+    const result = orderSchema.safeParse(order);
+
+    if (!result.success) {
+      return null;
+    }
+
+    orderMutate(result.data, {
+      onSuccess: () => {
+        toast.success("(...صبر کنید) سفارش با موفقیت ثبت شد");
+        setTimeout(() => {
+          redirect("/");
+        }, 2000);
+      },
+    });
+  }
 
   return (
     <main className="w-full min-h-screen pt-20 bg-[#fff8f6]">
@@ -25,7 +54,7 @@ export default function Checkout() {
             className="font-sans text-xs font-semibold uppercase tracking-wider text-[#8b4e40] hover:text-[#58261b] transition-colors flex items-center gap-1.5"
             href="/cart"
           >
-            Back to Bag
+            بازگشت به سبد خرید
             <ChevronRight size={14} />
           </Link>
         </div>
@@ -43,7 +72,12 @@ export default function Checkout() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           {/* Left: Address */}
           <div className="lg:col-span-7 flex flex-col gap-5">
-            <section className="bg-white p-5 sm:p-6 rounded-xl shadow-sm">
+            <form
+              id="submitOrder"
+              onSubmit={(e) => submitHandle(e)}
+              method="post"
+              className="bg-white p-5 sm:p-6 rounded-xl shadow-sm"
+            >
               <div className="flex items-center gap-2 mb-5">
                 <span className="text-[#8b4e40]">
                   <MapPin size={18} />
@@ -63,18 +97,7 @@ export default function Checkout() {
                   <input
                     className="bg-[#fcf1ef] px-4 py-2.5 text-[#1f1b1a] font-sans text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#8b4e40] placeholder:text-[#85736f]"
                     type="text"
-                  />
-                </label>   
-
-                <label className="flex flex-col gap-1.5">
-                  <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#534340]">
-                    شهر
-                  </span>
-
-                  <input
-                    className="bg-[#fcf1ef] px-4 py-2.5 text-[#1f1b1a] font-sans text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#8b4e40] placeholder:text-[#85736f]"
-                    placeholder="Tehran"
-                    type="text"
+                    name="recipientName"
                   />
                 </label>
 
@@ -86,6 +109,7 @@ export default function Checkout() {
                   <textarea
                     className="bg-[#fcf1ef] px-4 py-2.5 text-[#1f1b1a] font-sans text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#8b4e40] placeholder:text-[#85736f] min-h-24 resize-y"
                     placeholder="Street, building, unit number"
+                    name="address"
                   />
                 </label>
 
@@ -98,10 +122,11 @@ export default function Checkout() {
                     className="bg-[#fcf1ef] px-4 py-2.5 text-[#1f1b1a] font-sans text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#8b4e40] placeholder:text-[#85736f]"
                     placeholder="09xxxxxxxxx"
                     type="text"
+                    name="phoneNumber"
                   />
                 </label>
               </div>
-            </section>
+            </form>
 
             {/* Payment */}
             <section className="bg-white p-5 sm:p-6 rounded-xl shadow-sm">
@@ -169,7 +194,7 @@ export default function Checkout() {
 
               {!items.length || isLoading ? (
                 <p className="font-sans text-sm text-[#534340] py-6 text-center">
-                  Your bag is empty.
+                  .سبد شما خالی است
                 </p>
               ) : (
                 <div className="flex flex-col gap-3 max-h-72 overflow-y-auto pr-1">
@@ -233,7 +258,7 @@ export default function Checkout() {
               <div className="h-px bg-[#f0e6e4]" />
 
               <div className="flex justify-between items-baseline">
-                <span className="font-serif text-xl text-[#1f1b1a]">Total</span>
+                <span className="font-serif text-xl text-[#1f1b1a]">قیمت کل</span>
                 <span className="font-serif text-2xl text-[#1f1b1a]">
                   {subtotal}
                 </span>
@@ -242,8 +267,9 @@ export default function Checkout() {
               <button
                 className="w-full bg-[#8b4e40] text-white py-4 px-6 font-sans text-xs font-semibold uppercase tracking-widest rounded hover:bg-[#58261b] transition-all active:scale-[0.99] flex items-center justify-center gap-2 shadow-md disabled:bg-[#85736f] disabled:cursor-not-allowed"
                 type="button"
+                form="submitOrder"
               >
-                Place Order
+                {isPending ? "صبر کنید" : "ثبت سفارش"}
                 <span className="material-symbols-outlined text-base">
                   <Check />
                 </span>
