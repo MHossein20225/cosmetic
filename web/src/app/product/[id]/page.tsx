@@ -384,8 +384,8 @@ export default function ProductPage({
                     </>
                   )}
                 </button>
-              ) : (
-                <Link href="/login">
+              ) :
+                (user ? (
                   <button
                     type="button"
                     onClick={handleAddToBag}
@@ -395,8 +395,11 @@ export default function ProductPage({
                   >
                     you have to log in
                   </button>
-                </Link>
-              )}
+                ) : (
+                  <Link href="/login" className="text-sm text-amber-800 hover:text-amber-900">
+                    Log in to add to bag
+                  </Link>
+                ))}
             </div>
 
             <div className="flex items-center justify-center gap-2 mt-1 text-gray-500 text-xs">

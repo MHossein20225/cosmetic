@@ -1,16 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import { Search, ShoppingBag, Menu, X, Flower, User } from "lucide-react";
+import { useState, useCallback, useMemo } from "react";
+import { Search, ShoppingBag, Menu, X, Flower, User, Sparkles } from "lucide-react";
 import { NAV_LINKS } from "@/data";
 import NavLinkItem from "./NavLinkItems";
 import Link from "next/link";
 import { useAuthUser, useLogOut } from "@/hooks/userHooks";
 import { useCart } from "@/hooks/cartHooks";
+import { useSearchProducts } from "@/hooks/productHooks";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const { products, isFetching } = useSearchProducts({
+    search,
+    page: 1,
+    limit: 8,
+  });
+
+  const debouncedSearch = useMemo(() => search, [search]);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
+  }, []);
+
+  const handleSearchSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (!search.trim()) return;
+  }, [search]);
+
+  const clearSearch = useCallback(() => {
+    setSearch("");
+  }, []);
+
+  const hasResults = products?.length ?? 0 > 0;
   const { user } = useAuthUser();
   const { logOutMutate, isPending: isLoggingOut } = useLogOut();
   const { count: cartCount } = useCart();
@@ -33,18 +57,43 @@ export default function Header() {
           ))}
         </nav>
 
+        <div className="relative flex-1 min-w-0 hidden sm:flex items-center gap-3">
+          <form
+            method="get"
+            action="/products"
+            className="relative w-full"
+            onSubmit={handleSearchSubmit}
+          >
+            <Search
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
+            />
+            <input
+              type="search"
+              name="search"
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search products..."
+              aria-label="Search products"
+              className="w-full bg-white py-2 pl-11 pr-11 text-sm text-gray-900 rounded-lg border border-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:border-amber-800"
+            />
+            {search && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-800 transition-colors"
+                onClick={clearSearch}
+              >
+                <X size={16} />
+              </button>
+            )}
+          </form>
+        </div>
+
         <div className="flex items-center gap-4 sm:gap-5">
           <Link
-            href="/products"
-            aria-label="Search"
-            className="text-gray-700 hover:text-amber-800 transition-colors"
-          >
-            <Search size={20} />
-          </Link>
-
-          <Link
             href="/cart"
-            aria-label="Cart"
+            aria-label={`Cart ${cartCount > 0 ? `(${cartCount} items)` : ""}`}
             className="relative text-gray-700 hover:text-amber-800 transition-colors"
           >
             <ShoppingBag size={20} />

@@ -45,13 +45,18 @@ export default function ProductCard({
             )}
           </div>
 
-          <div className="absolute inset-x-2 sm:inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute inset-x-2 sm:inset-x-3 bottom-3 flex items-center justify-center gap-1.5">
             <button
-              disabled={outOfStock}
-              className="w-full bg-[#8b4e40] text-white font-sans text-[11px] font-semibold uppercase tracking-wider py-2.5 rounded shadow-sm hover:bg-[#58261b] transition-colors flex items-center justify-center gap-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
               type="button"
+              aria-label={
+                outOfStock
+                  ? `Add to bag for ${product.name}`
+                  : `Add ${product.name} to bag`
+              }
+              disabled={outOfStock}
+              className="min-w-[44px] h-[44px] bg-[#8b4e40] text-white font-sans text-[11px] font-semibold uppercase tracking-wider py-2.5 rounded shadow-sm hover:bg-[#58261b] transition-colors flex items-center justify-center gap-1 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
             >
-              {outOfStock ? "Out of stock" : "Add to Bag"}
+              Add to Bag
             </button>
           </div>
         </div>

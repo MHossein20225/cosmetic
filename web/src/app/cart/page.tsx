@@ -1,10 +1,5 @@
 'use client'
-import {
-  Check,
-  Minus,
-  Plus,
-  Trash,
-} from "lucide-react";
+import { Check, ChevronLeft, Minus, Plus, ShoppingBag, Trash, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import Loading from "@/components/Loading";
 import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/cartHooks";
@@ -37,9 +32,10 @@ export default function Cart() {
           <a
             className="font-sans text-xs font-semibold uppercase tracking-wider text-[#8b4e40] hover:text-[#58261b] transition-colors flex items-center gap-1.5"
             href="#"
+            aria-label="Continue browsing"
           >
-            <span className="material-symbols-outlined text-sm">west</span>
-            Continue Browsing
+            <ChevronLeft size={14} />
+            Continue browsing
           </a>
         </div>
 
@@ -49,8 +45,14 @@ export default function Cart() {
           <div className="lg:col-span-8 flex flex-col gap-5">
             {items.length === 0 ? (
               <div className="bg-white rounded-xl shadow-sm p-10 text-center">
-                <p className="font-sans text-sm text-[#534340]">
-                  Your bag is empty.
+                <div className="w-14 h-14 mx-auto rounded-full bg-rose-100 flex items-center justify-center">
+                  <ShoppingBag size={22} className="text-rose-400" />
+                </div>
+                <h2 className="mt-4 font-serif text-lg text-[#1f1b1a]">
+                  Your bag is empty
+                </h2>
+                <p className="mt-1 text-sm text-[#534340]">
+                  Add a few products to see them here.
                 </p>
               </div>
             ) : (
@@ -88,9 +90,7 @@ export default function Cart() {
                       className="text-[#85736f] hover:text-[#b44a4a] transition-colors p-1 rounded shrink-0"
                       type="button"
                     >
-                      <span className="material-symbols-outlined text-xl">
-                        <Trash color="red" />
-                      </span>
+                      <Trash size={18} className="text-red-500" />
                     </button>
                   </div>
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#f0e6e4]">
@@ -107,9 +107,7 @@ export default function Cart() {
                         className="w-8 h-8 flex items-center justify-center text-[#1f1b1a] hover:bg-white rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         type="button"
                       >
-                        <span className="material-symbols-outlined text-base">
-                          <Minus />
-                        </span>
+                        <Minus size={16} />
                       </button>
                       <span className="w-10 text-center font-sans text-sm font-semibold text-[#1f1b1a] select-none">
                         {item.quantity}
@@ -125,9 +123,7 @@ export default function Cart() {
                         className="w-8 h-8 flex items-center justify-center text-[#1f1b1a] hover:bg-white rounded transition-colors"
                         type="button"
                       >
-                        <span className="material-symbols-outlined text-base">
-                          <Plus />
-                        </span>
+                        <Plus size={16} />
                       </button>
                     </div>
                     <span className="font-sans text-base sm:text-lg font-semibold text-[#1f1b1a]">
@@ -206,9 +202,7 @@ export default function Cart() {
                 type="button"
               >
                 Proceed to Checkout
-                <span className="material-symbols-outlined text-base">
-                  <Check />
-                </span>
+                <Check size={18} />
               </button>
 
               {/* Trust Badges */}
@@ -216,9 +210,7 @@ export default function Cart() {
               {/* Security */}
               <div className="flex items-center justify-center gap-3 text-[#85736f] font-sans text-[11px] uppercase tracking-wider">
                 <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-xs">
-                    lock
-                  </span>
+                  <ShieldCheck size={14} />
                   256-Bit Encrypted
                 </span>
                 <span>•</span>
