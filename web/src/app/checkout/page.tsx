@@ -6,6 +6,52 @@ import { useCart } from "@/hooks/cartHooks";
 import { CartItem, orderSchema } from "@/types";
 import { useCreateOrder } from "@/hooks/orderHooks";
 import { redirect } from "next/navigation";
+
+export async function addOrder(
+  data: Pick<Order, "recipientName" | "phoneNumber" | "address">,
+) {
+  const csrfToken = typeof window !== "undefined"
+    ? localStorage.getItem("csrfToken")
+    : null;
+
+  const response = await fetch("/api/order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-csrf-token": csrfToken ?? "",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || "سفارش ثبت نشد");
+  }
+
+  return response.json();
+}
+  data: Pick<Order, "recipientName" | "phoneNumber" | "address">,
+) {
+  const csrfToken = typeof window !== "undefined"
+    ? localStorage.getItem("csrfToken")
+    : null;
+
+  const response = await fetch("/api/order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-csrf-token": csrfToken ?? "",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || "سفارش ثبت نشد");
+  }
+
+  return response.json();
+}
 import { toast } from "sonner";
 
 export default function Checkout() {
@@ -146,16 +192,18 @@ export default function Checkout() {
                     id: "cod",
                     label: "Cash on Delivery",
                     hint: "Pay when your order arrives",
+                    disabled: false,
                   },
                   {
                     id: "card",
                     label: "Credit / Debit Card",
-                    hint: "Visa, Mastercard",
+                    hint: "Not available at this time",
+                    disabled: true,
                   },
                 ].map((method) => (
                   <label
                     key={method.id}
-                    className="flex items-center gap-3 bg-[#fcf1ef] px-4 py-3 rounded-lg cursor-pointer hover:bg-[#f8ebe7] transition-colors"
+                    className={`flex items-center gap-3 bg-[#fcf1ef] px-4 py-3 rounded-lg cursor-pointer hover:bg-[#f8ebe7] transition-colors ${method.disabled ? "opacity-60 cursor-not-allowed" : ""}`}
                   >
                     <input
                       className="accent-[#8b4e40]"
@@ -163,6 +211,7 @@ export default function Checkout() {
                       name="payment"
                       type="radio"
                       value={method.id}
+                      disabled={method.disabled}
                     />
 
                     <span className="flex flex-col">
@@ -206,7 +255,7 @@ export default function Checkout() {
                       >
                         <div className="relative w-14 h-16 rounded-lg bg-[#fcf1ef] overflow-hidden shrink-0">
                           <Image
-                            src={item.product.imageUrl}
+                            src={item.product.imageUrl ?? "/images/nonProduct.jpg"}
                             alt={item.product.name}
                             fill
                             loading="eager"

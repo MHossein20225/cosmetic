@@ -1,8 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { validateCsrfToken } from "@/lib/csrf";
+import { cookies } from "next/headers";
+
+const CSRF_TOKEN = "csrfToken";
+const CSRF_HEADER = "x-csrf-token";
 
 export async function POST(req: Request) {
   try {
+    const cookieStore = await cookies();
+    if (!validateCsrfToken(cookieStore, req.headers)) {
+      return Response.json({ error: "درخواست کد تحریم معتبر نیست" }, { status: 403 });
+    }
+
     const user = await getCurrentUser();
 
     if (!user) {
@@ -30,65 +40,74 @@ export async function POST(req: Request) {
       );
     }
 
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
+    const result = await prisma.$transaction(async (tx) => {
+      const product = await tx.product.findUnique({
+        where: { id: productId },
+      });
+
+      if (!product) {
+        throw new Error("Product not found");
+      }
+
+      const cart = await tx.cart.upsert({
+        where: { userId: user.id },
+        update: {},
+        create: { userId: user.id },
+      });
+
+      const existingItem = await tx.cartItem.findUnique({
+        where: {
+          cartId_productId: {
+            cartId: cart.id,
+            productId,
+          },
+        },
+      });
+
+      const currentQty = existingItem?.quantity ?? 0;
+
+      if (currentQty + quantity > product.stock) {
+        throw new Error("Not enough stock");
+      }
+
+      const cartItem = await tx.cartItem.upsert({
+        where: {
+          cartId_productId: {
+            cartId: cart.id,
+            productId,
+          },
+        },
+        update: {
+          quantity: currentQty + quantity,
+        },
+        create: {
+          cartId: cart.id,
+          productId,
+          quantity,
+          unitPrice: product.price,
+        },
+        include: {
+          product: true,
+        },
+      });
+
+      return cartItem;
     });
 
-    if (!product) {
+    if (result instanceof Error) {
       return Response.json(
-        { error: "Product not found" },
-        { status: 404 }
+        { error: result.message },
+        result.message === "Not enough stock" ? { status: 400 } : { status: 500 }
       );
     }
 
-    const cart = await prisma.cart.upsert({
-      where: { userId: user.id },
-      update: {},
-      create: { userId: user.id },
-    });
-
-    const existingItem = await prisma.cartItem.findUnique({
-      where: {
-        cartId_productId: {
-          cartId: cart.id,
-          productId,
-        },
-      },
-    });
-
-    const currentQty = existingItem?.quantity ?? 0;
-
-    if (currentQty + quantity > product.stock) {
-      return Response.json(
-        { error: "Not enough stock" },
-        { status: 400 }
-      );
-    }
-
-    const cartItem = await prisma.cartItem.upsert({
-      where: {
-        cartId_productId: {
-          cartId: cart.id,
-          productId,
-        },
-      },
-      update: {
-        quantity: currentQty + quantity,
-      },
-      create: {
-        cartId: cart.id,
-        productId,
-        quantity,
-        unitPrice: product.price,
-      },
-      include: {
-        product: true,
-      },
-    });
-
-    return Response.json(cartItem, { status: 201 });
+    return Response.json(result, { status: 201 });
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error && error.message === "Not enough stock") {
+      return Response.json({ error: "Not enough stock" }, { status: 400 });
+    }
 
     return Response.json(
       { error: "Failed to add product to cart" },

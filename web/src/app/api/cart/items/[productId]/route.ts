@@ -1,11 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { validateCsrfToken } from "@/lib/csrf";
+import { cookies } from "next/headers";
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ productId: string }> }
-) {
+const CSRF_TOKEN = "csrfToken";
+const CSRF_HEADER = "x-csrf-token";
+
+export async function PATCH(req: Request, { params }: { params: Promise<{ productId: string }> }) {
   try {
+    const cookieStore = await cookies();
+    if (!validateCsrfToken(cookieStore, req.headers)) {
+      return Response.json({ error: "درخواست کد تحریم معتبر نیست" }, { status: 403 });
+    }
+
     const user = await getCurrentUser();
 
     if (!user) {
@@ -104,11 +111,13 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ productId: string }> }
-) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ productId: string }> }) {
   try {
+    const cookieStore = await cookies();
+    if (!validateCsrfToken(cookieStore, req.headers)) {
+      return Response.json({ error: "درخواست کد تحریم معتبر نیست" }, { status: 403 });
+    }
+
     const user = await getCurrentUser();
 
     if (!user) {

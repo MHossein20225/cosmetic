@@ -29,6 +29,13 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model RateLimit {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  count     Int      @default(0)
+  expiresAt DateTime
+}
+
 model Product {
   id          Int         @id @default(autoincrement())
   name        String
@@ -39,7 +46,7 @@ model Product {
   imageUrl    String?
   categoryId  Int
   createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  updatedAt   DateTime  @updatedAt
   category    Category    @relation(fields: [categoryId], references: [id])
   cartItems   CartItem[]
   orderItems  OrderItem[]
@@ -57,7 +64,7 @@ model Cart {
   user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
   items     CartItem[]
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  updatedAt DateTime  @updatedAt
 }
 
 model CartItem {
@@ -84,7 +91,7 @@ model Order {
   totalPrice    Int
   status        Status      @default(QUEUE)
   createdAt     DateTime    @default(now())
-  deliveryTime  DateTime    @default(now())
+  deliveryTime  DateTime?
 }
 
 model OrderItem {
@@ -100,7 +107,7 @@ model OrderItem {
 enum Status {
   QUEUE
   PREPARED
-  DELIVERING
+  DELIVERED
 }
 
 enum Role {

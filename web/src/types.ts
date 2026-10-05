@@ -2,7 +2,7 @@ import type { MouseEventHandler } from "react";
 import z from "zod";
 
 export type Role = "CUSTOMER" | "ADMIN";
-export type Status = "QUEUE" | "PREPARED" | "DELIVERIED";
+export type Status = "QUEUE" | "PREPARED" | "DELIVERED";
 
 export interface User {
   id: string;
@@ -14,6 +14,10 @@ export interface User {
   updatedAt: Date;
 }
 
+export type UserDTO = Omit<User, "password">;
+
+export type SafeUser = Omit<User, "password">;
+
 export interface Session {
   id: string;
   userId: string;
@@ -24,7 +28,6 @@ export interface Session {
 export interface Category {
   id: number;
   name: string;
-  image: string;
 }
 
 export interface Product {
@@ -34,7 +37,7 @@ export interface Product {
   price: number;
   discount: number;
   stock: number;
-  imageUrl: string;
+  imageUrl: string | null;
   categoryId: number;
   createdAt: string;
   updatedAt: string;
@@ -68,10 +71,6 @@ export interface SearchProductsResult {
   totalPages: number;
 }
 
-export interface CategoryWithProducts extends Category {
-  products: Product[];
-}
-
 export interface CreateProductInput {
   name: string;
   description: string;
@@ -81,8 +80,6 @@ export interface CreateProductInput {
   imageUrl?: string;
   categoryId: number;
 }
-
-export type SafeUser = Omit<User, "password">;
 
 export interface NavLink {
   label: string;
@@ -95,10 +92,10 @@ export interface NavLinkProps {
 }
 
 export interface CartItem {
-  id: number;
+  id: string;
   name: string;
   cartId: string;
-  productId: string;
+  productId: number;
   unitPrice: number;
   quantity: number;
   product: Product;
@@ -121,7 +118,7 @@ export interface Order {
   totalPrice: number;
   status: Status;
   createdAt: Date;
-  deliveryTime: Date;
+  deliveryTime: Date | null;
 }
 
 export interface OrderItem {

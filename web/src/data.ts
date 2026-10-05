@@ -9,10 +9,10 @@ export const NAV_LINKS: NavLink[] = [
 
 export const CART_ITEMS: CartItem[] = [
   {
-    id: 1,
+    id: "cart-demo-1",
     name: "Dew Elixir Facial Oil",
     cartId: "cart-demo-1",
-    productId: "p-demo-1",
+    productId: 1,
     unitPrice: 68,
     quantity: 1,
     product: {
@@ -30,10 +30,10 @@ export const CART_ITEMS: CartItem[] = [
     addedAt: new Date(),
   },
   {
-    id: 2,
+    id: "cart-demo-2",
     name: "Petal Lip & Cheek Balm",
     cartId: "cart-demo-2",
-    productId: "p-demo-2",
+    productId: 2,
     unitPrice: 32,
     quantity: 1,
     product: {
@@ -53,12 +53,12 @@ export const CART_ITEMS: CartItem[] = [
 ];
 
 export const BRANDS: Brand[] = [
-  { id: 1, name: "LUMIÈRE", image: "/images/nonProduct.jpg" },
-  { id: 2, name: "AURELIA", image: "/images/nonProduct.jpg" },
-  { id: 3, name: "ÉLAN", image: "/images/nonProduct.jpg" },
-  { id: 4, name: "VELVET", image: "/images/nonProduct.jpg" },
-  { id: 5, name: "NOIR", image: "/images/nonProduct.jpg" },
-  { id: 6, name: "MAISON ROSE", image: "/images/nonProduct.jpg" },
-  { id: 7, name: "ATELIER", image: "/images/nonProduct.jpg" },
-  { id: 8, name: "SÉRUM", image: "/images/nonProduct.jpg" },
+  { id: 1, name: "LUMIÈRE", image: "" },
+  { id: 2, name: "AURELIA", image: "" },
+  { id: 3, name: "ÉLAN", image: "" },
+  { id: 4, name: "VELVET", image: "" },
+  { id: 5, name: "NOIR", image: "" },
+  { id: 6, name: "MAISON ROSE", image: "" },
+  { id: 7, name: "ATELIER", image: "" },
+  { id: 8, name: "SÉRUM", image: "" },
 ];

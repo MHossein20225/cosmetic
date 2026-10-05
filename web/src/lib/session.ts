@@ -42,3 +42,16 @@ export async function getCurrentUser() {
 
   return session.user;
 }
+
+export function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+export function getSecureCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: isProduction(),
+    sameSite: "lax",
+    path: "/",
+  };
+}

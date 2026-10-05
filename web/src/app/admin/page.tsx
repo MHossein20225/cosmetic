@@ -1,20 +1,48 @@
 import Link from "next/link";
-import { ShoppingCart, Package, Users, TrendingUp } from "lucide-react";
+import { ShoppingCart, Package, Users, TrendingUp, AlertTriangle } from "lucide-react";
 
 export default async function AdminDashboard() {
-  // TODO: load these from /api/admin once it exists
-  const stats = {
-    orders: 3,
-    products: 8,
-    users: 12,
-    revenue: 1240,
-  };
+  const stats = await fetch("http://localhost:3000/api/admin", {
+    cache: "no-store",
+  })
+    .then((res) => {
+      if (!res.ok) return null;
+      return res.json();
+    })
+    .catch(() => null);
 
-  const recentOrders = [
-    { id: "order_1", customer: "جلال", total: 4499, status: "PENDING", date: "۱۴۰۴-۰۴-۱۲" },
-    { id: "order_2", customer: "سارا", total: 2199, status: "PREPARED", date: "۱۴۰۴-۰۴-۱۲" },
-    { id: "order_3", customer: "احمد", total: 6999, status: "DELIVERED", date: "۱۴۰۴-۰۴-۱۱" },
-  ];
+  if (!stats) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 font-semibold">دسترسی غیر مجاز</p>
+        <p className="text-sm text-[#85736f]">برای دیدن داشبورد، به عنوان ادمین وارد شوید</p>
+      </div>
+    );
+  }
+
+  const [orders, products, users] = await Promise.all([
+    fetch("http://localhost:3000/api/admin/orders?my=1", { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) return [];
+        return res.json();
+      })
+      .catch(() => []),
+    fetch("http://localhost:3000/api/admin/products", { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) return [];
+        return res.json();
+      })
+      .catch(() => []),
+    fetch("http://localhost:3000/api/admin/users", { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) return [];
+        return res.json();
+      })
+      .catch(() => []),
+  ]);
+
+  const lowStock = products.filter((p: { stock: number }) => p.stock < 10);
+  const totalRevenue = orders.reduce((sum: number, o: { totalPrice: number }) => sum + o.totalPrice, 0);
 
   return (
     <div>
@@ -36,7 +64,7 @@ export default async function AdminDashboard() {
             </div>
             <span className="text-sm font-medium text-[#85736f]">سفارشات</span>
           </div>
-          <p className="font-serif text-3xl font-bold">{stats.orders}</p>
+          <p className="font-serif text-3xl font-bold">{orders.length}</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-[#e8dfdc]">
@@ -46,7 +74,7 @@ export default async function AdminDashboard() {
             </div>
             <span className="text-sm font-medium text-[#85736f]">محصولات</span>
           </div>
-          <p className="font-serif text-3xl font-bold">{stats.products}</p>
+          <p className="font-serif text-3xl font-bold">{products.length}</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-[#e8dfdc]">
@@ -56,7 +84,7 @@ export default async function AdminDashboard() {
             </div>
             <span className="text-sm font-medium text-[#85736f]">کاربران</span>
           </div>
-          <p className="font-serif text-3xl font-bold">{stats.users}</p>
+          <p className="font-serif text-3xl font-bold">{users.length}</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-[#e8dfdc]">
@@ -66,31 +94,65 @@ export default async function AdminDashboard() {
             </div>
             <span className="text-sm font-medium text-[#85736f]">درآمد</span>
           </div>
-          <p className="font-serif text-3xl font-bold text-[#8b4e40]">{stats.revenue}،۰۰۰ تومان</p>
+          <p className="font-serif text-3xl font-bold text-[#8b4e40]">
+            {totalRevenue.toLocaleString()} تومان
+          </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#e8dfdc]">
-        <div className="p-5 border-b border-[#e8dfdc]">
-          <h2 className="font-serif text-xl">سفارشات اخیر</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white rounded-xl border border-[#e8dfdc]">
+          <div className="p-5 border-b border-[#e8dfdc]">
+            <h2 className="font-serif text-xl">محصولات پایین انرژی</h2>
+          </div>
+          <div className="p-5">
+            {lowStock.length === 0 ? (
+              <p className="text-sm text-[#85736f]">همه محصولات انرژی کافی دارند</p>
+            ) : (
+              <ul className="space-y-2">
+                {lowStock.map((p: { id: number; name: string; stock: number }) => (
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="text-[#85736f]">{p.name}</span>
+                    <span className={`font-semibold ${p.stock <= 0 ? "text-red-600" : "text-[#85736f]"}`}>
+                      {p.stock} موجود
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
-        <ul>
-          {recentOrders.map((order) => (
-            <li
-              key={order.id}
-              className="p-5 border-b border-[#e8dfdc] flex items-center justify-between"
-            >
-              <div>
-                <p className="font-semibold">{order.id}</p>
-                <p className="text-sm text-[#85736f]">{order.customer}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-semibold">{order.total}،۰۰۰ تومان</p>
-                <p className="text-xs text-[#85736f]">{order.date}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
+
+        <div className="bg-white rounded-xl border border-[#e8dfdc]">
+          <div className="p-5 border-b border-[#e8dfdc]">
+            <h2 className="font-serif text-xl">سفارشات اخیر</h2>
+          </div>
+          <div className="p-5">
+            {orders.length === 0 ? (
+              <p className="text-sm text-[#85736f]">سفارشی وجود ندارد</p>
+            ) : (
+              <ul className="space-y-3">
+                {orders.slice(0, 5).map((order: any) => (
+                  <li
+                    key={order.id}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <div>
+                      <p className="font-semibold">{order.id}</p>
+                      <p className="text-xs text-[#85736f]">
+                        {order.recipientName} · {new Date(order.createdAt).toLocaleDateString("fa-IR")}
+                      </p>
+                    </div>
+                    <span className="font-semibold">{order.totalPrice.toLocaleString()} تومان</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

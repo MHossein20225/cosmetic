@@ -49,14 +49,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const { name, description, price, discount, stock, imageUrl, categoryId } =
+    const { name, description, price, discount = 0, stock, imageUrl, categoryId } =
       result.data;
 
     const product = await prisma.product.create({
       data: {
         name,
         description,
-        price: price - (price * discount) / 100,
+        price,
         discount,
         stock,
         imageUrl,

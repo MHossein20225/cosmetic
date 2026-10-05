@@ -140,12 +140,12 @@ export default function ProductPage({
         <div className="lg:col-span-7 flex flex-col gap-4">
           <div className="relative w-full aspect-[4/5] bg-rose-50 rounded-lg overflow-hidden shadow-sm group">
             <Image
-              src={product.imageUrl}
-              alt={product.name}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 58vw"
-              className="object-cover transition-all duration-700 ease-out"
+            src={product.imageUrl ?? "/images/nonProduct.jpg"}
+            alt={product.name}
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 58vw"
+            className="object-cover transition-all duration-700 ease-out"
             />
 
             {/* Product label */}
@@ -505,7 +505,7 @@ export default function ProductPage({
             >
               <div className="relative aspect-[4/5] bg-white rounded overflow-hidden mb-4">
                 <Image
-                  src={product.imageUrl}
+                  src={product.imageUrl ?? "/images/nonProduct.jpg"}
                   alt={product.name}
                   fill
                   loading="eager"

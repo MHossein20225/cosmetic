@@ -63,7 +63,7 @@ export default function Cart() {
               >
                 <div className="relative w-24 h-32 sm:w-28 sm:h-36 rounded-lg bg-[#fcf1ef] overflow-hidden shrink-0">
                   <Image
-                    src={item.product.imageUrl}
+                    src={item.product.imageUrl ?? "/images/nonProduct.jpg"}
                     alt={item.product.name}
                     fill
                     loading="eager"
