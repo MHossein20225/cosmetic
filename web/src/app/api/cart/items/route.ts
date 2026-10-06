@@ -1,17 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-import { validateCsrfToken } from "@/lib/csrf";
-import { cookies } from "next/headers";
-
-const CSRF_TOKEN = "csrfToken";
-const CSRF_HEADER = "x-csrf-token";
 
 export async function POST(req: Request) {
   try {
-    const cookieStore = await cookies();
-    if (!validateCsrfToken(cookieStore, req.headers)) {
-      return Response.json({ error: "درخواست کد تحریم معتبر نیست" }, { status: 403 });
-    }
 
     const user = await getCurrentUser();
 
@@ -84,7 +75,7 @@ export async function POST(req: Request) {
           cartId: cart.id,
           productId,
           quantity,
-          unitPrice: product.price,
+          unitPrice: product.price - product.price * (product.discount / 100),
         },
         include: {
           product: true,
