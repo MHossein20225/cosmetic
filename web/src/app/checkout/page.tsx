@@ -3,33 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check, ChevronRight, MapPin } from "lucide-react";
 import { useCart } from "@/hooks/cartHooks";
-import { CartItem, orderSchema } from "@/types";
+import { CartItem, orderSchema, Order } from "@/types";
 import { useCreateOrder } from "@/hooks/orderHooks";
 import { redirect } from "next/navigation";
 
 export async function addOrder(
-  data: Pick<Order, "recipientName" | "phoneNumber" | "address">,
-) {
-  const csrfToken = typeof window !== "undefined"
-    ? localStorage.getItem("csrfToken")
-    : null;
-
-  const response = await fetch("/api/order", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-csrf-token": csrfToken ?? "",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.error || "سفارش ثبت نشد");
-  }
-
-  return response.json();
-}
   data: Pick<Order, "recipientName" | "phoneNumber" | "address">,
 ) {
   const csrfToken = typeof window !== "undefined"

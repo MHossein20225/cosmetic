@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ShoppingCart, Package, Users, TrendingUp, AlertTriangle } from "lucide-react";
 
 export default async function AdminDashboard() {
-  const stats = await fetch("http://localhost:3000/api/admin", {
+  const stats = await fetch("/api/admin", {
     cache: "no-store",
   })
     .then((res) => {
@@ -21,19 +21,19 @@ export default async function AdminDashboard() {
   }
 
   const [orders, products, users] = await Promise.all([
-    fetch("http://localhost:3000/api/admin/orders?my=1", { cache: "no-store" })
+    fetch("/api/admin/orders", { cache: "no-store" })
       .then((res) => {
         if (!res.ok) return [];
         return res.json();
       })
       .catch(() => []),
-    fetch("http://localhost:3000/api/admin/products", { cache: "no-store" })
+    fetch("/api/admin/products", { cache: "no-store" })
       .then((res) => {
         if (!res.ok) return [];
         return res.json();
       })
       .catch(() => []),
-    fetch("http://localhost:3000/api/admin/users", { cache: "no-store" })
+    fetch("/api/admin/users", { cache: "no-store" })
       .then((res) => {
         if (!res.ok) return [];
         return res.json();

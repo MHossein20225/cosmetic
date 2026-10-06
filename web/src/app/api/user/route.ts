@@ -13,7 +13,6 @@ export async function GET(request: Request) {
   }
 
   const user = await getCurrentUser();
-  const user = await getCurrentUser();
 
   if (user?.role !== "ADMIN") {
     return Response.json({ error: "فقط ادمین دسترسی دارد" }, { status: 403 });

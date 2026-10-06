@@ -99,7 +99,6 @@ export default function OrderDetail() {
       }
       return res.json()
     },
-    enabled: !!userData?.id,
   })
 
   useEffect(() => {

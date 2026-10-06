@@ -6,9 +6,9 @@ import { cookies } from "next/headers";
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 const RATE_LIMIT_MAX_ATTEMPTS = 10;
 
-import { generateToken } from "@/lib/csrf";
 
-import { validateCsrfToken } from "@/lib/csrf";
+
+import { generateToken, validateCsrfToken } from "@/lib/csrf";
 
 const CSRF_TOKEN = "csrfToken";
 const CSRF_HEADER = "x-csrf-token";
@@ -61,8 +61,6 @@ async function recordAttempt(email: string): Promise<void> {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const cookieStore = await cookies();
-
     const cookieStore = await cookies();
     if (!validateCsrfToken(cookieStore, req.headers)) {
       return Response.json(
@@ -132,7 +130,16 @@ export async function POST(req: Request) {
 
     const sessionToken = generateToken();
     const csrfToken = generateToken();
-    // CSRF token set via setCsrfTokenCookie in csrf utility
+
+    // Persist CSRF token as an HttpOnly cookie so server-side validateCsrfToken
+    // (cookie + header) succeeds, in addition to returning it in the JSON body.
+    await (await cookies()).set(CSRF_TOKEN, csrfToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      expires: expiresAt,
+      path: "/",
+    });
 
     cookieStore.set("sessionId", sessionToken, {
       httpOnly: true,

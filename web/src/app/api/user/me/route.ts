@@ -12,7 +12,6 @@ export async function GET(request: Request) {
   }
 
   const user = await getCurrentUser();
-  const user = await getCurrentUser();
 
   if (!user) {
     return Response.json(

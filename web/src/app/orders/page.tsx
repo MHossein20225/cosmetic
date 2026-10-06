@@ -52,8 +52,8 @@ export default function Orders() {
       }
       return res.json()
     },
-    enabled: !!user,
   })
+
 
   if (userLoading) {
     return (
@@ -261,7 +261,7 @@ export default function Orders() {
                         <p className="font-sans text-sm text-[#1f1b1a]">
                           {order.deliveryTime
                             ? new Date(order.deliveryTime).toLocaleDateString("fa-IR")
-                            : "تIPCUnknown"}
+                            : "تاریخ نامشخص"}
                         </p>
                       </div>
                       <div>

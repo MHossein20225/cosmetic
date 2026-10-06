@@ -12,8 +12,6 @@ type OrderRouteContext = {
 };
 
 export async function GET(request: Request) {
-
-export async function GET(request: Request) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -23,25 +21,26 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const myOrders = searchParams.get("my") === "1";
 
-    let orders;
     if (myOrders) {
-      orders = await prisma.order.findMany({
+      const orders = await prisma.order.findMany({
         where: { userId: user.id },
         include: { items: { include: { product: true } } },
         orderBy: { createdAt: "desc" },
       });
-    } else if (user.role !== "ADMIN") {
-      return Response.json({ error: "دسترسی غیر مجاز" }, { status: 403 });
-    } else {
-      orders = await prisma.order.findMany({
-        include: { items: { include: { product: true } } },
-        orderBy: { createdAt: "desc" },
-      });
-      if (orders.length === 0) {
-        return Response.json({ error: "سفارشی پیدا نشد" }, { status: 400 });
-      }
+      return Response.json(orders);
     }
 
+    if (user.role !== "ADMIN") {
+      return Response.json({ error: "دسترسی غیر مجاز" }, { status: 403 });
+    }
+
+    const orders = await prisma.order.findMany({
+      include: { items: { include: { product: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    if (orders.length === 0) {
+      return Response.json({ error: "سفارشی پیدا نشد" }, { status: 400 });
+    }
     return Response.json(orders);
   } catch (error) {
     console.error(error);
