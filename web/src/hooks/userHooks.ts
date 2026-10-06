@@ -2,9 +2,7 @@ import type { User } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authUser, createUser, logInUser, logOutUser } from "@/lib/userRequests";
 
-const USER_QUERY_KEY = ["user"] as const;
-const USERS_QUERY_KEY = ["users"] as const;
-const ALL_USERS_QUERY_KEY = ["users", "all"] as const;
+
 
 export function useCreateUser() {
   const {
@@ -54,7 +52,7 @@ export function useAuthUser() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: USER_QUERY_KEY,
+    queryKey: ["user"],
     queryFn: authUser,
   });
 
@@ -73,7 +71,7 @@ export function useLogOut() {
     mutationKey: ["user", "logout"],
     mutationFn: logOutUser,
     onSuccess: () => {
-      queryClient.setQueryData(USER_QUERY_KEY, null);
+      queryClient.setQueryData(["user"], null);
       queryClient.invalidateQueries({ queryKey:["cart"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["products", "search", { search: "" }] });
@@ -94,7 +92,7 @@ export function useAllUsers() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ALL_USERS_QUERY_KEY,
+    queryKey: ["users"],
     queryFn: async () => {
       const res = await fetch("/api/admin/users");
       if (!res.ok) {
@@ -144,7 +142,7 @@ export function useAdminUsers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
-      queryClient.invalidateQueries({ queryKey: ALL_USERS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       refetch();
     },
   });

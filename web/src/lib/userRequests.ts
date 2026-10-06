@@ -1,24 +1,11 @@
 import { User } from "@/types";
 
-export async function setCsrfToken(token: string) {
-  if (typeof window !== "undefined") {
-    localStorage.setItem("csrfToken", token);
-  }
-}
-
-export async function getCsrfToken(): Promise<string> {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("csrfToken") ?? "";
-  }
-  return "";
-}
-
 export async function createUser(user: {
   name: string;
   email: string;
   password: string;
 }) {
-  const response = await fetch("/api/user", {
+  const response = await fetch("/api/user/register", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -47,16 +34,11 @@ export async function logInUser(user: Pick<User, "email" | "password">) {
   }
 
   const data = await response.json();
-  await setCsrfToken(data.csrfToken ?? "");
   return data;
 }
 
 export async function authUser() {
-  const response = await fetch("/api/user/me", {
-    headers: {
-      "x-csrf-token": await getCsrfToken(),
-    },
-  });
+  const response = await fetch("/api/user/me");
 
   if (!response.ok) {
     return null;
@@ -66,12 +48,7 @@ export async function authUser() {
 }
 
 export async function logOutUser() {
-  const response = await fetch("/api/user/logout", {
-    method: "POST",
-    headers: {
-      "x-csrf-token": await getCsrfToken(),
-    },
-  });
+  const response = await fetch("/api/user/logout");
 
   if (!response.ok) {
     throw new Error("خطا در خروج از حساب");

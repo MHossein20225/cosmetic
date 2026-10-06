@@ -1,7 +1,15 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { Search, ShoppingBag, Menu, X, Flower, User, Sparkles } from "lucide-react";
+import { useState, useCallback } from "react";
+import {
+  Search,
+  ShoppingBag,
+  Menu,
+  X,
+  Flower,
+  User,
+  ChevronDown,
+} from "lucide-react";
 import { NAV_LINKS } from "@/data";
 import NavLinkItem from "./NavLinkItems";
 import Link from "next/link";
@@ -13,61 +21,86 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
+
   const { products, isFetching } = useSearchProducts({
     search,
     page: 1,
     limit: 8,
   });
 
-  const debouncedSearch = useMemo(() => search, [search]);
+  const { user } = useAuthUser();
+  const { logOutMutate, isPending: isLoggingOut } = useLogOut();
+  const { count: cartCount } = useCart();
 
   const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
   }, []);
 
-  const handleSearchSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (!search.trim()) return;
-  }, [search]);
+  const handleSearchSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      const value = search.trim();
+
+      if (!value) return;
+
+      window.location.href = `/products?search=${encodeURIComponent(value)}`;
+    },
+    [search],
+  );
 
   const clearSearch = useCallback(() => {
     setSearch("");
   }, []);
 
-  const hasResults = products?.length ?? 0 > 0;
-  const { user } = useAuthUser();
-  const { logOutMutate, isPending: isLoggingOut } = useLogOut();
-  const { count: cartCount } = useCart();
+  const closeMenus = useCallback(() => {
+    setIsMenuOpen(false);
+    setIsUserMenuOpen(false);
+  }, []);
 
   return (
-    <header className="w-full bg-rose-50/60 sticky top-0 z-50 backdrop-blur-md">
-      <div className="max-w-[1360px] mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="w-9 h-9 rounded-full bg-rose-200 flex items-center justify-center">
-            <span className="text-amber-800 text-lg">
-              <Flower size={18} />
-            </span>
+    <header className="sticky top-0 z-50 w-full border-b border-rose-100/80 bg-rose-50/90 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-[1360px] items-center gap-5 px-4 sm:px-6 lg:h-[72px]">
+        {/* Logo */}
+        <Link
+          href="/"
+          onClick={closeMenus}
+          className="group flex shrink-0 items-center gap-2.5"
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-rose-200 transition-transform duration-200 group-hover:scale-105">
+            <Flower
+              size={18}
+              className="text-amber-800"
+              strokeWidth={1.8}
+            />
           </span>
-          <span className="font-serif text-xl text-gray-900">Store Name</span>
+
+          <span className="hidden font-serif text-xl tracking-tight text-gray-900 sm:block">
+            Store Name
+          </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
+        {/* Desktop Navigation */}
+        <nav className="hidden shrink-0 items-center gap-7 lg:flex">
           {NAV_LINKS.map((link) => (
             <NavLinkItem key={link.href} link={link} />
           ))}
         </nav>
 
-        <div className="relative flex-1 min-w-0 hidden sm:flex items-center gap-3">
+        {/* Search */}
+        <div className="relative ml-auto hidden min-w-0 flex-1 sm:block lg:max-w-[420px]">
           <form
             method="get"
             action="/products"
-            className="relative w-full"
             onSubmit={handleSearchSubmit}
+            className="relative"
           >
             <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
+              size={17}
+              strokeWidth={1.8}
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
             />
+
             <input
               type="search"
               name="search"
@@ -75,35 +108,104 @@ export default function Header() {
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search products..."
               aria-label="Search products"
-              className="w-full bg-white py-2 pl-11 pr-11 text-sm text-gray-900 rounded-lg border border-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:border-amber-800"
+              className="h-10 w-full rounded-full border border-gray-200 bg-white/80 pl-10 pr-10 text-sm text-gray-900 shadow-sm outline-none transition-all placeholder:text-gray-400 focus:border-amber-700 focus:bg-white focus:ring-2 focus:ring-amber-800/10"
             />
+
             {search && (
               <button
                 type="button"
                 aria-label="Clear search"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-800 transition-colors"
                 onClick={clearSearch}
+                className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             )}
           </form>
+
+          {/* Search suggestions */}
+          {search.trim() && (
+            <div className="absolute left-0 right-0 top-12 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl">
+              {isFetching ? (
+                <div className="px-4 py-5 text-center text-sm text-gray-400">
+                  Searching...
+                </div>
+              ) : products && products.length > 0 ? (
+                <div className="py-2">
+                  {products.slice(0, 6).map((product) => (
+                    <Link
+                      key={product.id}
+                      href={`/products/${product.id}`}
+                      onClick={clearSearch}
+                      className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-rose-50"
+                    >
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt=""
+                          className="h-10 w-10 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-lg bg-rose-50" />
+                      )}
+
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-gray-900">
+                          {product.name}
+                        </p>
+
+                        <p className="text-xs text-gray-500">
+                          {product.price.toLocaleString()} تومان
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+
+                  <Link
+                    href={`/products?search=${encodeURIComponent(search.trim())}`}
+                    onClick={clearSearch}
+                    className="block border-t border-gray-100 px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-amber-800 transition-colors hover:bg-rose-50"
+                  >
+                    View all results
+                  </Link>
+                </div>
+              ) : (
+                <div className="px-4 py-6 text-center">
+                  <p className="text-sm text-gray-600">
+                    No products found
+                  </p>
+
+                  <p className="mt-1 text-xs text-gray-400">
+                    Try a different search
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center gap-4 sm:gap-5">
+        {/* Actions */}
+        <div className="ml-auto flex shrink-0 items-center gap-3 sm:ml-0 sm:gap-4">
+          {/* Cart */}
           <Link
             href="/cart"
-            aria-label={`Cart ${cartCount > 0 ? `(${cartCount} items)` : ""}`}
-            className="relative text-gray-700 hover:text-amber-800 transition-colors"
+            aria-label={
+              cartCount > 0
+                ? `Cart, ${cartCount} items`
+                : "Shopping cart"
+            }
+            className="relative flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-white hover:text-amber-800"
           >
-            <ShoppingBag size={20} />
+            <ShoppingBag size={19} strokeWidth={1.8} />
+
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-amber-800 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-                {cartCount}
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-800 px-1 text-[9px] font-semibold leading-none text-white">
+                {cartCount > 99 ? "99+" : cartCount}
               </span>
             )}
           </Link>
 
+          {/* User */}
           {user ? (
             <div
               className="relative"
@@ -111,77 +213,173 @@ export default function Header() {
               onMouseLeave={() => setIsUserMenuOpen(false)}
             >
               <button
+                type="button"
                 aria-label="Account menu"
                 aria-expanded={isUserMenuOpen}
-                onClick={() => setIsUserMenuOpen((open) => !open)}
-                className="text-gray-700 hover:text-amber-800 transition-colors"
+                onClick={() =>
+                  setIsUserMenuOpen((open) => !open)
+                }
+                className="flex h-9 items-center gap-1.5 rounded-full px-2 text-gray-700 transition-colors hover:bg-white hover:text-amber-800"
               >
-                <User size={20} />
+                <User size={19} strokeWidth={1.8} />
+
+                <ChevronDown
+                  size={13}
+                  className={`hidden transition-transform sm:block ${
+                    isUserMenuOpen ? "rotate-180" : ""
+                  }`}
+                />
               </button>
 
               {isUserMenuOpen && (
-                <div className="absolute right-0 top-full pt-2 z-50">
-                  <div className="w-48 bg-white rounded-xl shadow-lg border border-rose-100 py-2">
-                    <span className="block px-4 py-2 text-sm font-medium text-gray-900 truncate">
-                      {user.name}
-                    </span>
-                    <span className="block px-4 pb-2 text-xs text-gray-500 truncate">
-                      {user.email}
-                    </span>
-                    <div className="border-t border-rose-100 my-1" />
+                <div className="absolute right-0 top-full pt-2">
+                  <div className="w-60 overflow-hidden rounded-2xl border border-rose-100 bg-white shadow-xl">
+                    {/* User info */}
+                    <div className="px-4 py-4">
+                      <p className="truncate text-sm font-semibold text-gray-900">
+                        {user.name}
+                      </p>
+
+                      <p className="mt-0.5 truncate text-xs text-gray-500">
+                        {user.email}
+                      </p>
+                    </div>
+
+                    <div className="border-t border-gray-100" />
+
+                    <Link
+                      href="/orders"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="block px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-rose-50"
+                    >
+                      My Orders
+                    </Link>
+
+                    <div className="border-t border-gray-100" />
+
                     <button
                       type="button"
                       onClick={() => logOutMutate()}
                       disabled={isLoggingOut}
-                      className="w-full text-left px-4 py-2 text-sm text-rose-700 hover:bg-rose-50 transition-colors"
+                      className="w-full px-4 py-3 text-left text-sm text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
                     >
-                      {isLoggingOut ? "Logging out..." : "Log Out"}
+                      {isLoggingOut
+                        ? "Logging out..."
+                        : "Log Out"}
                     </button>
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wider">
+            <div className="hidden items-center gap-2 sm:flex">
               <Link
                 href="/login"
-                className="text-gray-700 hover:text-amber-800 transition-colors"
+                className="rounded-full px-3 py-2 text-xs font-medium uppercase tracking-wider text-gray-700 transition-colors hover:bg-white hover:text-amber-800"
               >
                 Login
               </Link>
+
               <Link
                 href="/register"
-                className="bg-amber-800 text-white px-3 py-2 rounded hover:bg-amber-900 transition-colors"
+                className="rounded-full bg-amber-800 px-4 py-2 text-xs font-medium uppercase tracking-wider text-white transition-colors hover:bg-amber-900"
               >
                 Register
               </Link>
             </div>
           )}
 
+          {/* Mobile menu */}
           <button
+            type="button"
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMenuOpen}
             onClick={() => setIsMenuOpen((open) => !open)}
-            className="md:hidden text-gray-700 hover:text-amber-800 transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-white hover:text-amber-800 md:hidden"
           >
-            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            {isMenuOpen ? (
+              <X size={21} />
+            ) : (
+              <Menu size={21} />
+            )}
           </button>
         </div>
       </div>
 
+      {/* Mobile Search */}
+      <div className="border-t border-rose-100/70 px-4 py-3 sm:hidden">
+        <form
+          method="get"
+          action="/products"
+          onSubmit={handleSearchSubmit}
+          className="relative"
+        >
+          <Search
+            size={17}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+
+          <input
+            type="search"
+            name="search"
+            value={search}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Search products..."
+            aria-label="Search products"
+            className="h-10 w-full rounded-full border border-gray-200 bg-white pl-10 pr-10 text-sm outline-none focus:border-amber-700 focus:ring-2 focus:ring-amber-800/10"
+          />
+
+          {search && (
+            <button
+              type="button"
+              aria-label="Clear search"
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-700"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </form>
+      </div>
+
+      {/* Mobile Navigation */}
       <nav
-        className={`md:hidden overflow-hidden transition-[max-height] duration-300 ease-in-out ${
-          isMenuOpen ? "max-h-96" : "max-h-0"
+        className={`md:hidden overflow-hidden transition-[max-height,opacity] duration-300 ${
+          isMenuOpen
+            ? "max-h-[500px] opacity-100"
+            : "max-h-0 opacity-0"
         }`}
       >
-        <div className="flex flex-col gap-1 px-6 pb-4 pt-2 border-t border-rose-200/60 bg-rose-50/95">
-          {NAV_LINKS.map((link) => (
-            <NavLinkItem
-              key={link.href}
-              link={link}
-              onClickFn={() => setIsMenuOpen(false)}
-            />
-          ))}
+        <div className="border-t border-rose-100 bg-rose-50/95 px-4 pb-5 pt-3">
+          <div className="flex flex-col gap-1">
+            {NAV_LINKS.map((link) => (
+              <NavLinkItem
+                key={link.href}
+                link={link}
+                onClickFn={() => setIsMenuOpen(false)}
+              />
+            ))}
+          </div>
+
+          {!user && (
+            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-rose-200 pt-4">
+              <Link
+                href="/login"
+                onClick={() => setIsMenuOpen(false)}
+                className="rounded-xl border border-gray-200 bg-white py-2.5 text-center text-xs font-medium uppercase tracking-wider text-gray-700"
+              >
+                Login
+              </Link>
+
+              <Link
+                href="/register"
+                onClick={() => setIsMenuOpen(false)}
+                className="rounded-xl bg-amber-800 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-white"
+              >
+                Register
+              </Link>
+            </div>
+          )}
         </div>
       </nav>
     </header>

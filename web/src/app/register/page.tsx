@@ -1,15 +1,16 @@
 "use client";
+
 import { useCreateUser } from "@/hooks/userHooks";
 import { User, userSchema } from "@/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-
-
 export default function Register() {
   const router = useRouter();
+
   const { userMutate, isPending } = useCreateUser();
+
   const [inputError, setInputError] = useState<
     Partial<Pick<User, "name" | "email" | "password">>
   >({});
@@ -17,15 +18,17 @@ export default function Register() {
   function submitHandle(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const data = new FormData(e.currentTarget);
+    if (isPending) return;
 
-    const user = {
-      name: data.get("name"),
-      email: data.get("email"),
-      password: data.get("password"),
+    const formData = new FormData(e.currentTarget);
+
+    const data = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      password: formData.get("password"),
     };
 
-    const result = userSchema.safeParse(user);
+    const result = userSchema.safeParse(data);
 
     if (!result.success) {
       const errors = result.error.flatten().fieldErrors;
@@ -35,23 +38,52 @@ export default function Register() {
         email: errors.email?.[0],
         password: errors.password?.[0],
       });
+
       return;
     }
 
+    setInputError({});
+
     userMutate(result.data, {
-      onSuccess: () => router.push("/login"),
+      onSuccess: () => {
+        router.push("/login");
+      },
     });
   }
+
+  function clearNameError() {
+    setInputError((prev) => ({
+      ...prev,
+      name: undefined,
+    }));
+  }
+
+  function clearEmailError() {
+    setInputError((prev) => ({
+      ...prev,
+      email: undefined,
+    }));
+  }
+
+  function clearPasswordError() {
+    setInputError((prev) => ({
+      ...prev,
+      password: undefined,
+    }));
+  }
+
   return (
-    <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-16 md:py-24 flex flex-col items-center">
-      <h1 className="font-serif text-3xl text-gray-900 mb-8">
+    <div className="mx-auto flex w-full max-w-[1360px] flex-col items-center px-4 py-16 sm:px-6 md:py-24">
+      <h1 className="mb-8 font-serif text-3xl text-gray-900">
         Create Your Account
       </h1>
 
       <form
-        onSubmit={(e) => submitHandle(e)}
-        className="flex flex-col gap-4 w-full max-w-sm"
+        onSubmit={submitHandle}
+        className="flex w-full max-w-sm flex-col gap-4"
+        noValidate
       >
+        {/* Name */}
         <div className="flex flex-col gap-1">
           <label
             htmlFor="name"
@@ -59,17 +91,28 @@ export default function Register() {
           >
             Name
           </label>
+
           <input
             id="name"
             name="name"
-            type="text"          
-            className="bg-white px-4 py-2.5 rounded border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-amber-800"
+            type="text"
+            autoComplete="name"
+            onChange={clearNameError}
+            className={`rounded border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-1 ${
+              inputError.name
+                ? "border-red-400 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-200 focus:ring-amber-800"
+            }`}
           />
-          <span className="text-xs text-gray-400">
-            {inputError && inputError.name}
-          </span>
+
+          {inputError.name && (
+            <span className="text-xs text-red-500">
+              {inputError.name}
+            </span>
+          )}
         </div>
 
+        {/* Email */}
         <div className="flex flex-col gap-1">
           <label
             htmlFor="email"
@@ -77,18 +120,28 @@ export default function Register() {
           >
             Email
           </label>
+
           <input
             id="email"
             name="email"
             type="email"
-            required
-            className="bg-white px-4 py-2.5 rounded border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-amber-800"
+            autoComplete="email"
+            onChange={clearEmailError}
+            className={`rounded border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-1 ${
+              inputError.email
+                ? "border-red-400 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-200 focus:ring-amber-800"
+            }`}
           />
-          <span className="text-xs text-gray-400">
-            {inputError && inputError.email}
-          </span>
+
+          {inputError.email && (
+            <span className="text-xs text-red-500">
+              {inputError.email}
+            </span>
+          )}
         </div>
 
+        {/* Password */}
         <div className="flex flex-col gap-1">
           <label
             htmlFor="password"
@@ -96,28 +149,42 @@ export default function Register() {
           >
             Password
           </label>
+
           <input
             id="password"
             name="password"
             type="password"
-            minLength={8}
-            className="bg-white px-4 py-2.5 rounded border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-amber-800"
+            autoComplete="new-password"
+            onChange={clearPasswordError}
+            className={`rounded border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-1 ${
+              inputError.password
+                ? "border-red-400 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-200 focus:ring-amber-800"
+            }`}
           />
-          <span className="text-xs text-gray-400">
-            {inputError && inputError.password}
-          </span>
+
+          {inputError.password && (
+            <span className="text-xs text-red-500">
+              {inputError.password}
+            </span>
+          )}
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-amber-800 text-white py-3 rounded text-xs font-medium uppercase tracking-wider hover:bg-amber-900 transition-colors"
+          disabled={isPending}
+          className="w-full rounded bg-amber-800 py-3 text-xs font-medium uppercase tracking-wider text-white transition-colors hover:bg-amber-900 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isPending ? "wait ...." : "Create Account"}
+          {isPending ? "Creating account..." : "Create Account"}
         </button>
 
-        <p className="text-sm text-gray-500 text-center">
+        <p className="text-center text-sm text-gray-500">
           Already have an account?{" "}
-          <Link href="/login" className="text-amber-800 hover:underline">
+          <Link
+            href="/login"
+            className="text-amber-800 hover:underline"
+          >
             Log in
           </Link>
         </p>

@@ -29,13 +29,6 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model RateLimit {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  count     Int      @default(0)
-  expiresAt DateTime
-}
-
 model Product {
   id          Int         @id @default(autoincrement())
   name        String
