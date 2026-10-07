@@ -140,3 +140,13 @@ export const orderSchema = z.object({
   phoneNumber: z.string().startsWith("09").max(11, "شماره معتبر نیست"),
   address: z.string().min(1, "آدرس را وارد کنید"),
 });
+
+export const productSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1),
+  price: z.number().positive(),
+  discount: z.number().default(0),
+  stock: z.number().positive().min(0).default(0),
+  imageUrl: z.string().url().optional(),
+  categoryId: z.number(),
+});
