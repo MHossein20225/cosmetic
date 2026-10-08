@@ -23,6 +23,9 @@ export async function POST(req: Request) {
       where: {
         email,
       },
+      select: {
+        email: true
+      }
     });
 
     if (existingUser) {

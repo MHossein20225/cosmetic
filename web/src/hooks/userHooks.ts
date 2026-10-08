@@ -32,6 +32,7 @@ export function useLogInUser() {
     isSuccess,
     isError,
     isPending,
+    error
   } = useMutation({
     mutationKey: ["user", "login"],
     mutationFn: (user: Pick<User, "email" | "password">) => logInUser(user),
@@ -42,6 +43,7 @@ export function useLogInUser() {
     isError,
     isSuccess,
     isPending,
+    error
   };
 }
 

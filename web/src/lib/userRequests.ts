@@ -30,7 +30,7 @@ export async function logInUser(user: Pick<User, "email" | "password">) {
   });
 
   if (!response.ok) {
-    throw new Error("خطا در ثبت کاربر");
+    throw new Error("رمز یا نام کاربری اشتباه است");
   }
 
   const data = await response.json();

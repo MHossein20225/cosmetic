@@ -14,7 +14,7 @@ export default function Login() {
     Partial<Pick<User, "email" | "password">>
   >({});
 
-  const { logInMutate, isPending, isError } = useLogInUser();
+  const { logInMutate, isPending, isError, error} = useLogInUser();
   const { createCartMutate } = useCreateCart();
 
   function submitHandle(e: React.FormEvent<HTMLFormElement>) {
@@ -134,7 +134,7 @@ export default function Login() {
 
         {isError && (
           <span className="text-xs text-end text-red-600">
-            رمز یا ایمیل اشتباه است
+            {error?.message}
           </span>
         )}
 

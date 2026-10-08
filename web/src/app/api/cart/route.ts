@@ -67,11 +67,7 @@ export async function POST() {
 
 
 export async function DELETE() {
-  const cookieStore = await cookies();
-  if (!validateCsrfToken(cookieStore, new Headers())) {
-    return Response.json({ error: "درخواست کد تحریم معتبر نیست" }, { status: 403 });
-  }
-
+  
   const user = await getCurrentUser();
 
   if (!user) {

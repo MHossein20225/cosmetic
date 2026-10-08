@@ -1,10 +1,16 @@
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/session";
 import { userSchema } from "@/types";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
+    const curruntUser = await getCurrentUser();
+    if (curruntUser) {
+      return Response.json({ error: "شما ورود کرده اید" }, { status: 401 });
+    }
+    
     const body = await req.json();
     const cookieStore = await cookies();
 

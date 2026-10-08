@@ -5,6 +5,7 @@ import { User, userSchema } from "@/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Register() {
   const router = useRouter();
@@ -46,7 +47,10 @@ export default function Register() {
 
     userMutate(result.data, {
       onSuccess: () => {
-        router.push("/login");
+        toast.success("ثبت نام با موفقیت انجام شد. کمی صبر کنید...")
+        setTimeout(() => {
+          router.push("/login");        
+        }, 2000)
       },
     });
   }
