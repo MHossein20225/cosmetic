@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/session";
 import { userSchema } from "@/types";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { randomBytes } from "node:crypto";
+import { consumeRateLimits, getClientIp, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
   try {
@@ -11,6 +13,12 @@ export async function POST(req: Request) {
       return Response.json({ error: "شما ورود کرده اید" }, { status: 401 });
     }
     
+    const ip = getClientIp(req);
+    const ipLimit = await consumeRateLimits([
+      { key: `login:ip:${ip}`, limit: 10, windowMs: 60 * 60 * 1000 },
+    ]);
+    if (!ipLimit.allowed) return rateLimitResponse(ipLimit);
+
     const body = await req.json();
     const cookieStore = await cookies();
 
@@ -27,6 +35,10 @@ export async function POST(req: Request) {
     }
 
     const { email, password } = result.data;
+    const accountLimit = await consumeRateLimits([
+      { key: `login:account:${email.trim().toLowerCase()}`, limit: 10, windowMs: 60 * 60 * 1000 },
+    ]);
+    if (!accountLimit.allowed) return rateLimitResponse(accountLimit);
 
     const user = await prisma.user.findUnique({
       where: {
@@ -56,6 +68,7 @@ export async function POST(req: Request) {
       data: {
         userId: user.id,
         expiresAt,
+        csrfToken: randomBytes(32).toString("base64url"),
       },
     });
 

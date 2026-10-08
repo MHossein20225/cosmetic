@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -41,14 +41,10 @@ export default function Orders() {
     queryKey: ["orders", "my"],
     queryFn: async () => {
       if (!user?.id) return []
-      const res = await fetch(`/api/order?my=1`, {
-        headers: {
-          "x-csrf-token": localStorage.getItem("csrfToken") || "",
-        },
-      })
+      const res = await fetch(`/api/order?my=1`)
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        throw new Error(body.error || "دریافت سفارشات انجام نشد")
+        throw new Error(body.error || "Ø¯Ø±ÛŒØ§ÙØª Ø³ÙØ§Ø±Ø´Ø§Øª Ø§Ù†Ø¬Ø§Ù… Ù†Ø´Ø¯")
       }
       return res.json()
     },
@@ -58,7 +54,7 @@ export default function Orders() {
   if (userLoading) {
     return (
       <div className="text-center py-12">
-        <p className="text-sm text-[#85736f]">در حال دریافت اطلاعات شما...</p>
+        <p className="text-sm text-[#85736f]">Ø¯Ø± Ø­Ø§Ù„ Ø¯Ø±ÛŒØ§ÙØª Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø´Ù…Ø§...</p>
       </div>
     )
   }
@@ -66,12 +62,12 @@ export default function Orders() {
   if (!user) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#85736f]">برای دیدن سفارشات، لطفاً وارد شوید</p>
+        <p className="text-[#85736f]">Ø¨Ø±Ø§ÛŒ Ø¯ÛŒØ¯Ù† Ø³ÙØ§Ø±Ø´Ø§ØªØŒ Ù„Ø·ÙØ§Ù‹ ÙˆØ§Ø±Ø¯ Ø´ÙˆÛŒØ¯</p>
         <Link
           href="/login"
           className="text-sm text-amber-800 hover:underline mt-2"
         >
-          ورود به حساب
+          ÙˆØ±ÙˆØ¯ Ø¨Ù‡ Ø­Ø³Ø§Ø¨
         </Link>
       </div>
     )
@@ -80,13 +76,13 @@ export default function Orders() {
   if (isError) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 font-semibold">خطا در دریافت سفارشات</p>
-        <p className="text-sm text-[#85736f]">{error?.message || "خطای ناشناخته"}</p>
+        <p className="text-red-600 font-semibold">Ø®Ø·Ø§ Ø¯Ø± Ø¯Ø±ÛŒØ§ÙØª Ø³ÙØ§Ø±Ø´Ø§Øª</p>
+        <p className="text-sm text-[#85736f]">{error?.message || "Ø®Ø·Ø§ÛŒ Ù†Ø§Ø´Ù†Ø§Ø®ØªÙ‡"}</p>
         <button
           onClick={() => window.location.reload()}
           className="text-sm text-amber-800 hover:underline mt-2"
         >
-          تلاش مجدد
+          ØªÙ„Ø§Ø´ Ù…Ø¬Ø¯Ø¯
         </button>
       </div>
     )
@@ -95,29 +91,29 @@ export default function Orders() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-serif text-2xl text-[#1f1b1a]">سفارش‌های من</h1>
+        <h1 className="font-serif text-2xl text-[#1f1b1a]">Ø³ÙØ§Ø±Ø´â€ŒÙ‡Ø§ÛŒ Ù…Ù†</h1>
         <Link
           href="/cart"
           className="text-sm text-amber-800 hover:text-amber-900"
         >
           <Check size={16} className="inline mr-1" />
-          سبد خرید
+          Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯
         </Link>
       </div>
 
       {orders?.length === 0 ? (
         <div className="bg-white rounded-xl border border-[#e8dfdc] p-8 text-center">
           <Package size={40} className="mx-auto text-[#85736f] mb-4" />
-          <h2 className="font-serif text-lg text-[#1f1b1a]">هنوز سفارشی ندارید</h2>
+          <h2 className="font-serif text-lg text-[#1f1b1a]">Ù‡Ù†ÙˆØ² Ø³ÙØ§Ø±Ø´ÛŒ Ù†Ø¯Ø§Ø±ÛŒØ¯</h2>
           <p className="text-sm text-[#85736f] mt-1">
-            برای شروع، محصولات مورد علاقه خود را به سبد خرید اضافه کنید
+            Ø¨Ø±Ø§ÛŒ Ø´Ø±ÙˆØ¹ØŒ Ù…Ø­ØµÙˆÙ„Ø§Øª Ù…ÙˆØ±Ø¯ Ø¹Ù„Ø§Ù‚Ù‡ Ø®ÙˆØ¯ Ø±Ø§ Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø§Ø¶Ø§ÙÙ‡ Ú©Ù†ÛŒØ¯
           </p>
           <Link
             href="/products"
             className="inline-flex items-center gap-2 bg-amber-800 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-amber-900 transition-colors"
           >
             <Check size={18} />
-            مشاهده محصولات
+            Ù…Ø´Ø§Ù‡Ø¯Ù‡ Ù…Ø­ØµÙˆÙ„Ø§Øª
           </Link>
         </div>
       ) : (
@@ -145,10 +141,10 @@ export default function Orders() {
                         }`}
                       >
                         {order.status === "QUEUE"
-                          ? "در صف"
+                          ? "Ø¯Ø± ØµÙ"
                           : order.status === "PREPARED"
-                          ? "پردازش شد"
-                          : "تحویل داده شد"}
+                          ? "Ù¾Ø±Ø¯Ø§Ø²Ø´ Ø´Ø¯"
+                          : "ØªØ­ÙˆÛŒÙ„ Ø¯Ø§Ø¯Ù‡ Ø´Ø¯"}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-[#85736f]">
@@ -163,18 +159,18 @@ export default function Orders() {
                     </div>
                     <div className="flex items-center justify-between pt-2 border-t border-[#f0e6e4]">
                       <p className="text-xs text-[#85736f]">
-                        {order.items.length} آیتم
+                        {order.items.length} Ø¢ÛŒØªÙ…
                       </p>
                       <div className="flex items-center gap-4">
                         <span className="font-semibold text-[#1f1b1a]">
-                          {order.totalPrice.toLocaleString()} تومان
+                          {order.totalPrice.toLocaleString()} ØªÙˆÙ…Ø§Ù†
                         </span>
                         {selectedOrder === order.id && (
                           <Link
                             href={`/orders/${order.id}`}
                             className="inline-flex items-center gap-1 text-xs text-amber-800 hover:text-amber-900"
                           >
-                            جزئیات <ArrowRight size={12} />
+                            Ø¬Ø²Ø¦ÛŒØ§Øª <ArrowRight size={12} />
                           </Link>
                         )}
                       </div>
@@ -186,7 +182,7 @@ export default function Orders() {
                         href={`/orders/${order.id}`}
                         className="text-amber-800 hover:text-amber-900 underline"
                       >
-                        نمایش جزئیات
+                        Ù†Ù…Ø§ÛŒØ´ Ø¬Ø²Ø¦ÛŒØ§Øª
                       </Link>
                     </div>
                   )}
@@ -203,7 +199,7 @@ export default function Orders() {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-serif text-2xl text-[#1f1b1a]">
-                  جزئیات سفارش #{selectedOrder}
+                  Ø¬Ø²Ø¦ÛŒØ§Øª Ø³ÙØ§Ø±Ø´ #{selectedOrder}
                 </h2>
                 <button
                   onClick={() => setSelectedOrder(null)}
@@ -224,7 +220,7 @@ export default function Orders() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                          نام گیرنده
+                          Ù†Ø§Ù… Ú¯ÛŒØ±Ù†Ø¯Ù‡
                         </p>
                         <p className="font-sans text-sm text-[#1f1b1a]">
                           {order.recipientName}
@@ -232,7 +228,7 @@ export default function Orders() {
                       </div>
                       <div>
                         <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                          شماره شیرو
+                          Ø´Ù…Ø§Ø±Ù‡ Ø´ÛŒØ±Ùˆ
                         </p>
                         <p className="font-sans text-sm text-[#1f1b1a]">
                           {order.phoneNumber}
@@ -240,7 +236,7 @@ export default function Orders() {
                       </div>
                       <div>
                         <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                          آدرس
+                          Ø¢Ø¯Ø±Ø³
                         </p>
                         <p className="font-sans text-sm text-[#1f1b1a] mt-1">
                           {order.address}
@@ -248,7 +244,7 @@ export default function Orders() {
                       </div>
                       <div>
                         <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                          تاریخ سفارش
+                          ØªØ§Ø±ÛŒØ® Ø³ÙØ§Ø±Ø´
                         </p>
                         <p className="font-sans text-sm text-[#1f1b1a]">
                           {new Date(order.createdAt).toLocaleDateString("fa-IR")}
@@ -256,17 +252,17 @@ export default function Orders() {
                       </div>
                       <div>
                         <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                          زمان تحویل
+                          Ø²Ù…Ø§Ù† ØªØ­ÙˆÛŒÙ„
                         </p>
                         <p className="font-sans text-sm text-[#1f1b1a]">
                           {order.deliveryTime
                             ? new Date(order.deliveryTime).toLocaleDateString("fa-IR")
-                            : "تاریخ نامشخص"}
+                            : "ØªØ§Ø±ÛŒØ® Ù†Ø§Ù…Ø´Ø®Øµ"}
                         </p>
                       </div>
                       <div>
                         <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                          وضعیت
+                          ÙˆØ¶Ø¹ÛŒØª
                         </p>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-semibold ${order.status === "QUEUE"
@@ -277,17 +273,17 @@ export default function Orders() {
                           }`}
                         >
                           {order.status === "QUEUE"
-                            ? "در صف"
+                            ? "Ø¯Ø± ØµÙ"
                             : order.status === "PREPARED"
-                            ? "پردازش شد"
-                            : "تحویل داده شده"}
+                            ? "Ù¾Ø±Ø¯Ø§Ø²Ø´ Ø´Ø¯"
+                            : "ØªØ­ÙˆÛŒÙ„ Ø¯Ø§Ø¯Ù‡ Ø´Ø¯Ù‡"}
                         </span>
                       </div>
                     </div>
 
                     <div>
                       <h3 className="font-serif text-lg text-[#1f1b1a] mb-4">
-                        آیتم‌های سفارش
+                        Ø¢ÛŒØªÙ…â€ŒÙ‡Ø§ÛŒ Ø³ÙØ§Ø±Ø´
                       </h3>
                       <div className="space-y-3">
                         {order.items.map((item: OrderItem) => (
@@ -300,7 +296,7 @@ export default function Orders() {
                                 {item.product.name}
                               </p>
                               <p className="text-xs text-[#85736f]">
-                                حجم: {item.quantity}
+                                Ø­Ø¬Ù…: {item.quantity}
                               </p>
                             </div>
                             <span className="font-sans text-sm font-semibold text-[#1f1b1a]">
@@ -314,10 +310,10 @@ export default function Orders() {
                     <div className="border-t border-[#f0e6e4] pt-4">
                       <div className="flex items-center justify-between">
                         <span className="font-serif text-xl text-[#1f1b1a]">
-                          مجموع
+                          Ù…Ø¬Ù…ÙˆØ¹
                         </span>
                         <span className="font-serif text-2xl text-[#1f1b1a]">
-                          {order.totalPrice.toLocaleString()} تومان
+                          {order.totalPrice.toLocaleString()} ØªÙˆÙ…Ø§Ù†
                         </span>
                       </div>
                     </div>
@@ -328,7 +324,7 @@ export default function Orders() {
                         className="bg-amber-800 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-amber-900 transition-colors flex items-center gap-2"
                       >
                         <Check size={18} />
-                        بستن
+                        Ø¨Ø³ØªÙ†
                       </Link>
                     </div>
                   </div>

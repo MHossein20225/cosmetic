@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/lib/session";
 
 
-export async function GET(request: Request) {
+export async function GET() {
 
   const user = await getCurrentUser();
 
@@ -16,5 +16,6 @@ export async function GET(request: Request) {
     id: user.id,
     name: user.name,
     email: user.email,
+    role: user.role,
   });
 }

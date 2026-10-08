@@ -1,35 +1,12 @@
-"use client";
+﻿"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { Check, ChevronRight, MapPin } from "lucide-react";
 import { useCart } from "@/hooks/cartHooks";
-import { CartItem, orderSchema, Order } from "@/types";
+import { CartItem, orderSchema } from "@/types";
 import { useCreateOrder } from "@/hooks/orderHooks";
 import { redirect } from "next/navigation";
 
-export async function addOrder(
-  data: Pick<Order, "recipientName" | "phoneNumber" | "address">,
-) {
-  const csrfToken = typeof window !== "undefined"
-    ? localStorage.getItem("csrfToken")
-    : null;
-
-  const response = await fetch("/api/order", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-csrf-token": csrfToken ?? "",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.error || "سفارش ثبت نشد");
-  }
-
-  return response.json();
-}
 import { toast } from "sonner";
 
 export default function Checkout() {
@@ -53,7 +30,7 @@ export default function Checkout() {
 
     orderMutate(result.data, {
       onSuccess: () => {
-        toast.success("(...صبر کنید) سفارش با موفقیت ثبت شد");
+        toast.success("(...ØµØ¨Ø± Ú©Ù†ÛŒØ¯) Ø³ÙØ§Ø±Ø´ Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø«Ø¨Øª Ø´Ø¯");
         setTimeout(() => {
           redirect("/");
         }, 2000);
@@ -78,7 +55,7 @@ export default function Checkout() {
             className="font-sans text-xs font-semibold uppercase tracking-wider text-[#8b4e40] hover:text-[#58261b] transition-colors flex items-center gap-1.5"
             href="/cart"
           >
-            بازگشت به سبد خرید
+            Ø¨Ø§Ø²Ú¯Ø´Øª Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯
             <ChevronRight size={14} />
           </Link>
         </div>
@@ -115,7 +92,7 @@ export default function Checkout() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label className="flex flex-col gap-1.5">
                   <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#534340]">
-                    نام گیرنده
+                    Ù†Ø§Ù… Ú¯ÛŒØ±Ù†Ø¯Ù‡
                   </span>
 
                   <input
@@ -127,7 +104,7 @@ export default function Checkout() {
 
                 <label className="flex flex-col gap-1.5 sm:col-span-2">
                   <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#534340]">
-                    آدرس
+                    Ø¢Ø¯Ø±Ø³
                   </span>
 
                   <textarea
@@ -139,7 +116,7 @@ export default function Checkout() {
 
                 <label className="flex flex-col gap-1.5">
                   <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#534340]">
-                    شماره تلفن
+                    Ø´Ù…Ø§Ø±Ù‡ ØªÙ„ÙÙ†
                   </span>
 
                   <input
@@ -221,7 +198,7 @@ export default function Checkout() {
 
               {!items.length || isLoading ? (
                 <p className="font-sans text-sm text-[#534340] py-6 text-center">
-                  .سبد شما خالی است
+                  .Ø³Ø¨Ø¯ Ø´Ù…Ø§ Ø®Ø§Ù„ÛŒ Ø§Ø³Øª
                 </p>
               ) : (
                 <div className="flex flex-col gap-3 max-h-72 overflow-y-auto pr-1">
@@ -285,7 +262,7 @@ export default function Checkout() {
               <div className="h-px bg-[#f0e6e4]" />
 
               <div className="flex justify-between items-baseline">
-                <span className="font-serif text-xl text-[#1f1b1a]">قیمت کل</span>
+                <span className="font-serif text-xl text-[#1f1b1a]">Ù‚ÛŒÙ…Øª Ú©Ù„</span>
                 <span className="font-serif text-2xl text-[#1f1b1a]">
                   {subtotal}
                 </span>
@@ -296,7 +273,7 @@ export default function Checkout() {
                 type="button"
                 form="submitOrder"
               >
-                {isPending ? "صبر کنید" : "ثبت سفارش"}
+                {isPending ? "ØµØ¨Ø± Ú©Ù†ÛŒØ¯" : "Ø«Ø¨Øª Ø³ÙØ§Ø±Ø´"}
                 <span className="material-symbols-outlined text-base">
                   <Check />
                 </span>
@@ -309,7 +286,7 @@ export default function Checkout() {
                   </span>
                   256-Bit Encrypted
                 </span>
-                <span>•</span>
+                <span>â€¢</span>
                 <span>Secure Checkout</span>
               </div>
             </div>

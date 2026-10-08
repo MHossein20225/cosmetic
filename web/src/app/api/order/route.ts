@@ -1,54 +1,35 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { orderSchema } from "@/types";
+import { authorizeMutation } from "@/lib/apiSecurity";
 
 class StockError extends Error {}
 
 export async function GET(request: Request) {
   try {
     const user = await getCurrentUser();
-
-    if (user?.role !== "ADMIN") {
-      return Response.json(
-        { error: "دسترسی غیر مجاز" },
-        { status: 403 },
-      );
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const myOrdersOnly = new URL(request.url).searchParams.get("my") === "1";
+    if (!myOrdersOnly && user.role !== "ADMIN") {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const orders = await prisma.order.findMany({
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      where: myOrdersOnly ? { userId: user.id } : undefined,
+      include: { items: { include: { product: true } } },
+      orderBy: { createdAt: "desc" },
     });
-
     return Response.json(orders, { status: 200 });
   } catch (error) {
     console.error("GET /api/order error:", error);
-
-    return Response.json(
-      { error: "سفارش‌ها دریافت نشدند" },
-      { status: 500 },
-    );
+    return Response.json({ error: "Failed to fetch orders" }, { status: 500 });
   }
 }
-
 export async function POST(req: Request) {
   try {
-    const user = await getCurrentUser();
-
-    if (!user) {
-      return Response.json(
-        { error: "برای ثبت سفارش باید وارد حساب شوید" },
-        { status: 401 },
-      );
-    }
+    const authorization = await authorizeMutation(req);
+    if (authorization.response) return authorization.response;
+    const user = authorization.session.user;
 
     const body = await req.json();
 
@@ -131,7 +112,7 @@ export async function POST(req: Request) {
           )?.product;
 
           throw new StockError(
-            `موجودی ${product?.name ?? "محصول"} کافی نیست`,
+            `Ù…ÙˆØ¬ÙˆØ¯ÛŒ ${product?.name ?? "Ù…Ø­ØµÙˆÙ„"} Ú©Ø§ÙÛŒ Ù†ÛŒØ³Øª`,
           );
         }
       }
@@ -177,7 +158,7 @@ export async function POST(req: Request) {
 
     return Response.json(
       {
-        message: "سفارش با موفقیت ثبت شد",
+        message: "Ø³ÙØ§Ø±Ø´ Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø«Ø¨Øª Ø´Ø¯",
         order,
       },
       { status: 201 },
@@ -196,7 +177,7 @@ export async function POST(req: Request) {
       if (error.message === "CART_NOT_FOUND") {
         return Response.json(
           {
-            error: "سبد خرید پیدا نشد",
+            error: "Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ù¾ÛŒØ¯Ø§ Ù†Ø´Ø¯",
           },
           { status: 404 },
         );
@@ -205,7 +186,7 @@ export async function POST(req: Request) {
       if (error.message === "CART_EMPTY") {
         return Response.json(
           {
-            error: "سبد خرید خالی است",
+            error: "Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø®Ø§Ù„ÛŒ Ø§Ø³Øª",
           },
           { status: 400 },
         );
@@ -216,7 +197,7 @@ export async function POST(req: Request) {
 
         return Response.json(
           {
-            error: `محصول ${productId} پیدا نشد`,
+            error: `Ù…Ø­ØµÙˆÙ„ ${productId} Ù¾ÛŒØ¯Ø§ Ù†Ø´Ø¯`,
           },
           { status: 404 },
         );
@@ -227,7 +208,7 @@ export async function POST(req: Request) {
 
     return Response.json(
       {
-        error: "ثبت سفارش انجام نشد",
+        error: "Ø«Ø¨Øª Ø³ÙØ§Ø±Ø´ Ø§Ù†Ø¬Ø§Ù… Ù†Ø´Ø¯",
       },
       { status: 500 },
     );

@@ -1,5 +1,7 @@
+import { apiFetch } from "@/lib/apiFetch";
+
 export async function createCart() {
-  const response = await fetch("/api/cart", {
+  const response = await apiFetch("/api/cart", {
     method: "POST",
   });
 
@@ -28,7 +30,7 @@ export async function addToCart(
   productId: number,
   quantity = 1
 ) {
-  const response = await fetch("/api/cart/items", {
+  const response = await apiFetch("/api/cart/items", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -54,7 +56,7 @@ export async function updateCartItemQuantity(
   productId: number,
   quantity: number
 ) {
-  const response = await fetch(`/api/cart/items/${productId}`, {
+  const response = await apiFetch(`/api/cart/items/${productId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -76,7 +78,7 @@ export async function updateCartItemQuantity(
 }
 
 export async function removeCartItem(productId: number) {
-  const response = await fetch(`/api/cart/items/${productId}`, {
+  const response = await apiFetch(`/api/cart/items/${productId}`, {
     method: "DELETE",
   });
 

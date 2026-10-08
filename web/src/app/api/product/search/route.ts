@@ -1,5 +1,6 @@
 ﻿import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { consumeRateLimits, getClientIp, rateLimitResponse } from "@/lib/rateLimit";
 
 const SORTS_ORDER_BY: Record<string, Prisma.ProductOrderByWithRelationInput[]> =
   {
@@ -11,6 +12,11 @@ const SORTS_ORDER_BY: Record<string, Prisma.ProductOrderByWithRelationInput[]> =
 
 export async function GET(request: Request) {
   try {
+    const searchLimit = await consumeRateLimits([
+      { key: `product-search:ip:${getClientIp(request)}`, limit: 120, windowMs: 60 * 1000 },
+    ]);
+    if (!searchLimit.allowed) return rateLimitResponse(searchLimit);
+
     const { searchParams } = new URL(request.url);
 
     const search = searchParams.get("search")?.trim() ?? "";

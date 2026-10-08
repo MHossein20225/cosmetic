@@ -1,6 +1,7 @@
 import type { User } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authUser, createUser, logInUser, logOutUser } from "@/lib/userRequests";
+import { apiFetch } from "@/lib/apiFetch";
 
 
 
@@ -129,10 +130,10 @@ export function useAdminUsers() {
 
   const updateUserRole = useMutation({
     mutationFn: async ({ id, role }: { id: string; role: "CUSTOMER" | "ADMIN" }) => {
-      const res = await fetch("/api/admin/users", {
-        method: "POST",
+      const res = await apiFetch("/api/admin/users", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "", email: "", password: "", role }),
+        body: JSON.stringify({ id, role }),
       });
 
       if (!res.ok) {

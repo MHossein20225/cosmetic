@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
@@ -33,9 +33,9 @@ interface Order {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  QUEUE: "در صف",
-  PREPARED: "پردازش شد",
-  DELIVERED: "تحویل داده شده",
+  QUEUE: "Ø¯Ø± ØµÙ",
+  PREPARED: "Ù¾Ø±Ø¯Ø§Ø²Ø´ Ø´Ø¯",
+  DELIVERED: "ØªØ­ÙˆÛŒÙ„ Ø¯Ø§Ø¯Ù‡ Ø´Ø¯Ù‡",
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -61,11 +61,7 @@ export default function OrderDetail() {
   } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-      const res = await fetch("/api/user/me", {
-        headers: {
-          "x-csrf-token": localStorage.getItem("csrfToken") || "",
-        },
-      })
+      const res = await fetch("/api/user/me")
       if (!res.ok) return null
       return res.json()
     },
@@ -73,7 +69,7 @@ export default function OrderDetail() {
 
   useEffect(() => {
     if (userQueryError) {
-      setError("خطا در دریافت اطلاعات کاربر")
+      setError("Ø®Ø·Ø§ Ø¯Ø± Ø¯Ø±ÛŒØ§ÙØª Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ú©Ø§Ø±Ø¨Ø±")
       setLoading(false)
     }
   }, [userQueryError])
@@ -82,20 +78,16 @@ export default function OrderDetail() {
     queryKey: ["orders", "my", orderId],
     queryFn: async () => {
       if (!userData?.id) return null
-      const res = await fetch(`/api/order/${orderId}`, {
-        headers: {
-          "x-csrf-token": localStorage.getItem("csrfToken") || "",
-        },
-      })
+      const res = await fetch(`/api/order/${orderId}`)
       if (!res.ok) {
         if (res.status === 404) {
-          throw new Error("سفارش یافت نشد")
+          throw new Error("Ø³ÙØ§Ø±Ø´ ÛŒØ§ÙØª Ù†Ø´Ø¯")
         }
         if (res.status === 403) {
-          throw new Error("دسترسی غیر مجاز")
+          throw new Error("Ø¯Ø³ØªØ±Ø³ÛŒ ØºÛŒØ± Ù…Ø¬Ø§Ø²")
         }
         const body = await res.json().catch(() => ({}))
-        throw new Error(body.error || "دریافت سفارش انجام نشد")
+        throw new Error(body.error || "Ø¯Ø±ÛŒØ§ÙØª Ø³ÙØ§Ø±Ø´ Ø§Ù†Ø¬Ø§Ù… Ù†Ø´Ø¯")
       }
       return res.json()
     },
@@ -111,7 +103,7 @@ export default function OrderDetail() {
 
     if (isLoading) return
     if (isError) {
-      setError(orderError?.message || "خطا در دریافت سفارش")
+      setError(orderError?.message || "Ø®Ø·Ø§ Ø¯Ø± Ø¯Ø±ÛŒØ§ÙØª Ø³ÙØ§Ø±Ø´")
       setLoading(false)
       return
     }
@@ -133,7 +125,7 @@ export default function OrderDetail() {
   if (userLoading || userQueryLoading) {
     return (
       <div className="text-center py-12">
-        <p className="text-sm text-[#85736f]">در حال دریافت اطلاعات شما...</p>
+        <p className="text-sm text-[#85736f]">Ø¯Ø± Ø­Ø§Ù„ Ø¯Ø±ÛŒØ§ÙØª Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø´Ù…Ø§...</p>
       </div>
     )
   }
@@ -141,12 +133,12 @@ export default function OrderDetail() {
   if (!userData) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#85736f]">ابتدا وارد حساب خود شوید</p>
+        <p className="text-[#85736f]">Ø§Ø¨ØªØ¯Ø§ ÙˆØ§Ø±Ø¯ Ø­Ø³Ø§Ø¨ Ø®ÙˆØ¯ Ø´ÙˆÛŒØ¯</p>
         <Link
           href="/login"
           className="text-sm text-amber-800 hover:underline mt-2"
         >
-          ورود به حساب
+          ÙˆØ±ÙˆØ¯ Ø¨Ù‡ Ø­Ø³Ø§Ø¨
         </Link>
       </div>
     )
@@ -155,7 +147,7 @@ export default function OrderDetail() {
   if (loading && !order) {
     return (
       <div className="text-center py-12">
-        <p className="text-sm text-[#85736f]">در حال بارگذاری...</p>
+        <p className="text-sm text-[#85736f]">Ø¯Ø± Ø­Ø§Ù„ Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ...</p>
       </div>
     )
   }
@@ -163,12 +155,12 @@ export default function OrderDetail() {
   if (error || !order) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 font-semibold">{error || "سفارش یافت نشد"}</p>
+        <p className="text-red-600 font-semibold">{error || "Ø³ÙØ§Ø±Ø´ ÛŒØ§ÙØª Ù†Ø´Ø¯"}</p>
         <Link
           href="/orders"
           className="text-sm text-amber-800 hover:underline mt-2"
         >
-          بازگشت به لیست سفارشات
+          Ø¨Ø§Ø²Ú¯Ø´Øª Ø¨Ù‡ Ù„ÛŒØ³Øª Ø³ÙØ§Ø±Ø´Ø§Øª
         </Link>
       </div>
     )
@@ -182,7 +174,7 @@ export default function OrderDetail() {
           className="text-sm text-[#85736f] hover:text-[#1f1b1a]"
         >
           <ArrowLeft size={18} />
-          برگشت به سفارشات
+          Ø¨Ø±Ú¯Ø´Øª Ø¨Ù‡ Ø³ÙØ§Ø±Ø´Ø§Øª
         </Link>
       </div>
 
@@ -192,7 +184,7 @@ export default function OrderDetail() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="font-serif text-2xl text-[#1f1b1a]">
-                  شماره سفارش #{order.id}
+                  Ø´Ù…Ø§Ø±Ù‡ Ø³ÙØ§Ø±Ø´ #{order.id}
                 </h1>
                 <span
                   className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[order.status]}`}
@@ -202,7 +194,7 @@ export default function OrderDetail() {
               </div>
               <div className="text-right">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                  تاریخ سفارش
+                  ØªØ§Ø±ÛŒØ® Ø³ÙØ§Ø±Ø´
                 </p>
                 <p className="font-serif text-lg text-[#1f1b1a]">
                   {new Date(order.createdAt).toLocaleDateString("fa-IR")}
@@ -215,7 +207,7 @@ export default function OrderDetail() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-[#faf6f3] p-4 rounded-lg">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                  نام گیرنده
+                  Ù†Ø§Ù… Ú¯ÛŒØ±Ù†Ø¯Ù‡
                 </p>
                 <p className="font-sans text-sm text-[#1f1b1a]">
                   {order.recipientName}
@@ -223,7 +215,7 @@ export default function OrderDetail() {
               </div>
               <div className="bg-[#faf6f3] p-4 rounded-lg">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                  شماره شیرو
+                  Ø´Ù…Ø§Ø±Ù‡ Ø´ÛŒØ±Ùˆ
                 </p>
                 <p className="font-sans text-sm text-[#1f1b1a]">
                   {order.phoneNumber}
@@ -231,7 +223,7 @@ export default function OrderDetail() {
               </div>
               <div className="bg-[#faf6f3] p-4 rounded-lg">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                  آدرس
+                  Ø¢Ø¯Ø±Ø³
                 </p>
                 <p className="font-sans text-sm text-[#1f1b1a] mt-1">
                   {order.address}
@@ -239,19 +231,19 @@ export default function OrderDetail() {
               </div>
               <div className="bg-[#faf6f3] p-4 rounded-lg">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                  زمان تحویل
+                  Ø²Ù…Ø§Ù† ØªØ­ÙˆÛŒÙ„
                 </p>
                 <p className="font-sans text-sm text-[#1f1b1a]">
                   {order.deliveryTime
                     ? new Date(order.deliveryTime).toLocaleDateString("fa-IR")
-                    : "تجویز نهایی نشده"}
+                    : "ØªØ¬ÙˆÛŒØ² Ù†Ù‡Ø§ÛŒÛŒ Ù†Ø´Ø¯Ù‡"}
                 </p>
               </div>
             </div>
 
             <div>
               <h2 className="font-serif text-lg text-[#1f1b1a] mb-4">
-                آیتم‌های سفارش
+                Ø¢ÛŒØªÙ…â€ŒÙ‡Ø§ÛŒ Ø³ÙØ§Ø±Ø´
               </h2>
               <div className="space-y-3">
                 {order.items.map((item) => (
@@ -264,7 +256,7 @@ export default function OrderDetail() {
                         {item.product.name}
                       </p>
                       <p className="text-xs text-[#85736f]">
-                        حجم: {item.quantity}
+                        Ø­Ø¬Ù…: {item.quantity}
                       </p>
                     </div>
                     <div className="text-right">
@@ -272,7 +264,7 @@ export default function OrderDetail() {
                         ${(item.unitPrice * item.quantity).toFixed(2)}
                       </p>
                       <p className="text-xs text-[#85736f]">
-                        واحد: ${item.unitPrice.toFixed(2)}
+                        ÙˆØ§Ø­Ø¯: ${item.unitPrice.toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -283,10 +275,10 @@ export default function OrderDetail() {
             <div>
               <div className="flex items-center justify-between border-t border-[#f0e6e4] pt-4">
                 <span className="font-serif text-xl text-[#1f1b1a]">
-                  مجموع
+                  Ù…Ø¬Ù…ÙˆØ¹
                 </span>
                 <span className="font-serif text-2xl text-[#1f1b1a]">
-                  {order.totalPrice.toLocaleString()} تومان
+                  {order.totalPrice.toLocaleString()} ØªÙˆÙ…Ø§Ù†
                 </span>
               </div>
             </div>
@@ -297,7 +289,7 @@ export default function OrderDetail() {
                 className="flex-1 bg-rose-800 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-rose-900 transition-colors text-center"
               >
                 <Check size={18} className="inline mr-2" />
-                بستن
+                Ø¨Ø³ØªÙ†
               </Link>
             </div>
           </div>

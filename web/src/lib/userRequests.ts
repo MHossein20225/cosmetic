@@ -1,11 +1,12 @@
 import { User } from "@/types";
+import { apiFetch, clearCsrfTokenCache } from "@/lib/apiFetch";
 
 export async function createUser(user: {
   name: string;
   email: string;
   password: string;
 }) {
-  const response = await fetch("/api/user/register", {
+  const response = await apiFetch("/api/user/register", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -21,7 +22,7 @@ export async function createUser(user: {
 }
 
 export async function logInUser(user: Pick<User, "email" | "password">) {
-  const response = await fetch(`/api/user/login`, {
+  const response = await apiFetch(`/api/user/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -34,6 +35,7 @@ export async function logInUser(user: Pick<User, "email" | "password">) {
   }
 
   const data = await response.json();
+  clearCsrfTokenCache();
   return data;
 }
 
@@ -48,11 +50,13 @@ export async function authUser() {
 }
 
 export async function logOutUser() {
-  const response = await fetch("/api/user/logout");
+  const response = await apiFetch("/api/user/logout", { method: "POST" });
 
   if (!response.ok) {
     throw new Error("خطا در خروج از حساب");
   }
 
-  return response.json();
+  const result = await response.json();
+  clearCsrfTokenCache();
+  return result;
 }

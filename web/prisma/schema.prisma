@@ -26,7 +26,18 @@ model Session {
   userId    String
   expiresAt DateTime
   createdAt DateTime @default(now())
+  csrfToken String?  @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  key       String   @unique @map("email")
+  count     Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
 }
 
 model Product {

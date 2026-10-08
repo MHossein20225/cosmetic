@@ -1,9 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import { userSchema } from "@/types";
 import bcrypt from "bcryptjs";
+import { consumeRateLimits, getClientIp, getNetworkKey, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const registrationLimit = await consumeRateLimits([
+      { key: `register:ip:${ip}`, limit: 5, windowMs: 60 * 60 * 1000 },
+      { key: `register:network:${getNetworkKey(ip)}`, limit: 30, windowMs: 24 * 60 * 60 * 1000 },
+    ]);
+    if (!registrationLimit.allowed) return rateLimitResponse(registrationLimit);
+
     const body = await req.json();
     const result = userSchema.safeParse(body);
 

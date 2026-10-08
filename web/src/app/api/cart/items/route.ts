@@ -1,17 +1,12 @@
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/session";
+import { authorizeMutation } from "@/lib/apiSecurity";
 
 export async function POST(req: Request) {
   try {
 
-    const user = await getCurrentUser();
-
-    if (!user) {
-      return Response.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    const authorization = await authorizeMutation(req);
+    if (authorization.response) return authorization.response;
+    const user = authorization.session.user;
 
     const body = await req.json();
     const productId = Number(body.productId);

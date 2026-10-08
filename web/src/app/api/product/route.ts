@@ -1,6 +1,16 @@
-import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/session";
-import { productSchema } from "@/types";
+﻿import { prisma } from "@/lib/prisma";
+import { authorizeMutation } from "@/lib/apiSecurity";
+import { z } from "zod";
+
+const productInputSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  description: z.string().trim().min(1).max(10000),
+  price: z.number().int().positive(),
+  discount: z.number().int().min(0).max(100).default(0),
+  stock: z.number().int().min(0),
+  imageUrl: z.string().max(2048).optional(),
+  categoryId: z.number().int().positive(),
+}).strict();
 
 
 
@@ -21,18 +31,15 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const user = await getCurrentUser();
-
-    if (user?.role !== "ADMIN") {
-      return Response.json({ error: "فقط ادمین دسترسی دارد" }, { status: 403 });
-    }
+    const authorization = await authorizeMutation(req, "ADMIN");
+    if (authorization.response) return authorization.response;
 
     const body = await req.json();
-    const result = productSchema.safeParse(body);
+    const result = productInputSchema.safeParse(body);
 
     if (!result.success) {
       return Response.json(
-        { error: "یک از وروردی ها یا اشتباه است یا وارد نشده" },
+        { error: "ÛŒÚ© Ø§Ø² ÙˆØ±ÙˆØ±Ø¯ÛŒ Ù‡Ø§ ÛŒØ§ Ø§Ø´ØªØ¨Ø§Ù‡ Ø§Ø³Øª ÛŒØ§ ÙˆØ§Ø±Ø¯ Ù†Ø´Ø¯Ù‡" },
         { status: 400 },
       );
     }
@@ -54,6 +61,6 @@ export async function POST(req: Request) {
     return Response.json(product, { status: 201 });
   } catch (error) {
     console.error(error);
-    return Response.json({ error: "محصول ساخته نشد" }, { status: 500 });
+    return Response.json({ error: "Ù…Ø­ØµÙˆÙ„ Ø³Ø§Ø®ØªÙ‡ Ù†Ø´Ø¯" }, { status: 500 });
   }
 }
