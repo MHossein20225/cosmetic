@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
@@ -12,6 +11,7 @@ interface ProductsViewProps {
   products: SearchProductsResult["products"];
   result?: SearchProductsResult;
   sort?: ProductSort;
+  search?: string;
   categoryLabel?: string;
   isFetching?: boolean;
   onParamsChange: (params: { search?: string; sort?: ProductSort; page?: number }) => void;
@@ -32,23 +32,14 @@ export default function ProductsView({
   products,
   result,
   sort,
+  search = "",
   categoryLabel,
   isFetching,
   onParamsChange,
 }: ProductsViewProps) {
-  const [search, setSearch] = useState("");
-
   const total = result?.total ?? 0;
   const page = result?.page ?? 1;
   const totalPages = result?.totalPages ?? 1;
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onParamsChange({ search, page: 1 });
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [search, onParamsChange]);
 
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-8 md:py-12">
@@ -89,7 +80,7 @@ export default function ProductsView({
 
           <input
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => onParamsChange({ search: event.target.value, page: 1 })}
             placeholder="Search products"
             aria-label="Search products"
             className="w-full bg-white pl-11 pr-10 py-2.5 text-sm text-gray-900 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-amber-800"
@@ -100,7 +91,7 @@ export default function ProductsView({
             <button
               type="button"
               aria-label="Clear search"
-              onClick={() => setSearch("")}
+              onClick={() => onParamsChange({ search: "", page: 1 })}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-800 transition-colors"
             >
               <X size={16} />

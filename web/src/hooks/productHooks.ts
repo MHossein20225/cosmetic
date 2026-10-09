@@ -2,6 +2,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getProducts, getProduct, getCategoriedProducts, searchProducts } from "../lib/productRequests";
 import type { SearchProductsParams } from "@/types";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export function useProducts() {
   const { data, isLoading, isError, error } = useQuery({
@@ -30,9 +31,11 @@ export function useCategoriedProducts(category: string | undefined) {
 }
 
 export function useSearchProducts(params: SearchProductsParams) {
+  const search = useDebouncedValue(params.search ?? "");
+  const queryParams = { ...params, search };
   const { data, isLoading, isFetching, isError, error } = useQuery({
-    queryKey: ["products", "search", params],
-    queryFn: () => searchProducts(params),
+    queryKey: ["products", "search", queryParams],
+    queryFn: () => searchProducts(queryParams),
     placeholderData: keepPreviousData,
   });
   return {

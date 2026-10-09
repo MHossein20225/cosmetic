@@ -14,7 +14,7 @@ interface CategoriedProductProps {
 export default function CategoriedProduct({ params }: CategoriedProductProps) {
   const { category: rawCategory } = use(params);
 
-  const category = decodeURIComponent(rawCategory);
+  const category = rawCategory;
 
   const [searchParams, setSearchParams] = useState<SearchProductsParams>({
     page: 1,
@@ -22,7 +22,7 @@ export default function CategoriedProduct({ params }: CategoriedProductProps) {
     category,
   });
 
-  const { products, result, isLoading, isFetching, isError } = useSearchProducts(searchParams);
+  const { products, result, isLoading, isFetching, isError } = useSearchProducts({ ...searchParams, category });
 
   const handleParamsChange = useCallback(
     (next: { search?: string; sort?: ProductSort; page?: number }) => {
@@ -62,6 +62,7 @@ export default function CategoriedProduct({ params }: CategoriedProductProps) {
       products={products ?? []}
       result={result}
       sort={searchParams.sort}
+      search={searchParams.search}
       description={`${category} Products`}
       categoryLabel={category}
       isFetching={isFetching}

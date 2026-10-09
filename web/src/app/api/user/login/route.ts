@@ -5,9 +5,11 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { randomBytes } from "node:crypto";
 import { consumeRateLimits, getClientIp, rateLimitResponse } from "@/lib/rateLimit";
+import { isSameOriginRequest } from "@/lib/csrf";
 
 export async function POST(req: Request) {
   try {
+    if (!isSameOriginRequest(req)) return Response.json({ error: "Invalid request" }, { status: 403 });
     const curruntUser = await getCurrentUser();
     if (curruntUser) {
       return Response.json({ error: "شما ورود کرده اید" }, { status: 401 });
@@ -19,7 +21,7 @@ export async function POST(req: Request) {
     ]);
     if (!ipLimit.allowed) return rateLimitResponse(ipLimit);
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
     const cookieStore = await cookies();
 
     const result = userSchema.omit({ name: true }).safeParse(body);
@@ -40,9 +42,9 @@ export async function POST(req: Request) {
     ]);
     if (!accountLimit.allowed) return rateLimitResponse(accountLimit);
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
-        email,
+        email: { equals: email, mode: "insensitive" },
       },
     });
 
@@ -68,6 +70,7 @@ export async function POST(req: Request) {
       data: {
         userId: user.id,
         expiresAt,
+        id: randomBytes(32).toString("base64url"),
         csrfToken: randomBytes(32).toString("base64url"),
       },
     });
@@ -88,7 +91,7 @@ export async function POST(req: Request) {
       role: user.role,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Login failed", error instanceof Error ? error.name : "Unknown error");
 
     return Response.json({ error: "خطای سرور" }, { status: 500 });
   }

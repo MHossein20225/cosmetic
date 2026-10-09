@@ -1,6 +1,7 @@
 ﻿import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { authorizeMutation } from "@/lib/apiSecurity";
+import { getProductPrice } from "@/lib/pricing";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -10,7 +11,10 @@ export async function GET() {
     where: { userId: user.id },
     include: { items: { include: { product: true } } },
   });
-  return Response.json(cart ?? { id: null, items: [] });
+  return Response.json(cart ? {
+    ...cart,
+    items: cart.items.map((item) => ({ ...item, unitPrice: getProductPrice(item.product) })),
+  } : { id: null, items: [] });
 }
 
 export async function POST(request: Request) {

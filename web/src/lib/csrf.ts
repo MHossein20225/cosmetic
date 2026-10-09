@@ -2,6 +2,13 @@ import { timingSafeEqual } from "node:crypto";
 
 export const CSRF_HEADER = "x-csrf-token";
 
+export function isSameOriginRequest(request: Request): boolean {
+  if (request.headers.get("sec-fetch-site") === "cross-site") return false;
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  return origin === new URL(process.env.APP_ORIGIN ?? request.url).origin;
+}
+
 export function validateCsrfToken(
   requestHeaders: Headers,
   expectedToken: string | null | undefined,

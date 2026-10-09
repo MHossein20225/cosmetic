@@ -1,15 +1,11 @@
 import Link from "next/link";
-import { ShoppingCart, Package, Users, TrendingUp, AlertTriangle } from "lucide-react";
+import { ShoppingCart, Package, Users, TrendingUp } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { requireRole } from "@/lib/apiSecurity";
 
 export default async function AdminDashboard() {
-  const stats = await fetch("/api/admin", {
-    cache: "no-store",
-  })
-    .then((res) => {
-      if (!res.ok) return null;
-      return res.json();
-    })
-    .catch(() => null);
+  const authorization = await requireRole("ADMIN");
+  const stats = authorization.session;
 
   if (!stats) {
     return (
@@ -20,29 +16,16 @@ export default async function AdminDashboard() {
     );
   }
 
-  const [orders, products, users] = await Promise.all([
-    fetch("/api/admin/orders", { cache: "no-store" })
-      .then((res) => {
-        if (!res.ok) return [];
-        return res.json();
-      })
-      .catch(() => []),
-    fetch("/api/admin/products", { cache: "no-store" })
-      .then((res) => {
-        if (!res.ok) return [];
-        return res.json();
-      })
-      .catch(() => []),
-    fetch("/api/admin/users", { cache: "no-store" })
-      .then((res) => {
-        if (!res.ok) return [];
-        return res.json();
-      })
-      .catch(() => []),
+  const [orders, productCount, userCount, orderCount, revenue, lowStock] = await Promise.all([
+    prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
+    prisma.product.count(),
+    prisma.user.count(),
+    prisma.order.count(),
+    prisma.order.aggregate({ _sum: { totalPrice: true } }),
+    prisma.product.findMany({ where: { stock: { lt: 10 } }, orderBy: { stock: "asc" } }),
   ]);
 
-  const lowStock = products.filter((p: { stock: number }) => p.stock < 10);
-  const totalRevenue = orders.reduce((sum: number, o: { totalPrice: number }) => sum + o.totalPrice, 0);
+  const totalRevenue = revenue._sum.totalPrice ?? 0;
 
   return (
     <div>
@@ -64,7 +47,7 @@ export default async function AdminDashboard() {
             </div>
             <span className="text-sm font-medium text-[#85736f]">سفارشات</span>
           </div>
-          <p className="font-serif text-3xl font-bold">{orders.length}</p>
+          <p className="font-serif text-3xl font-bold">{orderCount}</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-[#e8dfdc]">
@@ -74,7 +57,7 @@ export default async function AdminDashboard() {
             </div>
             <span className="text-sm font-medium text-[#85736f]">محصولات</span>
           </div>
-          <p className="font-serif text-3xl font-bold">{products.length}</p>
+          <p className="font-serif text-3xl font-bold">{productCount}</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-[#e8dfdc]">
@@ -84,7 +67,7 @@ export default async function AdminDashboard() {
             </div>
             <span className="text-sm font-medium text-[#85736f]">کاربران</span>
           </div>
-          <p className="font-serif text-3xl font-bold">{users.length}</p>
+          <p className="font-serif text-3xl font-bold">{userCount}</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-[#e8dfdc]">
@@ -135,7 +118,7 @@ export default async function AdminDashboard() {
               <p className="text-sm text-[#85736f]">سفارشی وجود ندارد</p>
             ) : (
               <ul className="space-y-3">
-                {orders.slice(0, 5).map((order: any) => (
+                {orders.map((order) => (
                   <li
                     key={order.id}
                     className="flex items-center justify-between text-sm"

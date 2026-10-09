@@ -28,6 +28,7 @@ export function useCreateUser() {
 }
 
 export function useLogInUser() {
+  const queryClient = useQueryClient();
   const {
     mutate: logInMutate,
     isSuccess,
@@ -37,6 +38,12 @@ export function useLogInUser() {
   } = useMutation({
     mutationKey: ["user", "login"],
     mutationFn: (user: Pick<User, "email" | "password">) => logInUser(user),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ["orders"] });
+      queryClient.removeQueries({ queryKey: ["admin"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
   });
 
   return {
@@ -75,6 +82,8 @@ export function useLogOut() {
     mutationFn: logOutUser,
     onSuccess: () => {
       queryClient.setQueryData(["user"], null);
+      queryClient.removeQueries({ queryKey: ["orders"] });
+      queryClient.removeQueries({ queryKey: ["admin"] });
       queryClient.invalidateQueries({ queryKey:["cart"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["products", "search", { search: "" }] });
@@ -102,7 +111,7 @@ export function useAllUsers() {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "دریافت کاربران انجام نشد");
       }
-      return res.json();
+      return res.json() as Promise<Pick<User, "id" | "name" | "email" | "role" | "createdAt">[]>;
     },
   });
 
@@ -124,7 +133,7 @@ export function useAdminUsers() {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "دریافت کاربران انجام نشد");
       }
-      return res.json();
+      return res.json() as Promise<Pick<User, "id" | "name" | "email" | "role" | "createdAt">[]>;
     },
   });
 
@@ -146,7 +155,6 @@ export function useAdminUsers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      refetch();
     },
   });
 

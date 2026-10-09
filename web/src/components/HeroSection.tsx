@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function HeroSection() {
     return (
         <section className="relative flex min-h-[70vh] w-full items-center justify-center overflow-hidden bg-[#f7f3ee] px-6 py-24 sm:min-h-[75vh] sm:px-10 lg:min-h-[80vh] lg:px-16">
@@ -33,19 +35,19 @@ export default function HeroSection() {
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <button
-              type="button"
+            <Link
+              href="/products"
               className="w-full rounded-full bg-white px-7 py-3 text-sm font-medium text-black transition-all duration-300 hover:bg-black hover:text-white sm:w-auto"
             >
               Explore Collection
-            </button>
+            </Link>
 
-            <button
-              type="button"
+            <Link
+              href="/about_us"
               className="w-full rounded-full border border-white/70 px-7 py-3 text-sm font-medium text-white backdrop-blur-sm transition-all duration-300 hover:bg-white hover:text-black sm:w-auto"
             >
               Our Philosophy
-            </button>
+            </Link>
           </div>
         </div>
       </section>

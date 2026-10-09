@@ -22,9 +22,19 @@ export async function PATCH(request: Request) {
   if (authorization.response) return authorization.response;
 
   try {
-    const result = updateOrderSchema.safeParse(await request.json());
+    const result = updateOrderSchema.safeParse(await request.json().catch(() => null));
     if (!result.success) return Response.json({ error: "Invalid order update" }, { status: 400 });
-    const order = await prisma.order.update({ where: { id: result.data.id }, data: { status: result.data.status } });
+    const currentOrder = await prisma.order.findUnique({ where: { id: result.data.id } });
+    if (!currentOrder) return Response.json({ error: "Order not found" }, { status: 404 });
+    if (currentOrder.status === result.data.status) return Response.json(currentOrder);
+    const nextStatus = currentOrder.status === "QUEUE" ? "PREPARED" : currentOrder.status === "PREPARED" ? "DELIVERED" : null;
+    if (result.data.status !== nextStatus) return Response.json({ error: "Invalid status transition" }, { status: 409 });
+    const updated = await prisma.order.updateMany({
+      where: { id: currentOrder.id, status: currentOrder.status },
+      data: { status: result.data.status },
+    });
+    if (updated.count !== 1) return Response.json({ error: "Order changed. Please refresh." }, { status: 409 });
+    const order = await prisma.order.findUnique({ where: { id: currentOrder.id } });
     return Response.json(order);
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "P2025") {

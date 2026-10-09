@@ -1,33 +1,26 @@
-import { z } from "zod";
+import { productSchema } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { authorizeMutation } from "@/lib/apiSecurity";
 
-const updateSchema = z.object({
-  name: z.string().trim().min(1).max(200).optional(),
-  description: z.string().trim().min(1).max(10000).optional(),
-  price: z.number().int().positive().optional(),
-  discount: z.number().int().min(0).max(100).optional(),
-  stock: z.number().int().min(0).optional(),
-  imageUrl: z.string().max(2048).nullable().optional(),
-  categoryId: z.number().int().positive().optional(),
-}).strict().refine((value) => Object.keys(value).length > 0);
+const updateSchema = productSchema.partial().refine((value) => Object.keys(value).length > 0);
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const authorization = await authorizeMutation(request, "ADMIN");
   if (authorization.response) return authorization.response;
   const id = Number((await params).id);
-  if (!Number.isInteger(id) || id <= 0) return Response.json({ error: "Invalid product ID" }, { status: 400 });
+  if (!Number.isInteger(id) || id <= 0 || id > 2147483647) return Response.json({ error: "Invalid product ID" }, { status: 400 });
 
   try {
-    const result = updateSchema.safeParse(await request.json());
+    const result = updateSchema.safeParse(await request.json().catch(() => null));
     if (!result.success) return Response.json({ error: "Invalid product data", fields: result.error.flatten().fieldErrors }, { status: 400 });
     const product = await prisma.product.update({ where: { id }, data: result.data });
     return Response.json(product);
   } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2003") return Response.json({ error: "Category not found" }, { status: 400 });
     if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
       return Response.json({ error: "Product not found" }, { status: 404 });
     }
-    console.error("PATCH /api/admin/products/[id] error:", error);
+    console.error("PATCH /api/admin/products/[id] failed");
     return Response.json({ error: "Failed to update product" }, { status: 500 });
   }
 }
@@ -36,7 +29,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const authorization = await authorizeMutation(request, "ADMIN");
   if (authorization.response) return authorization.response;
   const id = Number((await params).id);
-  if (!Number.isInteger(id) || id <= 0) return Response.json({ error: "Invalid product ID" }, { status: 400 });
+  if (!Number.isInteger(id) || id <= 0 || id > 2147483647) return Response.json({ error: "Invalid product ID" }, { status: 400 });
 
   try {
     await prisma.product.delete({ where: { id } });

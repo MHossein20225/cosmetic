@@ -1,5 +1,7 @@
-import { prisma } from "@/lib/prisma";
 import { authorizeMutation } from "@/lib/apiSecurity";
+import { cartItemSchema } from "@/types";
+import { getProductPrice } from "@/lib/pricing";
+import { runSerializable, TransactionConflictError } from "@/lib/transaction";
 
 export async function POST(req: Request) {
   try {
@@ -8,9 +10,9 @@ export async function POST(req: Request) {
     if (authorization.response) return authorization.response;
     const user = authorization.session.user;
 
-    const body = await req.json();
-    const productId = Number(body.productId);
-    const quantity = Number(body.quantity ?? 1);
+    const result = cartItemSchema.safeParse(await req.json().catch(() => null));
+    if (!result.success) return Response.json({ error: "Invalid product or quantity" }, { status: 400 });
+    const { productId, quantity } = result.data;
 
     if (!Number.isInteger(productId) || productId <= 0) {
       return Response.json(
@@ -26,7 +28,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const result = await prisma.$transaction(async (tx) => {
+    const cartItemResult = await runSerializable(async (tx) => {
       const product = await tx.product.findUnique({
         where: { id: productId },
       });
@@ -65,12 +67,13 @@ export async function POST(req: Request) {
         },
         update: {
           quantity: currentQty + quantity,
+          unitPrice: getProductPrice(product),
         },
         create: {
           cartId: cart.id,
           productId,
           quantity,
-          unitPrice: product.price - product.price * (product.discount / 100),
+          unitPrice: getProductPrice(product),
         },
         include: {
           product: true,
@@ -80,21 +83,18 @@ export async function POST(req: Request) {
       return cartItem;
     });
 
-    if (result instanceof Error) {
-      return Response.json(
-        { error: result.message },
-        result.message === "Not enough stock" ? { status: 400 } : { status: 500 }
-      );
-    }
-
-    return Response.json(result, { status: 201 });
+    return Response.json(cartItemResult, { status: 201 });
   } catch (error) {
-    console.error(error);
+    if (error instanceof TransactionConflictError) return Response.json({ error: error.message }, { status: 409 });
+    if (error instanceof Error && error.message === "Product not found") {
+      return Response.json({ error: "Product not found" }, { status: 404 });
+    }
 
     if (error instanceof Error && error.message === "Not enough stock") {
-      return Response.json({ error: "Not enough stock" }, { status: 400 });
+      return Response.json({ error: "Not enough stock" }, { status: 409 });
     }
 
+    console.error("Failed to add product to cart");
     return Response.json(
       { error: "Failed to add product to cart" },
       { status: 500 }

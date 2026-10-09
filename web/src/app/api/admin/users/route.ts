@@ -22,7 +22,7 @@ export async function PATCH(request: Request) {
   if (authorization.response) return authorization.response;
 
   try {
-    const result = roleUpdateSchema.safeParse(await request.json());
+    const result = roleUpdateSchema.safeParse(await request.json().catch(() => null));
     if (!result.success) return Response.json({ error: "Invalid user role update" }, { status: 400 });
     if (result.data.id === authorization.session.user.id) {
       return Response.json({ error: "You cannot change your own role" }, { status: 403 });

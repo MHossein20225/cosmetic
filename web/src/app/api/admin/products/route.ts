@@ -1,16 +1,6 @@
-import { z } from "zod";
+import { productSchema } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { authorizeMutation, requireRole } from "@/lib/apiSecurity";
-
-const productInputSchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  description: z.string().trim().min(1).max(10000),
-  price: z.number().int().positive(),
-  discount: z.number().int().min(0).max(100).default(0),
-  stock: z.number().int().min(0),
-  imageUrl: z.string().max(2048).optional(),
-  categoryId: z.number().int().positive(),
-}).strict();
 
 export async function GET() {
   const authorization = await requireRole("ADMIN");
@@ -27,14 +17,15 @@ export async function POST(request: Request) {
   if (authorization.response) return authorization.response;
 
   try {
-    const result = productInputSchema.safeParse(await request.json());
+    const result = productSchema.safeParse(await request.json().catch(() => null));
     if (!result.success) {
       return Response.json({ error: "Invalid product data", fields: result.error.flatten().fieldErrors }, { status: 400 });
     }
     const product = await prisma.product.create({ data: result.data });
     return Response.json(product, { status: 201 });
   } catch (error) {
-    console.error("POST /api/admin/products error:", error);
+    if (error && typeof error === "object" && "code" in error && error.code === "P2003") return Response.json({ error: "Category not found" }, { status: 400 });
+    console.error("POST /api/admin/products failed");
     return Response.json({ error: "Failed to create product" }, { status: 500 });
   }
 }

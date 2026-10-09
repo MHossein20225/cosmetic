@@ -11,7 +11,7 @@ export async function GET(
 ) {
   const { id } = await params;
   const productId = Number(id);
-  if (!Number.isInteger(productId) || productId <= 0) {
+  if (!Number.isInteger(productId) || productId <= 0 || productId > 2147483647) {
     return Response.json({ error: "Invalid product ID" }, { status: 400 });
   }
   const product = await prisma.product.findUnique({

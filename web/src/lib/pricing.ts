@@ -3,7 +3,7 @@ export function hasDiscount(discount: number) {
 }
 
 export function getDiscountedPrice(price: number, discount: number) {
-  return Math.round(price * (1 - discount / 100) * 100) / 100;
+  return Math.round(price * (100 - discount) / 100);
 }
 
 export function getProductPrice(product: {

@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAdminProducts, useAdminAuth } from "@/hooks/adminHooks";
-import { Package, Plus, X, Loader2 } from "lucide-react";
+import { useAdminProducts } from "@/hooks/adminHooks";
+import { useCategories } from "@/hooks/categoryHooks";
+import { productSchema, ProductWithCategory } from "@/types";
+import { Plus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AdminProductsPage() {
   const router = useRouter();
-  const { user } = useAdminAuth();
-  const { products, isLoading, isError, error, createProduct, createProductAsync } = useAdminProducts();
+  const { products, isLoading, isError, error, createProductAsync, updateProductAsync, deleteProductAsync } = useAdminProducts();
+  const { categories = [], isError: categoryError } = useCategories();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -18,31 +21,53 @@ export default function AdminProductsPage() {
   const [categoryId, setCategoryId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
-  const categories = [
-    { id: 1, name: "جلداسازی" },
-    { id: 2, name: "راتبیدازایی" },
-    { id: 3, name: "دلگشتی" },
-  ];
+  function resetForm() {
+    setEditingId(null);
+    setName(""); setDescription(""); setPrice(""); setDiscount("0");
+    setStock("0"); setCategoryId(""); setImageUrl("");
+  }
+
+  function editProduct(product: ProductWithCategory) {
+    setEditingId(product.id);
+    setName(product.name); setDescription(product.description); setPrice(String(product.price));
+    setDiscount(String(product.discount)); setStock(String(product.stock));
+    setCategoryId(String(product.categoryId)); setImageUrl(product.imageUrl ?? "");
+  }
+
+  async function handleDelete(id: number) {
+    if (!window.confirm("محصول حذف شود؟")) return;
+    setSaving(true);
+    try {
+      await deleteProductAsync(id);
+      if (editingId === id) resetForm();
+      toast.success("محصول حذف شد");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "حذف محصول انجام نشد");
+    } finally { setSaving(false); }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name || !description || !price || !categoryId) return;
+    if (saving) return;
+    const result = productSchema.safeParse({
+      name, description, price: Number(price), discount: Number(discount), stock: Number(stock),
+      categoryId: Number(categoryId), imageUrl: imageUrl || null,
+    });
+    if (!result.success) {
+      toast.error(result.error.issues[0]?.message || "اطلاعات محصول معتبر نیست");
+      return;
+    }
 
     setSaving(true);
     try {
-      await createProductAsync({
-        name,
-        description,
-        price: Number(price),
-        discount: Number(discount) || 0,
-        stock: Number(stock) || 0,
-        categoryId: Number(categoryId),
-        imageUrl: imageUrl || undefined,
-      });
-      router.push("/admin/products");
-    } catch {
-      alert("ثبت محصول انجام نشد");
+      if (editingId) await updateProductAsync({ id: editingId, product: result.data });
+      else await createProductAsync(result.data);
+      resetForm();
+      toast.success("محصول ذخیره شد");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "ثبت محصول انجام نشد");
     } finally {
       setSaving(false);
     }
@@ -74,17 +99,20 @@ export default function AdminProductsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-5 rounded-xl border border-[#e8dfdc]">
-          <h2 className="font-serif text-xl mb-4">افزودن محصول جدید</h2>
+          <h2 className="font-serif text-xl mb-4">{editingId ? "ویرایش محصول" : "افزودن محصول جدید"}</h2>
+          {categoryError && <p role="alert" className="text-red-600 text-sm">دریافت دسته‌بندی‌ها انجام نشد</p>}
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               className="w-full px-4 py-3 rounded-lg border border-[#e8dfdc] focus:outline-none focus:ring-2 focus:ring-amber-800"
               placeholder="نام محصول"
+              aria-label="نام محصول"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             <textarea
               className="w-full px-4 py-3 rounded-lg border border-[#e8dfdc] focus:outline-none focus:ring-2 focus:ring-amber-800"
               placeholder="توضیحات"
+              aria-label="توضیحات"
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -93,6 +121,7 @@ export default function AdminProductsPage() {
               <input
                 className="w-full px-4 py-3 rounded-lg border border-[#e8dfdc] focus:outline-none focus:ring-2 focus:ring-amber-800"
                 placeholder="قیمت (تومان)"
+                aria-label="قیمت"
                 type="number"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
@@ -100,6 +129,7 @@ export default function AdminProductsPage() {
               <input
                 className="w-full px-4 py-3 rounded-lg border border-[#e8dfdc] focus:outline-none focus:ring-2 focus:ring-amber-800"
                 placeholder="تخفیف (%)"
+                aria-label="تخفیف"
                 type="number"
                 value={discount}
                 onChange={(e) => setDiscount(e.target.value)}
@@ -109,11 +139,13 @@ export default function AdminProductsPage() {
               <input
                 className="w-full px-4 py-3 rounded-lg border border-[#e8dfdc] focus:outline-none focus:ring-2 focus:ring-amber-800"
                 placeholder="تعداد کالای موجود"
+                aria-label="موجودی"
                 type="number"
                 value={stock}
                 onChange={(e) => setStock(e.target.value)}
               />
               <select
+                aria-label="دسته‌بندی"
                 className="w-full px-4 py-3 rounded-lg border border-[#e8dfdc] focus:outline-none focus:ring-2 focus:ring-amber-800"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
@@ -129,6 +161,7 @@ export default function AdminProductsPage() {
             <input
               className="w-full px-4 py-3 rounded-lg border border-[#e8dfdc] focus:outline-none focus:ring-2 focus:ring-amber-800"
               placeholder="آدرس تصویر (اختیاری)"
+              aria-label="آدرس تصویر"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
             />
@@ -140,6 +173,7 @@ export default function AdminProductsPage() {
               {saving ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
               {saving ? "در حال ذخیره..." : "ذخیره محصول"}
             </button>
+            {editingId && <button type="button" onClick={resetForm} disabled={saving} className="text-sm text-amber-800">انصراف از ویرایش</button>}
           </form>
         </div>
 
@@ -156,10 +190,11 @@ export default function AdminProductsPage() {
                     <th className="text-left py-3 px-2 font-semibold text-[#85736f]">تخفیف</th>
                     <th className="text-left py-3 px-2 font-semibold text-[#85736f]">موجودی</th>
                     <th className="text-left py-3 px-2 font-semibold text-[#85736f]">تاریخ</th>
+                    <th className="text-left py-3 px-2 font-semibold text-[#85736f]">عملیات</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((product: any) => (
+                  {products.map((product) => (
                     <tr key={product.id} className="border-b border-[#f0e6e4]">
                       <td className="py-3 px-2 font-medium">{product.name}</td>
                       <td className="py-3 px-2 text-[#85736f]">{product.category?.name}</td>
@@ -167,6 +202,10 @@ export default function AdminProductsPage() {
                       <td className="py-3 px-2 text-[#85736f]">{product.discount}%</td>
                       <td className="py-3 px-2">{product.stock}</td>
                       <td className="py-3 px-2 text-[#85736f]">{new Date(product.createdAt).toLocaleDateString("fa-IR")}</td>
+                      <td className="py-3 px-2">
+                        <button type="button" onClick={() => editProduct(product)} disabled={saving} className="text-amber-800 mr-3 disabled:opacity-50">ویرایش</button>
+                        <button type="button" onClick={() => handleDelete(product.id)} disabled={saving} className="text-red-600 disabled:opacity-50">حذف</button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

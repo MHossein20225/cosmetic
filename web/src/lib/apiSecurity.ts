@@ -1,6 +1,6 @@
 import { getCurrentSession } from "@/lib/session";
 import { validateCsrfToken } from "@/lib/csrf";
-import { consumeRateLimit, getClientIp, rateLimitResponse } from "@/lib/rateLimit";
+import { consumeRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import type { Role } from "@/types";
 
 export async function authorizeMutation(request: Request, role?: Role) {
@@ -16,7 +16,7 @@ export async function authorizeMutation(request: Request, role?: Role) {
   }
   if (role === "ADMIN") {
     const decision = await consumeRateLimit(
-      `admin-mutation:user:${session.user.id}:ip:${getClientIp(request)}`,
+      `admin-mutation:user:${session.user.id}`,
       120,
       10 * 60 * 1000,
     );

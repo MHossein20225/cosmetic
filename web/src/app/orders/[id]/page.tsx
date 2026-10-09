@@ -1,41 +1,15 @@
 ﻿"use client"
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import Link from "next/link"
-import { useQuery } from "@tanstack/react-query"
+import { useOrder } from "@/hooks/orderHooks"
 import { useAuthUser } from "@/hooks/userHooks"
-import { ArrowLeft, Check, MapPin, Clock, User, Phone } from "lucide-react"
-
-interface OrderItem {
-  id: string
-  orderId: string
-  productId: number
-  quantity: number
-  unitPrice: number
-  product: {
-    id: number
-    name: string
-  }
-}
-
-interface Order {
-  id: string
-  userId: string
-  items: OrderItem[]
-  recipientName: string
-  phoneNumber: string
-  address: string
-  totalPrice: number
-  status: "QUEUE" | "PREPARED" | "DELIVERED"
-  createdAt: Date
-  deliveryTime: Date | null
-}
+import { ArrowLeft, Check } from "lucide-react"
 
 const STATUS_LABELS: Record<string, string> = {
-  QUEUE: "Ø¯Ø± ØµÙ",
-  PREPARED: "Ù¾Ø±Ø¯Ø§Ø²Ø´ Ø´Ø¯",
-  DELIVERED: "ØªØ­ÙˆÛŒÙ„ Ø¯Ø§Ø¯Ù‡ Ø´Ø¯Ù‡",
+  QUEUE: "در صف",
+  PREPARED: "پردازش شد",
+  DELIVERED: "تحویل داده شده",
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -46,99 +20,30 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function OrderDetail() {
   const params = useParams()
-  const router = useRouter()
   const { user, isLoading: userLoading } = useAuthUser()
-  const [order, setOrder] = useState<Order | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   const orderId = params.id as string
 
-  const {
-    data: userData,
-    isLoading: userQueryLoading,
-    error: userQueryError,
-  } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => {
-      const res = await fetch("/api/user/me")
-      if (!res.ok) return null
-      return res.json()
-    },
-  })
+  const { data: order, isLoading: loading, error: orderError } = useOrder(orderId, user?.id)
+  const error = orderError?.message
 
-  useEffect(() => {
-    if (userQueryError) {
-      setError("Ø®Ø·Ø§ Ø¯Ø± Ø¯Ø±ÛŒØ§ÙØª Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ú©Ø§Ø±Ø¨Ø±")
-      setLoading(false)
-    }
-  }, [userQueryError])
-
-  const { data: orderData, isLoading, isError, error: orderError } = useQuery({
-    queryKey: ["orders", "my", orderId],
-    queryFn: async () => {
-      if (!userData?.id) return null
-      const res = await fetch(`/api/order/${orderId}`)
-      if (!res.ok) {
-        if (res.status === 404) {
-          throw new Error("Ø³ÙØ§Ø±Ø´ ÛŒØ§ÙØª Ù†Ø´Ø¯")
-        }
-        if (res.status === 403) {
-          throw new Error("Ø¯Ø³ØªØ±Ø³ÛŒ ØºÛŒØ± Ù…Ø¬Ø§Ø²")
-        }
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.error || "Ø¯Ø±ÛŒØ§ÙØª Ø³ÙØ§Ø±Ø´ Ø§Ù†Ø¬Ø§Ù… Ù†Ø´Ø¯")
-      }
-      return res.json()
-    },
-  })
-
-  useEffect(() => {
-    if (userQueryLoading) return
-    if (userQueryError) {
-      setError(userQueryError.message)
-      setLoading(false)
-      return
-    }
-
-    if (isLoading) return
-    if (isError) {
-      setError(orderError?.message || "Ø®Ø·Ø§ Ø¯Ø± Ø¯Ø±ÛŒØ§ÙØª Ø³ÙØ§Ø±Ø´")
-      setLoading(false)
-      return
-    }
-
-    if (orderData) {
-      setOrder(orderData)
-    }
-    setLoading(false)
-  }, [
-    userQueryLoading,
-    userQueryError,
-    isLoading,
-    isError,
-    orderError,
-    orderData,
-    userData?.id,
-  ])
-
-  if (userLoading || userQueryLoading) {
+  if (userLoading) {
     return (
       <div className="text-center py-12">
-        <p className="text-sm text-[#85736f]">Ø¯Ø± Ø­Ø§Ù„ Ø¯Ø±ÛŒØ§ÙØª Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø´Ù…Ø§...</p>
+        <p className="text-sm text-[#85736f]">در حال دریافت اطلاعات شما...</p>
       </div>
     )
   }
 
-  if (!userData) {
+  if (!user) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#85736f]">Ø§Ø¨ØªØ¯Ø§ ÙˆØ§Ø±Ø¯ Ø­Ø³Ø§Ø¨ Ø®ÙˆØ¯ Ø´ÙˆÛŒØ¯</p>
+        <p className="text-[#85736f]">ابتدا وارد حساب خود شوید</p>
         <Link
           href="/login"
           className="text-sm text-amber-800 hover:underline mt-2"
         >
-          ÙˆØ±ÙˆØ¯ Ø¨Ù‡ Ø­Ø³Ø§Ø¨
+          ورود به حساب
         </Link>
       </div>
     )
@@ -147,7 +52,7 @@ export default function OrderDetail() {
   if (loading && !order) {
     return (
       <div className="text-center py-12">
-        <p className="text-sm text-[#85736f]">Ø¯Ø± Ø­Ø§Ù„ Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ...</p>
+        <p className="text-sm text-[#85736f]">در حال بارگذاری...</p>
       </div>
     )
   }
@@ -155,12 +60,12 @@ export default function OrderDetail() {
   if (error || !order) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 font-semibold">{error || "Ø³ÙØ§Ø±Ø´ ÛŒØ§ÙØª Ù†Ø´Ø¯"}</p>
+        <p className="text-red-600 font-semibold">{error || "سفارش یافت نشد"}</p>
         <Link
           href="/orders"
           className="text-sm text-amber-800 hover:underline mt-2"
         >
-          Ø¨Ø§Ø²Ú¯Ø´Øª Ø¨Ù‡ Ù„ÛŒØ³Øª Ø³ÙØ§Ø±Ø´Ø§Øª
+          بازگشت به لیست سفارشات
         </Link>
       </div>
     )
@@ -174,7 +79,7 @@ export default function OrderDetail() {
           className="text-sm text-[#85736f] hover:text-[#1f1b1a]"
         >
           <ArrowLeft size={18} />
-          Ø¨Ø±Ú¯Ø´Øª Ø¨Ù‡ Ø³ÙØ§Ø±Ø´Ø§Øª
+          برگشت به سفارشات
         </Link>
       </div>
 
@@ -184,7 +89,7 @@ export default function OrderDetail() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="font-serif text-2xl text-[#1f1b1a]">
-                  Ø´Ù…Ø§Ø±Ù‡ Ø³ÙØ§Ø±Ø´ #{order.id}
+                  شماره سفارش #{order.id}
                 </h1>
                 <span
                   className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[order.status]}`}
@@ -194,7 +99,7 @@ export default function OrderDetail() {
               </div>
               <div className="text-right">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                  ØªØ§Ø±ÛŒØ® Ø³ÙØ§Ø±Ø´
+                  تاریخ سفارش
                 </p>
                 <p className="font-serif text-lg text-[#1f1b1a]">
                   {new Date(order.createdAt).toLocaleDateString("fa-IR")}
@@ -207,7 +112,7 @@ export default function OrderDetail() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-[#faf6f3] p-4 rounded-lg">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                  Ù†Ø§Ù… Ú¯ÛŒØ±Ù†Ø¯Ù‡
+                  نام گیرنده
                 </p>
                 <p className="font-sans text-sm text-[#1f1b1a]">
                   {order.recipientName}
@@ -215,7 +120,7 @@ export default function OrderDetail() {
               </div>
               <div className="bg-[#faf6f3] p-4 rounded-lg">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                  Ø´Ù…Ø§Ø±Ù‡ Ø´ÛŒØ±Ùˆ
+                  شماره شیرو
                 </p>
                 <p className="font-sans text-sm text-[#1f1b1a]">
                   {order.phoneNumber}
@@ -223,7 +128,7 @@ export default function OrderDetail() {
               </div>
               <div className="bg-[#faf6f3] p-4 rounded-lg">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                  Ø¢Ø¯Ø±Ø³
+                  آدرس
                 </p>
                 <p className="font-sans text-sm text-[#1f1b1a] mt-1">
                   {order.address}
@@ -231,19 +136,19 @@ export default function OrderDetail() {
               </div>
               <div className="bg-[#faf6f3] p-4 rounded-lg">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
-                  Ø²Ù…Ø§Ù† ØªØ­ÙˆÛŒÙ„
+                  زمان تحویل
                 </p>
                 <p className="font-sans text-sm text-[#1f1b1a]">
                   {order.deliveryTime
                     ? new Date(order.deliveryTime).toLocaleDateString("fa-IR")
-                    : "ØªØ¬ÙˆÛŒØ² Ù†Ù‡Ø§ÛŒÛŒ Ù†Ø´Ø¯Ù‡"}
+                    : "تجویز نهایی نشده"}
                 </p>
               </div>
             </div>
 
             <div>
               <h2 className="font-serif text-lg text-[#1f1b1a] mb-4">
-                Ø¢ÛŒØªÙ…â€ŒÙ‡Ø§ÛŒ Ø³ÙØ§Ø±Ø´
+                آیتم‌های سفارش
               </h2>
               <div className="space-y-3">
                 {order.items.map((item) => (
@@ -253,10 +158,10 @@ export default function OrderDetail() {
                   >
                     <div className="flex-1 min-w-0">
                       <p className="font-sans text-sm text-[#1f1b1a]">
-                        {item.product.name}
+                        {item.productName}
                       </p>
                       <p className="text-xs text-[#85736f]">
-                        Ø­Ø¬Ù…: {item.quantity}
+                        حجم: {item.quantity}
                       </p>
                     </div>
                     <div className="text-right">
@@ -264,7 +169,7 @@ export default function OrderDetail() {
                         ${(item.unitPrice * item.quantity).toFixed(2)}
                       </p>
                       <p className="text-xs text-[#85736f]">
-                        ÙˆØ§Ø­Ø¯: ${item.unitPrice.toFixed(2)}
+                        واحد: ${item.unitPrice.toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -275,10 +180,10 @@ export default function OrderDetail() {
             <div>
               <div className="flex items-center justify-between border-t border-[#f0e6e4] pt-4">
                 <span className="font-serif text-xl text-[#1f1b1a]">
-                  Ù…Ø¬Ù…ÙˆØ¹
+                  مجموع
                 </span>
                 <span className="font-serif text-2xl text-[#1f1b1a]">
-                  {order.totalPrice.toLocaleString()} ØªÙˆÙ…Ø§Ù†
+                  {order.totalPrice.toLocaleString()} تومان
                 </span>
               </div>
             </div>
@@ -289,7 +194,7 @@ export default function OrderDetail() {
                 className="flex-1 bg-rose-800 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-rose-900 transition-colors text-center"
               >
                 <Check size={18} className="inline mr-2" />
-                Ø¨Ø³ØªÙ†
+                بستن
               </Link>
             </div>
           </div>

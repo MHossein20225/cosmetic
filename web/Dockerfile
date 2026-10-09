@@ -13,9 +13,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Prisma needs its schema present to generate the client during build
-RUN npx prisma generate
+RUN DATABASE_URL=postgresql://build:build@localhost:5432/build npx prisma generate
 
-RUN npm run build
+RUN DATABASE_URL=postgresql://build:build@localhost:5432/build npm run build
 
 # ---- Run ----
 FROM node:22-alpine AS runner

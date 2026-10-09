@@ -5,15 +5,21 @@ import { Check, ChevronRight, MapPin } from "lucide-react";
 import { useCart } from "@/hooks/cartHooks";
 import { CartItem, orderSchema } from "@/types";
 import { useCreateOrder } from "@/hooks/orderHooks";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAuthUser } from "@/hooks/userHooks";
+import Loading from "@/components/Loading";
 
 import { toast } from "sonner";
 
 export default function Checkout() {
+  const router = useRouter();
+  const { user, isLoading: userLoading } = useAuthUser();
   const { isLoading, items, subtotal, count } = useCart();
   const { orderMutate, isPending } = useCreateOrder();
 
   async function submitHandle(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (isPending || !user || items.length === 0) return;
     const formData = new FormData(e.currentTarget);
 
     const order = {
@@ -25,18 +31,21 @@ export default function Checkout() {
     const result = orderSchema.safeParse(order);
 
     if (!result.success) {
-      return null;
+      toast.error(result.error.issues[0]?.message || "اطلاعات سفارش معتبر نیست");
+      return;
     }
 
     orderMutate(result.data, {
       onSuccess: () => {
-        toast.success("(...ØµØ¨Ø± Ú©Ù†ÛŒØ¯) Ø³ÙØ§Ø±Ø´ Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø«Ø¨Øª Ø´Ø¯");
-        setTimeout(() => {
-          redirect("/");
-        }, 2000);
+        toast.success("سفارش با موفقیت ثبت شد");
+        router.push("/orders");
       },
+      onError: (error) => toast.error(error.message),
     });
   }
+
+  if (isLoading || userLoading) return <Loading />;
+  if (!user) return <div className="py-12 text-center"><Link href="/login" className="text-amber-800">برای ثبت سفارش وارد شوید</Link></div>;
 
   return (
     <main className="w-full min-h-screen pt-20 bg-[#fff8f6]">
@@ -55,7 +64,7 @@ export default function Checkout() {
             className="font-sans text-xs font-semibold uppercase tracking-wider text-[#8b4e40] hover:text-[#58261b] transition-colors flex items-center gap-1.5"
             href="/cart"
           >
-            Ø¨Ø§Ø²Ú¯Ø´Øª Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯
+            بازگشت به سبد خرید
             <ChevronRight size={14} />
           </Link>
         </div>
@@ -92,7 +101,7 @@ export default function Checkout() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label className="flex flex-col gap-1.5">
                   <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#534340]">
-                    Ù†Ø§Ù… Ú¯ÛŒØ±Ù†Ø¯Ù‡
+                    نام گیرنده
                   </span>
 
                   <input
@@ -104,7 +113,7 @@ export default function Checkout() {
 
                 <label className="flex flex-col gap-1.5 sm:col-span-2">
                   <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#534340]">
-                    Ø¢Ø¯Ø±Ø³
+                    آدرس
                   </span>
 
                   <textarea
@@ -116,7 +125,7 @@ export default function Checkout() {
 
                 <label className="flex flex-col gap-1.5">
                   <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#534340]">
-                    Ø´Ù…Ø§Ø±Ù‡ ØªÙ„ÙÙ†
+                    شماره تلفن
                   </span>
 
                   <input
@@ -198,7 +207,7 @@ export default function Checkout() {
 
               {!items.length || isLoading ? (
                 <p className="font-sans text-sm text-[#534340] py-6 text-center">
-                  .Ø³Ø¨Ø¯ Ø´Ù…Ø§ Ø®Ø§Ù„ÛŒ Ø§Ø³Øª
+                  .سبد شما خالی است
                 </p>
               ) : (
                 <div className="flex flex-col gap-3 max-h-72 overflow-y-auto pr-1">
@@ -262,7 +271,7 @@ export default function Checkout() {
               <div className="h-px bg-[#f0e6e4]" />
 
               <div className="flex justify-between items-baseline">
-                <span className="font-serif text-xl text-[#1f1b1a]">Ù‚ÛŒÙ…Øª Ú©Ù„</span>
+                <span className="font-serif text-xl text-[#1f1b1a]">قیمت کل</span>
                 <span className="font-serif text-2xl text-[#1f1b1a]">
                   {subtotal}
                 </span>
@@ -270,10 +279,11 @@ export default function Checkout() {
 
               <button
                 className="w-full bg-[#8b4e40] text-white py-4 px-6 font-sans text-xs font-semibold uppercase tracking-widest rounded hover:bg-[#58261b] transition-all active:scale-[0.99] flex items-center justify-center gap-2 shadow-md disabled:bg-[#85736f] disabled:cursor-not-allowed"
-                type="button"
+                type="submit"
                 form="submitOrder"
+                disabled={isPending || items.length === 0}
               >
-                {isPending ? "ØµØ¨Ø± Ú©Ù†ÛŒØ¯" : "Ø«Ø¨Øª Ø³ÙØ§Ø±Ø´"}
+                {isPending ? "صبر کنید" : "ثبت سفارش"}
                 <span className="material-symbols-outlined text-base">
                   <Check />
                 </span>

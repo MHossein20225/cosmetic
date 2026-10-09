@@ -1,17 +1,22 @@
 import Link from "next/link";
-import { Package, Users, ShoppingCart } from "lucide-react";
+import { Package, Users, ShoppingCart, LayoutDashboard } from "lucide-react";
+import { getCurrentUser } from "@/lib/session";
+import { redirect } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/admin", label: "داشبورد", icon: "layout-dashboard" },
+  { href: "/admin", label: "داشبورد", icon: LayoutDashboard },
   { href: "/admin/products", label: "محصولات", icon: Package },
   { href: "/admin/users", label: "کاربران", icon: Users },
   { href: "/admin/orders", label: "سفارشات", icon: ShoppingCart },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+  if (user.role !== "ADMIN") redirect("/");
   return (
     <div className="min-h-screen bg-[#f7f3ef] text-[#1f1b1a]">
-      <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-[#e8dfdc] p-5 flex flex-col gap-6">
+      <aside className="lg:fixed left-0 top-0 lg:h-screen w-full lg:w-64 bg-white border-r border-[#e8dfdc] p-5 flex flex-col gap-6">
         <div className="flex items-center gap-3 px-2">
           <div className="w-9 h-9 rounded-lg bg-amber-800 text-white flex items-center justify-center">
             <ShoppingCart size={18} />
@@ -43,9 +48,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      <main className="ml-64 min-h-screen bg-[#f7f3ef] p-6">
+      <main className="lg:ml-64 min-h-screen bg-[#f7f3ef] p-4 sm:p-6">
         <div className="max-w-6xl mx-auto">
-          <h1 className="font-serif text-3xl text-[#1f1b1a] mb-1">{children}</h1>
           {children}
         </div>
       </main>

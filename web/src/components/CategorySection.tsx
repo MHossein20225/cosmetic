@@ -47,7 +47,7 @@ export default function CategorySection() {
       >
         {categories?.map((category) => (
           <SwiperSlide key={category.id} className="h-auto">
-            <Link href={`/products/${category.name}`} className="h-full block">
+            <Link href={`/products/${encodeURIComponent(category.name)}`} className="h-full block">
               <CategoryCard category={category} />
             </Link>
           </SwiperSlide>

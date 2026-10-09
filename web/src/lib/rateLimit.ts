@@ -1,5 +1,6 @@
 import { createHmac, randomUUID } from "node:crypto";
 import { Prisma } from "@/generated/prisma/client";
+import { isIP } from "node:net";
 import { prisma } from "@/lib/prisma";
 
 export type RateLimitDecision = { allowed: boolean; retryAfterSeconds: number };
@@ -12,9 +13,14 @@ function hashKey(value: string) {
 }
 
 export function getClientIp(request: Request) {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const realIp = request.headers.get("x-real-ip")?.trim();
-  return (forwarded || realIp || "unknown").slice(0, 128);
+  // Enable only behind a proxy that overwrites the configured header.
+  if (process.env.TRUST_PROXY !== "true") return "unknown";
+  const header = process.env.RATE_LIMIT_IP_HEADER ?? "x-forwarded-for";
+  const value = request.headers.get(header)?.split(",").at(-1)?.trim() ?? "";
+  if (!isIP(value)) return "unknown";
+  if (isIP(value) === 4) return value;
+  if (value.toLowerCase().startsWith("::ffff:") && isIP(value.slice(7)) === 4) return value.slice(7);
+  return new URL(`http://[${value}]/`).hostname.slice(1, -1);
 }
 
 export function getNetworkKey(ip: string) {
@@ -24,7 +30,13 @@ export function getNetworkKey(ip: string) {
       return `${octets.slice(0, 3).join(".")}.0/24`;
     }
   }
-  if (ip.includes(":")) return `${ip.split(":").slice(0, 4).join(":")}/64`;
+  if (isIP(ip) === 6) {
+    const [left, right = ""] = ip.split("::");
+    const start = left ? left.split(":") : [];
+    const end = right ? right.split(":") : [];
+    const parts = ip.includes("::") ? [...start, ...Array(8 - start.length - end.length).fill("0"), ...end] : start;
+    return `${parts.slice(0, 4).map((part) => parseInt(part, 16).toString(16)).join(":")}/64`;
+  }
   return ip;
 }
 
@@ -44,7 +56,7 @@ export async function consumeRateLimit(
       INSERT INTO "RateLimit" ("id", "email", "count", "expiresAt", "createdAt")
       VALUES (${randomUUID()}, ${hashedKey}, 1, NOW() + (${windowMs} * INTERVAL '1 millisecond'), NOW())
       ON CONFLICT ("email") DO UPDATE SET
-        "count" = CASE WHEN "RateLimit"."expiresAt" <= NOW() THEN 1 ELSE "RateLimit"."count" + 1 END,
+        "count" = CASE WHEN "RateLimit"."expiresAt" <= NOW() THEN 1 ELSE LEAST("RateLimit"."count" + 1, ${limit + 1}) END,
         "expiresAt" = CASE
           WHEN "RateLimit"."expiresAt" <= NOW()
             THEN NOW() + (${windowMs} * INTERVAL '1 millisecond')

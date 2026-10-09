@@ -42,11 +42,10 @@ export async function logInUser(user: Pick<User, "email" | "password">) {
 export async function authUser() {
   const response = await fetch("/api/user/me");
 
-  if (!response.ok) {
-    return null;
-  }
+  if (response.status === 401) return null;
+  if (!response.ok) throw new Error("Unable to restore your session");
 
-  return response.json();
+  return response.json() as Promise<Pick<User, "id" | "name" | "email" | "role">>;
 }
 
 export async function logOutUser() {

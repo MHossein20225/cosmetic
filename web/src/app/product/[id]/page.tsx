@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -37,6 +37,7 @@ export default function ProductPage({
 }) {
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
+  const imageDialog = useRef<HTMLDialogElement>(null);
 
   const { id } = use(params);
 
@@ -59,19 +60,20 @@ export default function ProductPage({
   }
 
   function handleAddToBag() {
-    setJustAdded(true);
+    if (isPending) return;
 
     addToCartMutate(
       { productId, quantity },
       {
-        onSuccess: () => toast.success("محصول با موفقیت اضافه شد"),
-        onError: () => toast.error("با خطا مواجه شد"),
+        onSuccess: () => {
+          toast.success("محصول با موفقیت اضافه شد");
+          setJustAdded(true);
+          setTimeout(() => setJustAdded(false), 1800);
+        },
+        onError: (error) => toast.error(error.message),
       },
     );
 
-    setTimeout(() => {
-      setJustAdded(false);
-    }, 1800);
   }
   if (!Number.isInteger(productId) || productId <= 0) {
     return (
@@ -118,6 +120,12 @@ export default function ProductPage({
 
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-8 md:py-12">
+      <dialog ref={imageDialog} aria-label="Product image" className="m-auto bg-transparent p-6 backdrop:bg-black/80">
+        <button type="button" autoFocus aria-label="Close image" onClick={() => imageDialog.current?.close()} className="absolute top-2 right-2 text-white text-2xl">×</button>
+        <div className="relative w-[min(90vw,48rem)] h-[80vh]">
+          <Image src={product.imageUrl || "/images/nonProduct.jpg"} alt={product.name} fill sizes="90vw" className="object-contain" />
+        </div>
+      </dialog>
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-gray-500 text-xs uppercase tracking-wider mb-6 flex-wrap">
         <Link href="/" className="hover:text-amber-800 transition-colors">
@@ -125,7 +133,7 @@ export default function ProductPage({
         </Link>
         <ChevronRight size={12} />
         <Link
-          href={`/products/${product.category.name}`}
+          href={`/products/${encodeURIComponent(product.category.name)}`}
           className="hover:text-amber-800 transition-colors"
         >
           {product.category.name}
@@ -159,6 +167,7 @@ export default function ProductPage({
             <button
               type="button"
               aria-label="Zoom image"
+              onClick={() => imageDialog.current?.showModal()}
               className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-white transition-all opacity-0 group-hover:opacity-100 shadow-sm"
             >
               <Maximize2 size={18} />
@@ -366,13 +375,14 @@ export default function ProductPage({
                 <button
                   type="button"
                   onClick={handleAddToBag}
+                  disabled={isPending}
                   className={`flex-1 min-w-[180px] py-3 px-4 rounded text-xs font-medium uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] ${
                     justAdded && isPending
                       ? "bg-rose-200 text-amber-900"
                       : "bg-amber-800 text-white hover:bg-amber-900"
                   }`}
                 >
-                  {justAdded ? (
+                  {isPending ? "Adding..." : justAdded ? (
                     <>
                       <Check size={18} />
                       Added to Bag
@@ -384,22 +394,11 @@ export default function ProductPage({
                     </>
                   )}
                 </button>
-              ) :
-                (user ? (
-                  <button
-                    type="button"
-                    onClick={handleAddToBag}
-                    className={
-                      "flex-1 min-w-[180px] py-3 px-4 rounded text-xs font-medium uppercase tracking-wider bg-amber-800 text-white hover:bg-amber-900 transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.99]"
-                    }
-                  >
-                    you have to log in
-                  </button>
-                ) : (
+              ) : (
                   <Link href="/login" className="text-sm text-amber-800 hover:text-amber-900">
                     Log in to add to bag
                   </Link>
-                ))}
+                )}
             </div>
 
             <div className="flex items-center justify-center gap-2 mt-1 text-gray-500 text-xs">

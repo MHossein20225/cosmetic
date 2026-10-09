@@ -77,7 +77,7 @@ export interface CreateProductInput {
   price: number;
   discount?: number;
   stock: number;
-  imageUrl?: string;
+  imageUrl?: string | null;
   categoryId: number;
 }
 
@@ -124,29 +124,46 @@ export interface Order {
 export interface OrderItem {
   id: string;
   orderId: string;
-  productId: number;
+  productId: number | null;
+  productName: string;
+  product?: Product | null;
   quantity: number;
   unitPrice: number;
 }
 
 export const userSchema = z.object({
-  name: z.string().min(3, "نام باید حداقل 3 حرف باشد"),
-  email: z.string().email("ایمیل معتبر نیست"),
-  password: z.string().min(6, "رمز باید بیشتر از 6 حرف باشد"),
+  name: z.string().trim().min(3, "نام باید حداقل 3 حرف باشد").max(200),
+  email: z.string().trim().email("ایمیل معتبر نیست").max(254).transform((email) => email.toLowerCase()),
+  password: z.string().min(6, "رمز باید بیشتر از 6 حرف باشد").max(72, "رمز باید حداکثر 72 حرف باشد").refine((password) => new TextEncoder().encode(password).length <= 72, "رمز عبور بیش از حد طولانی است"),
 });
 
 export const orderSchema = z.object({
-  recipientName: z.string().min(3, "نام حداقل باید 3 حرف باشد"),
-  phoneNumber: z.string().startsWith("09").max(11, "شماره معتبر نیست"),
-  address: z.string().min(1, "آدرس را وارد کنید"),
+  recipientName: z.string().trim().min(3, "نام حداقل باید 3 حرف باشد").max(200),
+  phoneNumber: z.string().regex(/^09\d{9}$/, "شماره معتبر نیست"),
+  address: z.string().trim().min(1, "آدرس را وارد کنید").max(2000),
 });
 
-export const productSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1),
-  price: z.number().positive(),
-  discount: z.number().default(0),
-  stock: z.number().positive().min(0).default(0),
-  imageUrl: z.string().url().optional(),
-  categoryId: z.number(),
+export const cartItemSchema = z.object({
+  productId: z.number().int().positive().max(2147483647),
+  quantity: z.number().int().positive().max(2147483647).default(1),
 });
+
+export const cartQuantitySchema = cartItemSchema.pick({ quantity: true }).required();
+
+export const productSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  description: z.string().trim().min(1).max(10000),
+  price: z.number().int().positive().max(2147483647),
+  discount: z.number().int().min(0).max(100).default(0),
+  stock: z.number().int().min(0).max(2147483647).default(0),
+  imageUrl: z.string().max(2048).refine((value) => {
+    if (value.startsWith("/") && !value.startsWith("//")) return true;
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" && url.hostname === "lh3.googleusercontent.com";
+    } catch {
+      return false;
+    }
+  }, "Use a local image path or an allowed HTTPS image URL").nullable().optional(),
+  categoryId: z.number().int().positive().max(2147483647),
+}).strict();

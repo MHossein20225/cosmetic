@@ -1,5 +1,7 @@
-import { prisma } from "@/lib/prisma";
 import { authorizeMutation } from "@/lib/apiSecurity";
+import { cartItemSchema } from "@/types";
+import { getProductPrice } from "@/lib/pricing";
+import { runSerializable, TransactionConflictError } from "@/lib/transaction";
 
 export async function POST(req: Request) {
   try {
@@ -7,9 +9,9 @@ export async function POST(req: Request) {
     if (authorization.response) return authorization.response;
     const user = authorization.session.user;
 
-    const { productId: rawProductId, quantity: rawQuantity } = await req.json();
-    const productId = Number(rawProductId);
-    const quantity = Number(rawQuantity);
+    const result = cartItemSchema.safeParse(await req.json().catch(() => null));
+    if (!result.success) return Response.json({ error: "Invalid product or quantity" }, { status: 400 });
+    const { productId, quantity } = result.data;
 
     if (!Number.isInteger(productId) || productId <= 0) {
       return Response.json(
@@ -21,46 +23,38 @@ export async function POST(req: Request) {
       return Response.json({ error: "Quantity must be at least 1" }, { status: 400 });
     }
 
+    const cartItem = await runSerializable(async (tx) => {
     // Get the user's cart
-    const cart = await prisma.cart.findUnique({
+    const cart = await tx.cart.findUnique({
       where: {
         userId: user.id,
       },
     });
 
     if (!cart) {
-      return Response.json(
-        { error: "Cart not found" },
-        { status: 404 }
-      );
+      throw new Error("Cart not found");
     }
 
     // Get the product
-    const product = await prisma.product.findUnique({
+    const product = await tx.product.findUnique({
       where: {
         id: Number(productId),
       },
     });
 
     if (!product) {
-      return Response.json(
-        { error: "Product not found" },
-        { status: 404 }
-      );
+      throw new Error("Product not found");
     }
 
-    const existingItem = await prisma.cartItem.findUnique({
+    const existingItem = await tx.cartItem.findUnique({
       where: { cartId_productId: { cartId: cart.id, productId: product.id } },
     });
     const nextQuantity = (existingItem?.quantity ?? 0) + quantity;
     if (product.stock < nextQuantity) {
-      return Response.json(
-        { error: "Not enough stock" },
-        { status: 409 }
-      );
+      throw new Error("Not enough stock");
     }
 
-    const cartItem = await prisma.cartItem.upsert({
+    return tx.cartItem.upsert({
       where: {
         cartId_productId: {
           cartId: cart.id,
@@ -68,6 +62,7 @@ export async function POST(req: Request) {
         },
       },
       update: {
+        unitPrice: getProductPrice(product),
         quantity: {
           increment: quantity,
         },
@@ -76,15 +71,19 @@ export async function POST(req: Request) {
         cartId: cart.id,
         productId: product.id,
         quantity,
-        unitPrice: Math.round(product.price * (1 - product.discount / 100)),
+        unitPrice: getProductPrice(product),
       },
       include: {
         product: true,
       },
     });
+    });
 
     return Response.json(cartItem, { status: 201 });
   } catch (error) {
+    if (error instanceof TransactionConflictError) return Response.json({ error: error.message }, { status: 409 });
+    if (error instanceof Error && error.message === "Not enough stock") return Response.json({ error: error.message }, { status: 409 });
+    if (error instanceof Error && ["Cart not found", "Product not found"].includes(error.message)) return Response.json({ error: error.message }, { status: 404 });
     console.error(error);
 
     return Response.json(

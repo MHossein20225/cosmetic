@@ -13,11 +13,15 @@ import {
 import { NAV_LINKS } from "@/data";
 import NavLinkItem from "./NavLinkItems";
 import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { getProductPrice } from "@/lib/pricing";
 import { useAuthUser, useLogOut } from "@/hooks/userHooks";
 import { useCart } from "@/hooks/cartHooks";
 import { useSearchProducts } from "@/hooks/productHooks";
 
 export default function Header() {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -44,9 +48,9 @@ export default function Header() {
 
       if (!value) return;
 
-      window.location.href = `/products?search=${encodeURIComponent(value)}`;
+      router.push(`/products?search=${encodeURIComponent(value)}`);
     },
-    [search],
+    [search, router],
   );
 
   const clearSearch = useCallback(() => {
@@ -140,9 +144,11 @@ export default function Header() {
                       className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-rose-50"
                     >
                       {product.imageUrl ? (
-                        <img
+                        <Image
                           src={product.imageUrl}
                           alt=""
+                          width={40}
+                          height={40}
                           className="h-10 w-10 rounded-lg object-cover"
                         />
                       ) : (
@@ -155,7 +161,7 @@ export default function Header() {
                         </p>
 
                         <p className="text-xs text-gray-500">
-                          {product.price.toLocaleString()} تومان
+                          {getProductPrice(product).toLocaleString()} تومان
                         </p>
                       </div>
                     </Link>
@@ -255,6 +261,7 @@ export default function Header() {
                       My Orders
                     </Link>
 
+                    {user.role === "ADMIN" && <Link href="/admin" onClick={closeMenus} className="block px-4 py-3 text-sm text-gray-700 hover:bg-rose-50">Admin dashboard</Link>}
                     <div className="border-t border-gray-100" />
 
                     <button

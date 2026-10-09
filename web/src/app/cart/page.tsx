@@ -1,16 +1,20 @@
 'use client'
 import { Check, ChevronLeft, Minus, Plus, ShoppingBag, Trash, ShieldCheck } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import Loading from "@/components/Loading";
 import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/cartHooks";
-import type { CartItem, Product } from "@/types";
+import type { CartItem } from "@/types";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 
 
 export default function Cart() {
+  const router = useRouter();
   const { items, count, subtotal, isLoading } = useCart();
-  const { updateCartItemMutate } = useUpdateCartItem();
-  const { removeCartItemMutate } = useRemoveCartItem();
+  const { updateCartItemMutate, isPending: updating } = useUpdateCartItem();
+  const { removeCartItemMutate, isPending: removing } = useRemoveCartItem();
 
   if (isLoading) {
     return <Loading />;
@@ -29,14 +33,14 @@ export default function Cart() {
               ({count} {count === 1 ? "item" : "items"})
             </span>
           </div>
-          <a
+          <Link
             className="font-sans text-xs font-semibold uppercase tracking-wider text-[#8b4e40] hover:text-[#58261b] transition-colors flex items-center gap-1.5"
-            href="#"
+            href="/products"
             aria-label="Continue browsing"
           >
             <ChevronLeft size={14} />
             Continue browsing
-          </a>
+          </Link>
         </div>
 
         {/* Main Grid */}
@@ -86,7 +90,8 @@ export default function Cart() {
                     </div>
                     <button
                       aria-label={`Remove ${item.product.name}`}
-                      onClick={() => removeCartItemMutate(item.product.id)}
+                      onClick={() => removeCartItemMutate(item.product.id, { onError: (error) => toast.error(error.message) })}
+                      disabled={updating || removing}
                       className="text-[#85736f] hover:text-[#b44a4a] transition-colors p-1 rounded shrink-0"
                       type="button"
                     >
@@ -97,12 +102,12 @@ export default function Cart() {
                     <div className="flex items-center bg-[#fcf1ef] rounded-lg p-1">
                       <button
                         aria-label="Decrease quantity"
-                        disabled={item.quantity <= 1}
+                        disabled={item.quantity <= 1 || updating || removing}
                         onClick={() =>
                           updateCartItemMutate({
                             productId: item.product.id,
                             quantity: item.quantity - 1,
-                          })
+                          }, { onError: (error) => toast.error(error.message) })
                         }
                         className="w-8 h-8 flex items-center justify-center text-[#1f1b1a] hover:bg-white rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         type="button"
@@ -114,11 +119,12 @@ export default function Cart() {
                       </span>
                       <button
                         aria-label="Increase quantity"
+                        disabled={item.quantity >= item.product.stock || updating || removing}
                         onClick={() =>
                           updateCartItemMutate({
                             productId: item.product.id,
                             quantity: item.quantity + 1,
-                          })
+                          }, { onError: (error) => toast.error(error.message) })
                         }
                         className="w-8 h-8 flex items-center justify-center text-[#1f1b1a] hover:bg-white rounded transition-colors"
                         type="button"
@@ -200,6 +206,8 @@ export default function Cart() {
               <button
                 className="w-full bg-[#8b4e40] text-white py-4 px-6 font-sans text-xs font-semibold uppercase tracking-widest rounded hover:bg-[#58261b] transition-all active:scale-[0.99] flex items-center justify-center gap-2 shadow-md"
                 type="button"
+                onClick={() => router.push("/checkout")}
+                disabled={!items.length || updating || removing}
               >
                 Proceed to Checkout
                 <Check size={18} />

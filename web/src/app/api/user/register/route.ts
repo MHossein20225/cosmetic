@@ -2,9 +2,11 @@ import { prisma } from "@/lib/prisma";
 import { userSchema } from "@/types";
 import bcrypt from "bcryptjs";
 import { consumeRateLimits, getClientIp, getNetworkKey, rateLimitResponse } from "@/lib/rateLimit";
+import { isSameOriginRequest } from "@/lib/csrf";
 
 export async function POST(req: Request) {
   try {
+    if (!isSameOriginRequest(req)) return Response.json({ error: "Invalid request" }, { status: 403 });
     const ip = getClientIp(req);
     const registrationLimit = await consumeRateLimits([
       { key: `register:ip:${ip}`, limit: 5, windowMs: 60 * 60 * 1000 },
@@ -12,7 +14,7 @@ export async function POST(req: Request) {
     ]);
     if (!registrationLimit.allowed) return rateLimitResponse(registrationLimit);
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
     const result = userSchema.safeParse(body);
 
     if (!result.success) {
@@ -27,9 +29,9 @@ export async function POST(req: Request) {
 
     const { name, email, password } = result.data;
 
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.user.findFirst({
       where: {
-        email,
+        email: { equals: email, mode: "insensitive" },
       },
       select: {
         email: true
@@ -60,7 +62,8 @@ export async function POST(req: Request) {
       { status: 201 },
     );
   } catch (error) {
-    console.error(error);
+    if (error && typeof error === "object" && "code" in error && error.code === "P2002") return Response.json({ error: "این ایمیل قبلاً ثبت شده است" }, { status: 409 });
+    console.error("Registration failed", error instanceof Error ? error.name : "Unknown error");
 
     return Response.json(
       {

@@ -2,6 +2,8 @@
 import { getCurrentUser } from "@/lib/session";
 import { orderSchema } from "@/types";
 import { authorizeMutation } from "@/lib/apiSecurity";
+import { getProductPrice } from "@/lib/pricing";
+import { runSerializable, TransactionConflictError } from "@/lib/transaction";
 
 class StockError extends Error {}
 
@@ -31,7 +33,7 @@ export async function POST(req: Request) {
     if (authorization.response) return authorization.response;
     const user = authorization.session.user;
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
 
     const result = orderSchema.safeParse(body);
 
@@ -50,7 +52,7 @@ export async function POST(req: Request) {
       address,
     } = result.data;
 
-    const order = await prisma.$transaction(async (tx) => {
+    const order = await runSerializable(async (tx) => {
       const cart = await tx.cart.findUnique({
         where: {
           userId: user.id,
@@ -79,9 +81,7 @@ export async function POST(req: Request) {
           throw new Error(`PRODUCT_NOT_FOUND:${item.productId}`);
         }
 
-        const unitPrice = Math.round(
-          product.price * (1 - product.discount / 100),
-        );
+        const unitPrice = getProductPrice(product);
 
         return {
           productId: product.id,
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
         };
       });
 
-      for (const item of orderItems) {
+      for (const item of [...orderItems].sort((a, b) => a.productId - b.productId)) {
         const updatedProduct = await tx.product.updateMany({
           where: {
             id: item.productId,
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
           )?.product;
 
           throw new StockError(
-            `Ù…ÙˆØ¬ÙˆØ¯ÛŒ ${product?.name ?? "Ù…Ø­ØµÙˆÙ„"} Ú©Ø§ÙÛŒ Ù†ÛŒØ³Øª`,
+            `موجودی ${product?.name ?? "محصول"} کافی نیست`,
           );
         }
       }
@@ -122,6 +122,7 @@ export async function POST(req: Request) {
           total + item.unitPrice * item.quantity,
         0,
       );
+      if (!Number.isSafeInteger(totalPrice) || totalPrice > 2147483647) throw new Error("TOTAL_TOO_LARGE");
 
       const deliveryTime = new Date(
         Date.now() + 1000 * 60 * 60 * 24 * 3,
@@ -158,12 +159,13 @@ export async function POST(req: Request) {
 
     return Response.json(
       {
-        message: "Ø³ÙØ§Ø±Ø´ Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø«Ø¨Øª Ø´Ø¯",
+        message: "سفارش با موفقیت ثبت شد",
         order,
       },
       { status: 201 },
     );
   } catch (error) {
+    if (error instanceof TransactionConflictError) return Response.json({ error: error.message }, { status: 409 });
     if (error instanceof StockError) {
       return Response.json(
         {
@@ -174,10 +176,11 @@ export async function POST(req: Request) {
     }
 
     if (error instanceof Error) {
+      if (error.message === "TOTAL_TOO_LARGE") return Response.json({ error: "Order total is too large" }, { status: 400 });
       if (error.message === "CART_NOT_FOUND") {
         return Response.json(
           {
-            error: "Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ù¾ÛŒØ¯Ø§ Ù†Ø´Ø¯",
+            error: "سبد خرید پیدا نشد",
           },
           { status: 404 },
         );
@@ -186,7 +189,7 @@ export async function POST(req: Request) {
       if (error.message === "CART_EMPTY") {
         return Response.json(
           {
-            error: "Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø®Ø§Ù„ÛŒ Ø§Ø³Øª",
+            error: "سبد خرید خالی است",
           },
           { status: 400 },
         );
@@ -197,7 +200,7 @@ export async function POST(req: Request) {
 
         return Response.json(
           {
-            error: `Ù…Ø­ØµÙˆÙ„ ${productId} Ù¾ÛŒØ¯Ø§ Ù†Ø´Ø¯`,
+            error: `محصول ${productId} پیدا نشد`,
           },
           { status: 404 },
         );
@@ -208,7 +211,7 @@ export async function POST(req: Request) {
 
     return Response.json(
       {
-        error: "Ø«Ø¨Øª Ø³ÙØ§Ø±Ø´ Ø§Ù†Ø¬Ø§Ù… Ù†Ø´Ø¯",
+        error: "ثبت سفارش انجام نشد",
       },
       { status: 500 },
     );

@@ -1,5 +1,6 @@
 'use client'
-import { useCallback, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Loading from "@/components/Loading";
 import ProductsView from "@/components/ProductsView";
@@ -7,9 +8,19 @@ import { useSearchProducts } from "@/hooks/productHooks";
 import type { ProductSort, SearchProductsParams } from "@/types";
 
 export default function Products() {
+  return <Suspense fallback={<Loading />}><ProductsFromUrl /></Suspense>;
+}
+
+function ProductsFromUrl() {
+  const searchParams = useSearchParams();
+  return <ProductsContent key={searchParams.toString()} initialSearch={searchParams.get("search") ?? ""} />;
+}
+
+function ProductsContent({ initialSearch }: { initialSearch: string }) {
   const [params, setParams] = useState<SearchProductsParams>({
     page: 1,
     limit: 12,
+    search: initialSearch,
   });
 
   const { products, result, isLoading, isFetching, isError } = useSearchProducts(params);
@@ -53,6 +64,7 @@ export default function Products() {
       products={products ?? []}
       result={result}
       sort={params.sort}
+      search={params.search}
       isFetching={isFetching}
       onParamsChange={handleParamsChange}
     />

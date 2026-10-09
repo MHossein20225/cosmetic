@@ -3,20 +3,15 @@ import { PrismaClient } from '../src/generated/prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // 0. Clear existing data (respect FK order) so the seed can be re-run
-  await prisma.product.deleteMany()
-  await prisma.category.deleteMany()
-
   // 1. Create categories
-  const skincare = await prisma.category.create({ data: { name: 'Skincare' } })
-  const makeup = await prisma.category.create({ data: { name: 'Makeup' } })
-  const haircare = await prisma.category.create({ data: { name: 'Haircare' } })
-  const fragrance = await prisma.category.create({ data: { name: 'Fragrance' } })
-  const skincareTools = await prisma.category.create({ data: { name: 'Tools & Accessories' } })
+  const skincare = await prisma.category.upsert({ where: { name: 'Skincare' }, update: {}, create: { name: 'Skincare' } })
+  const makeup = await prisma.category.upsert({ where: { name: 'Makeup' }, update: {}, create: { name: 'Makeup' } })
+  const haircare = await prisma.category.upsert({ where: { name: 'Haircare' }, update: {}, create: { name: 'Haircare' } })
+  const fragrance = await prisma.category.upsert({ where: { name: 'Fragrance' }, update: {}, create: { name: 'Fragrance' } })
+  const skincareTools = await prisma.category.upsert({ where: { name: 'Tools & Accessories' }, update: {}, create: { name: 'Tools & Accessories' } })
 
   // 2. Create products, linked to categories
-  await prisma.product.createMany({
-    data: [
+  const products = [
       // Skincare
       {
         name: 'Vitamin C Brightening Serum',
@@ -153,9 +148,12 @@ async function main() {
         categoryId: skincareTools.id
       }
     ]
-  })
+  for (const product of products) {
+    const existing = await prisma.product.findFirst({ where: { name: product.name, categoryId: product.categoryId } })
+    if (!existing) await prisma.product.create({ data: product })
+  }
 
-  console.log('✅ Seed data created: 5 categories, 14 products')
+  console.log('✅ Missing seed categories and products added; existing records preserved')
 }
 
 main()

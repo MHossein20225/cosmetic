@@ -13,6 +13,7 @@ export function useCategories(){
 export function useCategory(id: number | undefined){
     const { data, isLoading, isError, error } = useQuery<Category>({
         queryKey: ["category", id],
+        enabled: id !== undefined,
         queryFn: () => getCategory(id as number)
     })
     return { category: data, isLoading, isError, error };

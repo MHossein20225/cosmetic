@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminUsers, useAdminAuth } from "@/hooks/adminHooks";
-import { Users, Key, Loader2, LogOut } from "lucide-react";
+import { Key, Loader2 } from "lucide-react";
 
 export default function AdminUsersPage() {
   const router = useRouter();
   const { user: admin } = useAdminAuth();
-  const { users, isLoading, isError, error, refetch, updateUserRole, updateUserRoleAsync } = useAdminUsers();
+  const { users, isLoading, isError, error, updateUserRoleAsync } = useAdminUsers();
 
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [role, setRole] = useState<"CUSTOMER" | "ADMIN">("CUSTOMER");
@@ -20,7 +20,6 @@ export default function AdminUsersPage() {
     try {
       await updateUserRoleAsync({ id: selectingId, role });
       setSelectingId(null);
-      refetch();
     } catch {
       alert("تغییر نقش انجام نشد");
     } finally {
@@ -72,7 +71,7 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((u: any) => (
+                {users.map((u) => (
                   <tr key={u.id} className="border-b border-[#f0e6e4]">
                     <td className="py-3 px-2 font-medium">{u.name}</td>
                     <td className="py-3 px-2 text-[#85736f]">{u.email}</td>
@@ -134,7 +133,6 @@ export default function AdminUsersPage() {
                 type="button"
                 onClick={() => {
                   setRole("CUSTOMER");
-                  setSelectingId(null);
                 }}
                 className="flex-1 py-2 rounded-lg border border-[#e8dfdc] font-semibold"
               >
@@ -144,7 +142,6 @@ export default function AdminUsersPage() {
                 type="button"
                 onClick={() => {
                   setRole("ADMIN");
-                  setSelectingId(null);
                 }}
                 className="flex-1 py-2 rounded-lg bg-amber-800 text-white font-semibold hover:bg-amber-900"
               >
