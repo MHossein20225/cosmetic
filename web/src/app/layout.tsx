@@ -5,6 +5,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import QueryClientProvider from "@/app/QueryProvider";
 import { Toaster } from "sonner";
+import Script from "next/script";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,17 +28,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const session = await getSession();
-  // const user = session ? { id: session.user.id, name: session.user.name } : null;
   return (
-    <html lang="fa" dir="rtl" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="fa" dir="rtl" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="bg-rose-50/40 text-gray-900 antialiased min-h-screen flex flex-col selection:bg-rose-200 selection:text-gray-900">
+        <Script
+          id="theme-initialization"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
         <QueryClientProvider>
           <Header />
           {children}
           <Footer />
         </QueryClientProvider>
-        <Toaster position="top-left" />
+        <Toaster position="top-left" theme="light" />
       </body>
     </html>
   );

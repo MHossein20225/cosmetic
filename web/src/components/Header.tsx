@@ -19,6 +19,7 @@ import { formatToman, getProductPrice } from "@/lib/pricing";
 import { useAuthUser, useLogOut } from "@/hooks/userHooks";
 import { useCart } from "@/hooks/cartHooks";
 import { useSearchProducts } from "@/hooks/productHooks";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
   const router = useRouter();
@@ -192,6 +193,8 @@ export default function Header() {
 
         {/* Actions */}
         <div className="ml-auto flex shrink-0 items-center gap-3 sm:ml-0 sm:gap-4">
+          <ThemeToggle />
+
           {/* Cart */}
           <Link
             href="/cart"

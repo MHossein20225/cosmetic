@@ -3,6 +3,56 @@
 :root {
   --background: #fdf2f0;
   --foreground: #1f2937;
+  --surface: #ffffff;
+  --surface-raised: #fffdfc;
+  --surface-muted: #fff8f6;
+  --surface-subtle: #faf6f3;
+  --text-muted: #6f5d59;
+  --text-faint: #8a7772;
+  --border: #e8dfdc;
+  --border-soft: #f0e6e4;
+  --accent: #8b4e40;
+  --accent-strong: #58261b;
+  --accent-soft: #f8ebe7;
+  --focus: #c07862;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #171514;
+  --foreground: #f5efec;
+  --surface: #211e1d;
+  --surface-raised: #292523;
+  --surface-muted: #302927;
+  --surface-subtle: #272321;
+  --text-muted: #c1b2ad;
+  --text-faint: #a79792;
+  --border: #443a36;
+  --border-soft: #3a312e;
+  --accent: #e0a18d;
+  --accent-strong: #f0b49f;
+  --accent-soft: #3a2925;
+  --focus: #f0b49f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --background: #171514;
+    --foreground: #f5efec;
+    --surface: #211e1d;
+    --surface-raised: #292523;
+    --surface-muted: #302927;
+    --surface-subtle: #272321;
+    --text-muted: #c1b2ad;
+    --text-faint: #a79792;
+    --border: #443a36;
+    --border-soft: #3a312e;
+    --accent: #e0a18d;
+    --accent-strong: #f0b49f;
+    --accent-soft: #3a2925;
+    --focus: #f0b49f;
+  }
 }
 
 @theme inline {
@@ -16,6 +66,212 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Tahoma, Arial, var(--font-sans), sans-serif;
+}
+
+/* Existing screens use Tailwind color utilities; remap their palette centrally. */
+:root[data-theme="dark"] body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+:root[data-theme="dark"] :is(
+  [class~="bg-white"],
+  [class~="bg-white/80"],
+  [class~="bg-white/90"],
+  [class~="bg-white/95"]
+) {
+  background-color: var(--surface) !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="bg-rose-50"],
+  [class~="bg-rose-50/40"],
+  [class~="bg-rose-50/90"],
+  [class~="bg-rose-50/95"],
+  [class~="bg-[#fff8f6]"],
+  [class~="bg-[#faf6f3]"],
+  [class~="bg-[#faf9f7]"],
+  [class~="bg-[#fcf1ef]"],
+  [class~="bg-[#f7f3ef]"],
+  [class~="bg-[#f7f3ee]"],
+  [class~="bg-[#f0ece8]"],
+  [class~="bg-[#85736f]"],
+  [class~="bg-[#f0e6e4]"],
+  [class~="bg-[#e3cbc5]"],
+  [class~="bg-gray-100"],
+  [class~="bg-gray-300"]
+) {
+  background-color: var(--surface-muted) !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="bg-rose-100"],
+  [class~="bg-rose-200"]
+) {
+  background-color: var(--accent-soft) !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="bg-amber-800/5"],
+  [class~="bg-amber-800/10"],
+  [class~="bg-amber-800/15"]
+) {
+  background-color: color-mix(in srgb, var(--accent) 12%, transparent) !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="bg-amber-800"],
+  [class~="bg-amber-900"],
+  [class~="bg-rose-800"],
+  [class~="bg-rose-900"],
+  [class~="bg-[#8b4e40]"],
+  [class~="bg-[#58261b]"]
+) {
+  background-color: #985b4b !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="text-gray-900"],
+  [class~="text-gray-800"],
+  [class~="text-gray-700"],
+  [class~="text-black"],
+  [class~="text-[#1f1b1a]"]
+) {
+  color: var(--foreground) !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="text-gray-600"],
+  [class~="text-gray-500"],
+  [class~="text-gray-400"],
+  [class~="text-[#534340]"],
+  [class~="text-[#85736f]"]
+) {
+  color: var(--text-muted) !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="text-amber-900"],
+  [class~="text-amber-800"],
+  [class~="text-amber-700"],
+  [class~="text-[#8b4e40]"],
+  [class~="text-[#58261b]"]
+) {
+  color: var(--accent) !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="text-rose-700"],
+  [class~="text-rose-800"],
+  [class~="text-red-500"],
+  [class~="text-red-600"],
+  [class~="text-[#b44a4a]"]
+) {
+  color: #ff9292 !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="text-green-700"],
+  [class~="text-green-800"]
+) {
+  color: #8de0ae !important;
+}
+
+:root[data-theme="dark"] [class~="text-blue-800"] {
+  color: #9ac6ff !important;
+}
+
+:root[data-theme="dark"] [class~="text-yellow-800"] {
+  color: #f0cf83 !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="border-rose-100"],
+  [class~="border-rose-100/70"],
+  [class~="border-rose-100/80"],
+  [class~="border-rose-200"],
+  [class~="border-gray-100"],
+  [class~="border-gray-200"],
+  [class~="border-[#e8dfdc]"],
+  [class~="border-[#f0e6e4]"],
+  [class~="border-white/70"]
+) {
+  border-color: var(--border) !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="border-amber-700"],
+  [class~="border-amber-800"]
+) {
+  border-color: var(--focus) !important;
+}
+
+:root[data-theme="dark"] [class~="divide-gray-100"] > :not(:last-child),
+:root[data-theme="dark"] [class~="divide-[#e8dfdc]"] > :not(:last-child) {
+  border-color: var(--border-soft) !important;
+}
+
+:root[data-theme="dark"] [class~="hover:bg-rose-50"]:hover,
+:root[data-theme="dark"] [class~="hover:bg-gray-100"]:hover,
+:root[data-theme="dark"] [class~="hover:bg-white"]:hover {
+  background-color: var(--surface-muted) !important;
+}
+
+:root[data-theme="dark"] :is(
+  [class~="hover:text-amber-800"],
+  [class~="hover:text-amber-900"],
+  [class~="hover:text-[#58261b]"]
+):hover {
+  color: var(--accent) !important;
+}
+
+:root[data-theme="dark"] [class~="focus:border-amber-700"]:focus {
+  border-color: var(--focus) !important;
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select {
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select {
+  background-color: var(--surface) !important;
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+  color: var(--text-faint);
+}
+
+:root[data-theme="dark"] :focus-visible {
+  outline-color: var(--focus);
+}
+
+:root[data-theme="dark"] :is(
+  [class~="ring-amber-800"],
+  [class~="ring-amber-800/10"],
+  [class~="ring-amber-700"]
+) {
+  --tw-ring-color: var(--focus) !important;
+}
+
+:root[data-theme="dark"] [data-sonner-toast] {
+  background: var(--surface-raised) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+
+.theme-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.theme-menu[open] > summary {
+  background-color: var(--surface-muted);
 }
 
 input[type="email"],
