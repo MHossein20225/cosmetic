@@ -23,6 +23,7 @@ import { useCategoriedProducts, useProduct } from "@/hooks/productHooks";
 import { useAuthUser } from "@/hooks/userHooks";
 import { useAddToCart } from "@/hooks/cartHooks";
 import {
+  formatToman,
   getProductPrice,
   getStockLabel,
   hasDiscount,
@@ -78,13 +79,13 @@ export default function ProductPage({
   if (!Number.isInteger(productId) || productId <= 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-serif text-gray-900">Product not found</h1>
+        <h1 className="text-2xl font-serif text-gray-900">محصول پیدا نشد</h1>
 
         <Link
           href="/products"
           className="text-sm text-amber-800 hover:text-amber-900"
         >
-          Back to products
+        بازگشت به محصولات
         </Link>
       </div>
     );
@@ -93,7 +94,7 @@ export default function ProductPage({
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500 text-sm">Loading product...</div>
+        <div className="text-gray-500 text-sm">در حال بارگذاری محصول...</div>
       </div>
     );
   }
@@ -101,13 +102,13 @@ export default function ProductPage({
   if (error || !product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-serif text-gray-900">Product not found</h1>
+        <h1 className="text-2xl font-serif text-gray-900">محصول پیدا نشد</h1>
 
         <Link
           href="/products"
           className="text-sm text-amber-800 hover:text-amber-900"
         >
-          Back to products
+        بازگشت به محصولات
         </Link>
       </div>
     );
@@ -120,8 +121,8 @@ export default function ProductPage({
 
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-8 md:py-12">
-      <dialog ref={imageDialog} aria-label="Product image" className="m-auto bg-transparent p-6 backdrop:bg-black/80">
-        <button type="button" autoFocus aria-label="Close image" onClick={() => imageDialog.current?.close()} className="absolute top-2 right-2 text-white text-2xl">×</button>
+        <dialog ref={imageDialog} aria-label="تصویر محصول" className="m-auto bg-transparent p-6 backdrop:bg-black/80">
+        <button type="button" autoFocus aria-label="بستن تصویر" onClick={() => imageDialog.current?.close()} className="absolute top-2 end-2 text-white text-2xl">×</button>
         <div className="relative w-[min(90vw,48rem)] h-[80vh]">
           <Image src={product.imageUrl || "/images/nonProduct.jpg"} alt={product.name} fill sizes="90vw" className="object-contain" />
         </div>
@@ -129,7 +130,7 @@ export default function ProductPage({
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-gray-500 text-xs uppercase tracking-wider mb-6 flex-wrap">
         <Link href="/" className="hover:text-amber-800 transition-colors">
-          Home
+          خانه
         </Link>
         <ChevronRight size={12} />
         <Link
@@ -157,7 +158,7 @@ export default function ProductPage({
             />
 
             {/* Product label */}
-            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full">
+            <div className="absolute top-4 start-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full">
               <span className="text-xs uppercase tracking-widest text-amber-800">
                 {product.category.name}
               </span>
@@ -166,9 +167,9 @@ export default function ProductPage({
             {/* Zoom button */}
             <button
               type="button"
-              aria-label="Zoom image"
+                aria-label="بزرگ‌نمایی تصویر"
               onClick={() => imageDialog.current?.showModal()}
-              className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-white transition-all opacity-0 group-hover:opacity-100 shadow-sm"
+              className="absolute bottom-4 end-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-white transition-all opacity-0 group-hover:opacity-100 shadow-sm"
             >
               <Maximize2 size={18} />
             </button>
@@ -181,7 +182,7 @@ export default function ProductPage({
                 key={img.alt + i}
                 type="button"
                 onClick={() => setActiveImage(i)}
-                aria-label={`View image ${i + 1}`}
+                aria-label={`نمایش تصویر ${i + 1}`}
                 className={`relative aspect-square rounded overflow-hidden bg-rose-50 transition-all ${
                   activeImage === i
                     ? "ring-2 ring-amber-800"
@@ -209,7 +210,7 @@ export default function ProductPage({
               </span>
 
               <span className="text-xs text-gray-500 hidden sm:block">
-                Cold-pressed actives
+              ترکیبات فعال با عصاره‌گیری سرد
               </span>
             </div>
 
@@ -217,11 +218,11 @@ export default function ProductPage({
               <ShieldCheck size={20} className="text-amber-800" />
 
               <span className="text-[11px] sm:text-xs font-medium uppercase tracking-wider text-gray-900">
-                Dermatologist Tested
+              آزموده‌شده توسط متخصص پوست
               </span>
 
               <span className="text-xs text-gray-500 hidden sm:block">
-                Sensitive skin safe
+              مناسب پوست حساس
               </span>
             </div>
 
@@ -229,7 +230,7 @@ export default function ProductPage({
               <Recycle size={20} className="text-amber-800" />
 
               <span className="text-[11px] sm:text-xs font-medium uppercase tracking-wider text-gray-900">
-                Infinite Glass
+                شفافیت بی‌پایان
               </span>
 
               <span className="text-xs text-gray-500 hidden sm:block">
@@ -263,9 +264,9 @@ export default function ProductPage({
 
                 <a
                   href="#reviews"
-                  className="text-xs text-gray-500 hover:text-amber-800 transition-colors ml-1"
+                  className="text-xs text-gray-500 hover:text-amber-800 transition-colors ms-1"
                 >
-                  (124 reviews)
+                  (۱۲۴ دیدگاه)
                 </a>
               </div>
             </div>
@@ -276,16 +277,16 @@ export default function ProductPage({
 
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl text-gray-900">
-                ${getProductPrice(product).toFixed(2)}
+                {formatToman(getProductPrice(product))}
               </span>
 
               {discounted && (
                 <span className="text-base text-gray-400 line-through">
-                  ${product.price.toFixed(2)}
+                  {formatToman(product.price)}
                 </span>
               )}
 
-              <span className="text-xs text-gray-500">Tax included</span>
+              <span className="text-xs text-gray-500">شامل مالیات</span>
             </div>
           </div>
 
@@ -315,15 +316,15 @@ export default function ProductPage({
           {discounted && (
             <div className="flex items-center gap-2 flex-wrap">
               <span className="bg-rose-100 text-rose-800 px-3 py-1 rounded-full text-xs font-semibold">
-                {product.discount}% OFF
+                {product.discount.toLocaleString("fa-IR")}٪ تخفیف
               </span>
 
               <span className="text-sm text-gray-500">
-                You save ${(product.price - getProductPrice(product)).toFixed(2)}
+                شما {formatToman(product.price - getProductPrice(product))} صرفه‌جویی می‌کنید
               </span>
 
               <span className="text-sm text-gray-500">
-                Limited time offer
+                پیشنهاد محدود
               </span>
             </div>
           )}
@@ -331,7 +332,7 @@ export default function ProductPage({
           {/* Quantity */}
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wider text-gray-900">
-              Quantity
+                  تعداد
             </span>
 
             <div className="flex gap-2 sm:gap-3 items-center flex-wrap">
@@ -339,7 +340,7 @@ export default function ProductPage({
               <div className="flex items-center bg-rose-50 rounded p-1">
                 <button
                   type="button"
-                  aria-label="Decrease quantity"
+                  aria-label="کاهش تعداد"
                   disabled={quantity <= 1}
                   onClick={() => handleQtyChange(-1)}
                   className="w-9 h-9 rounded flex items-center justify-center text-gray-900 hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
@@ -353,7 +354,7 @@ export default function ProductPage({
 
                 <button
                   type="button"
-                  aria-label="Increase quantity"
+                  aria-label="افزایش تعداد"
                   disabled={outOfStock || quantity >= product.stock}
                   onClick={() => handleQtyChange(1)}
                   className="w-9 h-9 rounded flex items-center justify-center text-gray-900 hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
@@ -369,7 +370,7 @@ export default function ProductPage({
                   className="flex-1 min-w-[180px] py-3 px-4 rounded text-xs font-medium uppercase tracking-wider bg-gray-300 text-gray-600 transition-all flex items-center justify-center gap-2 cursor-not-allowed"
                 >
                   <ShoppingBag size={18} />
-                  Out of stock
+              ناموجود
                 </button>
               ) : user ? (
                 <button
@@ -385,18 +386,18 @@ export default function ProductPage({
                   {isPending ? "Adding..." : justAdded ? (
                     <>
                       <Check size={18} />
-                      Added to Bag
+                      به سبد خرید افزوده شد
                     </>
                   ) : (
                     <>
                       <ShoppingBag size={18} />
-                      Add to Bag — ${total.toFixed(2)}
+                      افزودن به سبد خرید — {formatToman(total)}
                     </>
                   )}
                 </button>
               ) : (
                   <Link href="/login" className="text-sm text-amber-800 hover:text-amber-900">
-                    Log in to add to bag
+                  برای افزودن به سبد خرید وارد شوید
                   </Link>
                 )}
             </div>
@@ -405,7 +406,7 @@ export default function ProductPage({
               <Leaf size={14} className="text-amber-800" />
 
               <span>
-                Complimentary signature organic samples with every order
+                نمونه‌های رایگان محصولات گیاهی منتخب، همراه هر سفارش
               </span>
             </div>
           </div>
@@ -416,10 +417,10 @@ export default function ProductPage({
             <div className="py-3 first:pt-0">
               <button
                 type="button"
-                className="w-full flex items-center justify-between text-left group"
+                className="w-full flex items-center justify-between text-right group"
               >
                 <span className="font-serif text-lg text-gray-900 group-hover:text-amber-800 transition-colors">
-                  Product Details
+                  مشخصات محصول
                 </span>
 
                 <ChevronDown size={18} className="text-gray-500" />
@@ -434,10 +435,10 @@ export default function ProductPage({
             <div className="py-3">
               <button
                 type="button"
-                className="w-full flex items-center justify-between text-left group"
+                className="w-full flex items-center justify-between text-right group"
               >
                 <span className="font-serif text-lg text-gray-900 group-hover:text-amber-800 transition-colors">
-                  The Daily Ritual
+                  آیین روزانه
                 </span>
 
                 <ChevronDown size={18} className="text-gray-500" />
@@ -453,10 +454,10 @@ export default function ProductPage({
             <div className="py-3 last:pb-0">
               <button
                 type="button"
-                className="w-full flex items-center justify-between text-left group"
+                className="w-full flex items-center justify-between text-right group"
               >
                 <span className="font-serif text-lg text-gray-900 group-hover:text-amber-800 transition-colors">
-                  Shipping & Returns
+                  ارسال و بازگشت کالا
                 </span>
 
                 <ChevronDown size={18} className="text-gray-500" />
@@ -478,11 +479,11 @@ export default function ProductPage({
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-2">
           <div>
             <span className="text-xs font-medium uppercase tracking-wider text-amber-800">
-              Harmonious Pairings
+                  ترکیب‌های هماهنگ
             </span>
 
             <h2 className="font-serif text-2xl sm:text-3xl text-gray-900 mt-1">
-              Complete the Radiance Ritual
+            آیین درخشش را کامل کنید
             </h2>
           </div>
 
@@ -490,7 +491,7 @@ export default function ProductPage({
             href="/products"
             className="text-xs font-medium uppercase tracking-wider text-amber-800 hover:text-amber-900 transition-colors inline-flex items-center gap-1"
           >
-            Explore All Products
+            مشاهده همه محصولات
             <ArrowRight size={14} />
           </Link>
         </div>
@@ -522,7 +523,7 @@ export default function ProductPage({
               </h3>
 
               <span className="text-base font-semibold text-gray-900 mt-auto">
-                ${getProductPrice(product).toFixed(2)}
+                {formatToman(getProductPrice(product))}
               </span>
             </Link>
           ))}

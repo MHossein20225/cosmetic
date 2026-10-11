@@ -16,12 +16,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (user.role !== "ADMIN") redirect("/");
   return (
     <div className="min-h-screen bg-[#f7f3ef] text-[#1f1b1a]">
-      <aside className="lg:fixed left-0 top-0 lg:h-screen w-full lg:w-64 bg-white border-r border-[#e8dfdc] p-5 flex flex-col gap-6">
+      <aside className="lg:fixed start-0 top-0 lg:h-screen w-full lg:w-64 bg-white border-e border-[#e8dfdc] p-5 flex flex-col gap-6">
         <div className="flex items-center gap-3 px-2">
           <div className="w-9 h-9 rounded-lg bg-amber-800 text-white flex items-center justify-center">
             <ShoppingCart size={18} />
           </div>
-          <span className="font-serif text-xl font-bold">Store Admin</span>
+          <span className="font-serif text-xl font-bold">مدیریت فروشگاه</span>
         </div>
 
         <nav className="flex flex-col gap-2 flex-1">
@@ -48,7 +48,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
       </aside>
 
-      <main className="lg:ml-64 min-h-screen bg-[#f7f3ef] p-4 sm:p-6">
+      <main className="lg:me-64 min-h-screen bg-[#f7f3ef] p-4 sm:p-6">
         <div className="max-w-6xl mx-auto">
           {children}
         </div>

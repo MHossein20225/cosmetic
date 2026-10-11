@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ShoppingCart, Package, Users, TrendingUp } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/apiSecurity";
+import { formatToman } from "@/lib/pricing";
 
 export default async function AdminDashboard() {
   const authorization = await requireRole("ADMIN");
@@ -78,7 +79,7 @@ export default async function AdminDashboard() {
             <span className="text-sm font-medium text-[#85736f]">درآمد</span>
           </div>
           <p className="font-serif text-3xl font-bold text-[#8b4e40]">
-            {totalRevenue.toLocaleString()} تومان
+            {formatToman(totalRevenue)}
           </p>
         </div>
       </div>
@@ -129,7 +130,7 @@ export default async function AdminDashboard() {
                         {order.recipientName} · {new Date(order.createdAt).toLocaleDateString("fa-IR")}
                       </p>
                     </div>
-                    <span className="font-semibold">{order.totalPrice.toLocaleString()} تومان</span>
+                    <span className="font-semibold">{formatToman(order.totalPrice)}</span>
                   </li>
                 ))}
               </ul>

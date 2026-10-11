@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { isSameOriginRequest, validateCsrfToken } from "../src/lib/csrf";
 import { getClientIp, getNetworkKey } from "../src/lib/rateLimit";
@@ -22,19 +23,84 @@ test("cross-site authentication requests are rejected", () => {
   assert.equal(isSameOriginRequest(new Request("https://shop.example/api/user/login", { headers: { "sec-fetch-site": "cross-site" } })), false);
 });
 
-test("IP headers require explicit proxy trust and IPv6 networks are normalized", () => {
+test("untrusted forwarding headers are ignored without explicit proxy trust", () => {
   const previous = process.env.TRUST_PROXY;
   const previousHeader = process.env.RATE_LIMIT_IP_HEADER;
-  delete process.env.TRUST_PROXY;
-  delete process.env.RATE_LIMIT_IP_HEADER;
-  const request = new Request("https://shop.example", { headers: { "x-forwarded-for": "1.2.3.4, 5.6.7.8" } });
-  assert.equal(getClientIp(request), "unknown");
-  process.env.TRUST_PROXY = "true";
-  assert.equal(getClientIp(request), "5.6.7.8");
-  assert.equal(getNetworkKey("2001:db8::1"), getNetworkKey("2001:0db8:0:0:0:0:0:2"));
-  assert.equal(getNetworkKey("5.6.7.8"), "5.6.7.0/24");
-  if (previous === undefined) delete process.env.TRUST_PROXY; else process.env.TRUST_PROXY = previous;
-  if (previousHeader === undefined) delete process.env.RATE_LIMIT_IP_HEADER; else process.env.RATE_LIMIT_IP_HEADER = previousHeader;
+  try {
+    delete process.env.TRUST_PROXY;
+    delete process.env.RATE_LIMIT_IP_HEADER;
+    const spoofed = new Request("https://shop.example", {
+      headers: { "x-forwarded-for": "198.51.100.10", "x-real-ip": "203.0.113.20" },
+    });
+    assert.equal(getClientIp(spoofed), "unknown");
+  } finally {
+    if (previous === undefined) delete process.env.TRUST_PROXY; else process.env.TRUST_PROXY = previous;
+    if (previousHeader === undefined) delete process.env.RATE_LIMIT_IP_HEADER; else process.env.RATE_LIMIT_IP_HEADER = previousHeader;
+  }
+});
+
+test("missing or invalid trusted-proxy values fail closed", () => {
+  const previous = process.env.TRUST_PROXY;
+  const previousHeader = process.env.RATE_LIMIT_IP_HEADER;
+  try {
+    process.env.TRUST_PROXY = "yes";
+    process.env.RATE_LIMIT_IP_HEADER = "x-forwarded-for";
+    assert.equal(getClientIp(new Request("https://shop.example", {
+      headers: { "x-forwarded-for": "198.51.100.10" },
+    })), "unknown");
+
+    process.env.TRUST_PROXY = "true";
+    assert.equal(getClientIp(new Request("https://shop.example", {
+      headers: { "x-forwarded-for": "not-an-ip" },
+    })), "unknown");
+
+    process.env.RATE_LIMIT_IP_HEADER = "x-verified-client-ip";
+    assert.equal(getClientIp(new Request("https://shop.example", {
+      headers: { "x-forwarded-for": "198.51.100.10" },
+    })), "unknown");
+  } finally {
+    if (previous === undefined) delete process.env.TRUST_PROXY; else process.env.TRUST_PROXY = previous;
+    if (previousHeader === undefined) delete process.env.RATE_LIMIT_IP_HEADER; else process.env.RATE_LIMIT_IP_HEADER = previousHeader;
+  }
+});
+
+test("Compose exposes only the proxy and the proxy overwrites the IP header", () => {
+  const compose = readFileSync("docker-compose.yml", "utf8");
+  const proxyConfig = readFileSync("nginx/default.conf", "utf8");
+  const dbService = compose.match(/  db:\n([\s\S]*?)(?=\n  [a-z][a-z0-9_-]*:\n|\nnetworks:)/)?.[1] ?? "";
+  const webService = compose.match(/  web:\n([\s\S]*?)(?=\n  [a-z][a-z0-9_-]*:\n|\nnetworks:)/)?.[1] ?? "";
+
+  assert.match(dbService, /127\.0\.0\.1:5432:5432/);
+  assert.match(webService, /expose:\n\s+- "3000"/);
+  assert.doesNotMatch(webService, /ports:/);
+  assert.match(webService, /TRUST_PROXY: "true"/);
+  assert.match(webService, /RATE_LIMIT_IP_HEADER: "x-forwarded-for"/);
+  assert.match(proxyConfig, /proxy_set_header X-Forwarded-For \$remote_addr;/);
+  assert.doesNotMatch(proxyConfig, /proxy_add_x_forwarded_for/);
+});
+
+test("configured trusted proxy addresses resolve independently and IPv6 networks normalize", () => {
+  const previous = process.env.TRUST_PROXY;
+  const previousHeader = process.env.RATE_LIMIT_IP_HEADER;
+  try {
+    process.env.TRUST_PROXY = "true";
+    process.env.RATE_LIMIT_IP_HEADER = "x-forwarded-for";
+    const first = new Request("https://shop.example", { headers: { "x-forwarded-for": "198.51.100.10" } });
+    const second = new Request("https://shop.example", { headers: { "x-forwarded-for": "203.0.113.20" } });
+    const firstIp = getClientIp(first);
+    const secondIp = getClientIp(second);
+    assert.equal(firstIp, "198.51.100.10");
+    assert.equal(secondIp, "203.0.113.20");
+    assert.notEqual(`product-search:ip:${firstIp}`, `product-search:ip:${secondIp}`);
+    assert.equal(getClientIp(new Request("https://shop.example", {
+      headers: { "x-forwarded-for": "198.51.100.99, 198.51.100.10" },
+    })), "198.51.100.10");
+    assert.equal(getNetworkKey("2001:db8::1"), getNetworkKey("2001:0db8:0:0:0:0:0:2"));
+    assert.equal(getNetworkKey("5.6.7.8"), "5.6.7.0/24");
+  } finally {
+    if (previous === undefined) delete process.env.TRUST_PROXY; else process.env.TRUST_PROXY = previous;
+    if (previousHeader === undefined) delete process.env.RATE_LIMIT_IP_HEADER; else process.env.RATE_LIMIT_IP_HEADER = previousHeader;
+  }
 });
 
 test("integer pricing and authoritative validation agree", () => {

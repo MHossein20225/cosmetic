@@ -43,14 +43,14 @@ export default function CategoriedProduct({ params }: CategoriedProductProps) {
         </h1>
 
         <p className="text-sm text-gray-500 max-w-md">
-          Something went wrong while fetching this category. Please try again.
+          هنگام دریافت این دسته‌بندی خطایی رخ داد. لطفاً دوباره تلاش کنید.
         </p>
 
         <Link
           href="/products"
           className="text-sm text-amber-800 hover:text-amber-900"
         >
-          Browse all products
+          مشاهده همه محصولات
         </Link>
       </div>
     );
@@ -58,12 +58,12 @@ export default function CategoriedProduct({ params }: CategoriedProductProps) {
 
   return (
     <ProductsView
-      title={`${category} Products`}
+      title={category}
       products={products ?? []}
       result={result}
       sort={searchParams.sort}
       search={searchParams.search}
-      description={`${category} Products`}
+      description={`محصولات دسته‌بندی ${category}`}
       categoryLabel={category}
       isFetching={isFetching}
       onParamsChange={handleParamsChange}

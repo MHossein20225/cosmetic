@@ -10,6 +10,7 @@ import { useAuthUser } from "@/hooks/userHooks";
 import Loading from "@/components/Loading";
 
 import { toast } from "sonner";
+import { formatToman } from "@/lib/pricing";
 
 export default function Checkout() {
   const router = useRouter();
@@ -54,7 +55,7 @@ export default function Checkout() {
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-6 sm:mb-8 gap-2">
           <div className="flex items-baseline gap-3">
             <h1 className="font-serif text-3xl sm:text-4xl text-[#1f1b1a]">
-              Checkout
+              تکمیل سفارش
             </h1>
             <span className="font-sans text-sm text-[#534340] italic">
               {count}
@@ -71,11 +72,11 @@ export default function Checkout() {
 
         {/* Steps */}
         <ol className="flex items-center gap-2 sm:gap-4 mb-8 font-sans text-[11px] font-semibold uppercase tracking-wider">
-          <li className="text-[#8b4e40]">Bag</li>
+          <li className="text-[#8b4e40]">سبد خرید</li>
           <li className="h-px w-6 sm:w-10 bg-[#e3cbc5]" />
-          <li className="text-[#1f1b1a]">Address</li>
+          <li className="text-[#1f1b1a]">نشانی</li>
           <li className="h-px w-6 sm:w-10 bg-[#e3cbc5]" />
-          <li className="text-[#85736f]">Payment</li>
+          <li className="text-[#85736f]">پرداخت</li>
         </ol>
 
         {/* Main Grid */}
@@ -94,7 +95,7 @@ export default function Checkout() {
                 </span>
 
                 <h2 className="font-serif text-xl text-[#1f1b1a]">
-                  Shipping Address
+                  نشانی ارسال
                 </h2>
               </div>
 
@@ -118,7 +119,7 @@ export default function Checkout() {
 
                   <textarea
                     className="bg-[#fcf1ef] px-4 py-2.5 text-[#1f1b1a] font-sans text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#8b4e40] placeholder:text-[#85736f] min-h-24 resize-y"
-                    placeholder="Street, building, unit number"
+                    placeholder="خیابان، پلاک، واحد"
                     name="address"
                   />
                 </label>
@@ -132,6 +133,8 @@ export default function Checkout() {
                     className="bg-[#fcf1ef] px-4 py-2.5 text-[#1f1b1a] font-sans text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#8b4e40] placeholder:text-[#85736f]"
                     placeholder="09xxxxxxxxx"
                     type="text"
+                    dir="ltr"
+                    inputMode="tel"
                     name="phoneNumber"
                   />
                 </label>
@@ -146,7 +149,7 @@ export default function Checkout() {
                 </span>
 
                 <h2 className="font-serif text-xl text-[#1f1b1a]">
-                  Payment Method
+                  روش پرداخت
                 </h2>
               </div>
 
@@ -198,10 +201,10 @@ export default function Checkout() {
             <div className="bg-white p-5 sm:p-6 rounded-xl shadow-md flex flex-col gap-5">
               <div className="flex items-center justify-between">
                 <h2 className="font-serif text-xl text-[#1f1b1a]">
-                  Your Order
+                  سفارش شما
                 </h2>
                 <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#85736f]">
-                  USD
+                  تومان
                 </span>
               </div>
 
@@ -210,7 +213,7 @@ export default function Checkout() {
                   .سبد شما خالی است
                 </p>
               ) : (
-                <div className="flex flex-col gap-3 max-h-72 overflow-y-auto pr-1">
+                <div className="flex flex-col gap-3 max-h-72 overflow-y-auto pe-1">
                   {items.length &&
                     items.map((item: CartItem) => (
                       <div
@@ -227,7 +230,7 @@ export default function Checkout() {
                             className="object-cover"
                           />
 
-                          <span className="absolute top-0 right-0 bg-[#8b4e40] text-white text-[10px] w-5 h-5 rounded-bl-lg flex items-center justify-center">
+                          <span className="absolute top-0 end-0 bg-[#8b4e40] text-white text-[10px] w-5 h-5 rounded-bl-lg flex items-center justify-center">
                             {item.quantity}
                           </span>
                         </div>
@@ -238,12 +241,12 @@ export default function Checkout() {
                           </h3>
 
                           <p className="font-sans text-xs text-[#85736f]">
-                            {item.product.price.toFixed(2)}
+                            {formatToman(item.unitPrice)}
                           </p>
                         </div>
 
                         <span className="font-sans text-sm font-semibold text-[#1f1b1a]">
-                          {(item.unitPrice * item.quantity).toFixed(2)}
+                          {formatToman(item.unitPrice * item.quantity)}
                         </span>
                       </div>
                     ))}
@@ -254,16 +257,16 @@ export default function Checkout() {
 
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center font-sans text-sm text-[#534340]">
-                  <span>Subtotal</span>
+                  <span>جمع جزء</span>
                   <span className="font-sans text-sm font-semibold text-[#1f1b1a]">
-                    {subtotal}
+                    {formatToman(subtotal)}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center font-sans text-sm text-[#534340]">
-                  <span>Shipping</span>
+                  <span>هزینه ارسال</span>
                   <span className="font-sans text-sm font-semibold text-green-700">
-                    Free
+                    رایگان
                   </span>
                 </div>
               </div>
@@ -273,7 +276,7 @@ export default function Checkout() {
               <div className="flex justify-between items-baseline">
                 <span className="font-serif text-xl text-[#1f1b1a]">قیمت کل</span>
                 <span className="font-serif text-2xl text-[#1f1b1a]">
-                  {subtotal}
+                  {formatToman(subtotal)}
                 </span>
               </div>
 
@@ -283,7 +286,7 @@ export default function Checkout() {
                 form="submitOrder"
                 disabled={isPending || items.length === 0}
               >
-                {isPending ? "صبر کنید" : "ثبت سفارش"}
+                {isPending ? "در حال ثبت..." : "ثبت سفارش"}
                 <span className="material-symbols-outlined text-base">
                   <Check />
                 </span>
@@ -294,10 +297,10 @@ export default function Checkout() {
                   <span className="material-symbols-outlined text-xs">
                     lock
                   </span>
-                  256-Bit Encrypted
+                  پرداخت امن
                 </span>
-                <span>â€¢</span>
-                <span>Secure Checkout</span>
+                <span>•</span>
+                <span>ثبت سفارش امن</span>
               </div>
             </div>
           </div>

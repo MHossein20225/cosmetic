@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useOrder } from "@/hooks/orderHooks"
 import { useAuthUser } from "@/hooks/userHooks"
 import { ArrowLeft, Check } from "lucide-react"
+import { formatToman } from "@/lib/pricing"
 
 const STATUS_LABELS: Record<string, string> = {
   QUEUE: "در صف",
@@ -166,10 +167,10 @@ export default function OrderDetail() {
                     </div>
                     <div className="text-right">
                       <p className="font-sans text-sm text-[#1f1b1a]">
-                        ${(item.unitPrice * item.quantity).toFixed(2)}
+                        {formatToman(item.unitPrice * item.quantity)}
                       </p>
                       <p className="text-xs text-[#85736f]">
-                        واحد: ${item.unitPrice.toFixed(2)}
+                        هر عدد: {formatToman(item.unitPrice)}
                       </p>
                     </div>
                   </div>
@@ -183,7 +184,7 @@ export default function OrderDetail() {
                   مجموع
                 </span>
                 <span className="font-serif text-2xl text-[#1f1b1a]">
-                  {order.totalPrice.toLocaleString()} تومان
+                  {formatToman(order.totalPrice)}
                 </span>
               </div>
             </div>
@@ -193,7 +194,7 @@ export default function OrderDetail() {
                 href="/orders"
                 className="flex-1 bg-rose-800 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-rose-900 transition-colors text-center"
               >
-                <Check size={18} className="inline mr-2" />
+                <Check size={18} className="inline me-2" />
                 بستن
               </Link>
             </div>

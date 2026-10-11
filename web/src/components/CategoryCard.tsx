@@ -14,7 +14,7 @@ export default function CategoryCard({ category }: { category: Category }) {
           </h3>
         </div>
         <div className="pt-6 mt-4 flex items-center gap-1 text-xs font-medium uppercase tracking-[0.15em] text-amber-800 group-hover:gap-2 transition-all">
-          <span>Discover</span>
+          <span>مشاهده محصولات</span>
           <ArrowUpRight size={14} />
         </div>
       </div>

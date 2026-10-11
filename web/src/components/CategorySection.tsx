@@ -22,14 +22,14 @@ export default function CategorySection() {
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-3 border-b border-gray-200">
         <div>
           <span className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500 block mb-1">
-            Curation
+            گزیده‌ای برای شما
           </span>
           <h2 className="font-serif text-3xl text-gray-900">
-            Categories of Practice
+            دسته‌بندی محصولات
           </h2>
         </div>
         <p className="text-sm text-gray-500 mt-2 md:mt-0">
-          4 Core Rituals · 48 Minimal Essentials
+          چهار دسته اصلی · ۴۸ محصول منتخب
         </p>
       </div>
 

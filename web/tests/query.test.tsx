@@ -5,6 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAdminProducts, useAdminOrders } from "../src/hooks/adminHooks";
 import { useCreateOrder } from "../src/hooks/orderHooks";
 import { clearCsrfTokenCache } from "../src/lib/apiFetch";
+import { formatToman } from "../src/lib/pricing";
+
+test("toman formatting uses Persian digits and the shared currency unit", () => {
+  assert.equal(formatToman(1234), "۱٬۲۳۴ تومان");
+  assert.equal(formatToman(1234.4), "۱٬۲۳۴ تومان");
+});
 
 test("admin mutations and checkout invalidate the existing query keys", async () => {
   const client = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false }, mutations: { retry: false } } });

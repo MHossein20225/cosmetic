@@ -79,7 +79,7 @@ export default function Register() {
   return (
     <div className="mx-auto flex w-full max-w-[1360px] flex-col items-center px-4 py-16 sm:px-6 md:py-24">
       <h1 className="mb-8 font-serif text-3xl text-gray-900">
-        Create Your Account
+        ساخت حساب کاربری
       </h1>
 
       <form
@@ -93,7 +93,7 @@ export default function Register() {
             htmlFor="name"
             className="text-xs font-medium uppercase tracking-wider text-gray-700"
           >
-            Name
+            نام
           </label>
 
           <input
@@ -122,7 +122,7 @@ export default function Register() {
             htmlFor="email"
             className="text-xs font-medium uppercase tracking-wider text-gray-700"
           >
-            Email
+            ایمیل
           </label>
 
           <input
@@ -151,7 +151,7 @@ export default function Register() {
             htmlFor="password"
             className="text-xs font-medium uppercase tracking-wider text-gray-700"
           >
-            Password
+            رمز عبور
           </label>
 
           <input
@@ -180,16 +180,16 @@ export default function Register() {
           disabled={isPending}
           className="w-full rounded bg-amber-800 py-3 text-xs font-medium uppercase tracking-wider text-white transition-colors hover:bg-amber-900 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isPending ? "Creating account..." : "Create Account"}
+          {isPending ? "در حال ساخت حساب..." : "ساخت حساب کاربری"}
         </button>
 
         <p className="text-center text-sm text-gray-500">
-          Already have an account?{" "}
+          از قبل حساب کاربری دارید؟{" "}
           <Link
             href="/login"
             className="text-amber-800 hover:underline"
           >
-            Log in
+            ورود
           </Link>
         </p>
       </form>

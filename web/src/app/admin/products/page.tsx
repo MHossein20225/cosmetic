@@ -6,6 +6,7 @@ import { useAdminProducts } from "@/hooks/adminHooks";
 import { useCategories } from "@/hooks/categoryHooks";
 import { productSchema, ProductWithCategory } from "@/types";
 import { Plus, Loader2 } from "lucide-react";
+import { formatToman } from "@/lib/pricing";
 import { toast } from "sonner";
 
 export default function AdminProductsPage() {
@@ -184,13 +185,13 @@ export default function AdminProductsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[#e8dfdc]">
-                    <th className="text-left py-3 px-2 font-semibold text-[#85736f]">نام</th>
-                    <th className="text-left py-3 px-2 font-semibold text-[#85736f]">دسته‌بندی</th>
-                    <th className="text-left py-3 px-2 font-semibold text-[#85736f]">قیمت</th>
-                    <th className="text-left py-3 px-2 font-semibold text-[#85736f]">تخفیف</th>
-                    <th className="text-left py-3 px-2 font-semibold text-[#85736f]">موجودی</th>
-                    <th className="text-left py-3 px-2 font-semibold text-[#85736f]">تاریخ</th>
-                    <th className="text-left py-3 px-2 font-semibold text-[#85736f]">عملیات</th>
+                    <th className="text-right py-3 px-2 font-semibold text-[#85736f]">نام</th>
+                    <th className="text-right py-3 px-2 font-semibold text-[#85736f]">دسته‌بندی</th>
+                    <th className="text-right py-3 px-2 font-semibold text-[#85736f]">قیمت</th>
+                    <th className="text-right py-3 px-2 font-semibold text-[#85736f]">تخفیف</th>
+                    <th className="text-right py-3 px-2 font-semibold text-[#85736f]">موجودی</th>
+                    <th className="text-right py-3 px-2 font-semibold text-[#85736f]">تاریخ</th>
+                    <th className="text-right py-3 px-2 font-semibold text-[#85736f]">عملیات</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -198,12 +199,12 @@ export default function AdminProductsPage() {
                     <tr key={product.id} className="border-b border-[#f0e6e4]">
                       <td className="py-3 px-2 font-medium">{product.name}</td>
                       <td className="py-3 px-2 text-[#85736f]">{product.category?.name}</td>
-                      <td className="py-3 px-2">{product.price} تومان</td>
+                    <td className="py-3 px-2">{formatToman(product.price)}</td>
                       <td className="py-3 px-2 text-[#85736f]">{product.discount}%</td>
                       <td className="py-3 px-2">{product.stock}</td>
                       <td className="py-3 px-2 text-[#85736f]">{new Date(product.createdAt).toLocaleDateString("fa-IR")}</td>
                       <td className="py-3 px-2">
-                        <button type="button" onClick={() => editProduct(product)} disabled={saving} className="text-amber-800 mr-3 disabled:opacity-50">ویرایش</button>
+                        <button type="button" onClick={() => editProduct(product)} disabled={saving} className="me-3 text-amber-800 disabled:opacity-50">ویرایش</button>
                         <button type="button" onClick={() => handleDelete(product.id)} disabled={saving} className="text-red-600 disabled:opacity-50">حذف</button>
                       </td>
                     </tr>

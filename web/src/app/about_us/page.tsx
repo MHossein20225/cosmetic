@@ -14,22 +14,21 @@ export default function AboutUs() {
             className="inline-flex items-center gap-2 text-sm font-medium text-[#85736f] hover:text-[#534340] transition-colors mb-4"
           >
             <Flower size={16} />
-            Back to home
+            بازگشت به صفحه اصلی
           </Link>
 
           <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber-800 mb-3">
             <Leaf size={14} />
-            About us
+            درباره ما
           </span>
 
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-[#1f1b1a] tracking-tight">
-            Intentional beauty,
-            <span className="text-[#8b4e40]"> intentional rituals.</span>
+            زیبایی آگاهانه،
+            <span className="text-[#8b4e40]"> آیین‌های روزمره.</span>
           </h1>
 
           <p className="mt-5 max-w-2xl text-lg text-[#534340] leading-relaxed mx-auto">
-            We believe cosmetics should nourish the skin as much as they
-            adorn it. Every formula is cold-pressed, plant-powered, and
+            باور داریم محصولات آرایشی باید همان‌قدر که زیبایی می‌آفرینند، از پوست نیز مراقبت کنند. فرمول‌های ما با ترکیبات گیاهی و
             designed in small batches — so you get the full ritual, not just
             the product.
           </p>
@@ -38,9 +37,9 @@ export default function AboutUs() {
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 mb-14">
           {[
-            { value: "120+", label: "Organic botanicals" },
-            { value: "50k", label: "Rituals started" },
-            { value: "30+", label: "Categories" },
+            { value: "۱۲۰+", label: "ترکیب گیاهی" },
+            { value: "۵۰هزار", label: "آیین روزانه" },
+            { value: "۳۰+", label: "دسته محصول" },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -61,13 +60,13 @@ export default function AboutUs() {
           {[
             {
               icon: Sparkles,
-              title: "Clean by design",
-              body: "Every formula is free from parabens, sulfates, and synthetic fragrances. We source only what the skin truly needs.",
+              title: "فرمولاسیون پاک",
+              body: "فرمول‌های ما بدون پارابن، سولفات و رایحه مصنوعی هستند و تنها از ترکیبات مورد نیاز پوست بهره می‌برند.",
             },
             {
               icon: Leaf,
-              title: "Botanical first",
-              body: "Cold-pressed actives and pressed botanicals deliver visible ritual results without compromising the skin barrier.",
+              title: "با تکیه بر گیاهان",
+              body: "ترکیبات فعال و عصاره‌های گیاهی به مراقبت مؤثر از پوست کمک می‌کنند و به سد دفاعی آن احترام می‌گذارند.",
             },
           ].map((item) => (
             <div
@@ -96,7 +95,7 @@ export default function AboutUs() {
             className="inline-flex items-center gap-2 bg-amber-800 text-white px-7 py-3.5 rounded-xl font-sans text-sm font-semibold uppercase tracking-wider hover:bg-amber-900 transition-all shadow-sm"
           >
             <Flower size={18} />
-            Explore the collection
+             مشاهده محصولات
           </Link>
         </div>
       </div>

@@ -63,11 +63,11 @@ export default function AdminUsersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#e8dfdc]">
-                  <th className="text-left py-3 px-2 font-semibold text-[#85736f]">نام</th>
-                  <th className="text-left py-3 px-2 font-semibold text-[#85736f]">ایمیل</th>
-                  <th className="text-left py-3 px-2 font-semibold text-[#85736f]">نقش</th>
-                  <th className="text-left py-3 px-2 font-semibold text-[#85736f]">تاریخ ثبت</th>
-                  <th className="text-left py-3 px-2 font-semibold text-[#85736f]">عملیات</th>
+                  <th className="text-right py-3 px-2 font-semibold text-[#85736f]">نام</th>
+                  <th className="text-right py-3 px-2 font-semibold text-[#85736f]">ایمیل</th>
+                  <th className="text-right py-3 px-2 font-semibold text-[#85736f]">نقش</th>
+                  <th className="text-right py-3 px-2 font-semibold text-[#85736f]">تاریخ ثبت</th>
+                  <th className="text-right py-3 px-2 font-semibold text-[#85736f]">عملیات</th>
                 </tr>
               </thead>
               <tbody>

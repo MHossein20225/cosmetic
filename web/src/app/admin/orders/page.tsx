@@ -38,13 +38,13 @@ export default function AdminOrdersPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[#e8dfdc]">
-              <th className="text-left py-3 px-2 font-semibold text-[#85736f]">شماره سفارش</th>
-              <th className="text-left py-3 px-2 font-semibold text-[#85736f]">مشتری</th>
-              <th className="text-left py-3 px-2 font-semibold text-[#85736f]">آدرس</th>
-              <th className="text-left py-3 px-2 font-semibold text-[#85736f]">مجموع</th>
-              <th className="text-left py-3 px-2 font-semibold text-[#85736f]">وضعیت</th>
-              <th className="text-left py-3 px-2 font-semibold text-[#85736f]">جزئیات</th>
-              <th className="text-left py-3 px-2 font-semibold text-[#85736f]">عملیات</th>
+              <th className="text-right py-3 px-2 font-semibold text-[#85736f]">شماره سفارش</th>
+              <th className="text-right py-3 px-2 font-semibold text-[#85736f]">مشتری</th>
+              <th className="text-right py-3 px-2 font-semibold text-[#85736f]">آدرس</th>
+              <th className="text-right py-3 px-2 font-semibold text-[#85736f]">مجموع</th>
+              <th className="text-right py-3 px-2 font-semibold text-[#85736f]">وضعیت</th>
+              <th className="text-right py-3 px-2 font-semibold text-[#85736f]">جزئیات</th>
+              <th className="text-right py-3 px-2 font-semibold text-[#85736f]">عملیات</th>
             </tr>
           </thead>
           <tbody>

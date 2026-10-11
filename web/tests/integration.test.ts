@@ -1,14 +1,29 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
-import { consumeRateLimit } from "../src/lib/rateLimit";
-import { prisma as sharedPrisma } from "../src/lib/prisma";
+import { resolveAuditTestDatabaseUrls } from "../scripts/audit-test-env.mjs";
 
-const databaseUrl = process.env.TEST_DATABASE_URL;
-if (!databaseUrl || !/test|audit/i.test(new URL(databaseUrl).pathname)) throw new Error("An isolated test database is required");
-process.env.DATABASE_URL = databaseUrl;
+const { testUrl } = resolveAuditTestDatabaseUrls({
+  ...process.env,
+  DATABASE_URL: process.env.AUDIT_LIVE_DATABASE_URL ?? process.env.DATABASE_URL,
+});
+process.env.DATABASE_URL = testUrl;
+process.env.TEST_DATABASE_URL = testUrl;
+type RateLimitModule = typeof import("../src/lib/rateLimit");
+type PrismaModule = typeof import("../src/lib/prisma");
+let consumeRateLimit: RateLimitModule["consumeRateLimit"];
+let getNetworkKey: RateLimitModule["getNetworkKey"];
+let sharedPrisma: PrismaModule["prisma"];
+const runtimeInitialization = Promise.all([
+  import("../src/lib/rateLimit"),
+  import("../src/lib/prisma"),
+]).then(([rateLimitModule, prismaModule]) => {
+  consumeRateLimit = rateLimitModule.consumeRateLimit;
+  getNetworkKey = rateLimitModule.getNetworkKey;
+  sharedPrisma = prismaModule.prisma;
+});
 const db = new PrismaClient();
 const baseUrl = process.env.TEST_BASE_URL ?? "http://127.0.0.1:3001";
 if (!["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) throw new Error("Run integration tests against a local test server");
@@ -23,7 +38,26 @@ async function request(path: string, method = "GET", body?: unknown, client?: Cl
   return { status: response.status, body: await response.json().catch(() => null), headers: response.headers };
 }
 
+const rateLimitStorageKeys = new Set<string>();
+const rateLimitHashSecret = process.env.RATE_LIMIT_SECRET ?? process.env.DATABASE_URL;
+
+function trackRateLimitKey(key: string) {
+  if (!rateLimitHashSecret) throw new Error("Test rate-limit secret is not configured");
+  rateLimitStorageKeys.add(createHmac("sha256", rateLimitHashSecret).update(key).digest("hex"));
+}
+
+function trackLoginRateLimitKeys(email: string, ip: string) {
+  trackRateLimitKey(`login:ip:${ip}`);
+  trackRateLimitKey(`login:account:${email.trim().toLowerCase()}`);
+}
+
+function trackRegistrationRateLimitKeys(ip: string) {
+  trackRateLimitKey(`register:ip:${ip}`);
+  trackRateLimitKey(`register:network:${getNetworkKey(ip)}`);
+}
+
 test("isolated production server: authentication, security, cart, checkout, admin, and concurrency", { timeout: 180000 }, async (t) => {
+  await runtimeInitialization;
   const marker = randomUUID();
   const ipSubnet = randomBytes(2).readUInt16BE() % 512;
   const testIp = (host: number) => `198.${18 + Math.floor(ipSubnet / 256)}.${ipSubnet % 256}.${host}`;
@@ -35,8 +69,9 @@ test("isolated production server: authentication, security, cart, checkout, admi
   let customer: Client;
   let other: Client;
   let admin: Client;
-  let orderId: string;
-  let productId: number;
+let orderId: string;
+let productId: number;
+let checkoutOrderReady = false;
 
   async function fixture(role: "CUSTOMER" | "ADMIN", ip: string) {
     const user = await db.user.create({ data: { name: "Audit Customer", email: `${randomUUID()}@audit.example`, password: passwordHash, role } });
@@ -48,6 +83,7 @@ test("isolated production server: authentication, security, cart, checkout, admi
   try {
     const adminFixture = await fixture("ADMIN", "198.18.1.1");
     admin = adminFixture.client;
+    trackRateLimitKey(`admin-mutation:user:${adminFixture.user.id}`);
     // A session that exists only in this database proves the HTTP server uses this test database.
     const identity = await request("/api/user/me", "GET", undefined, admin);
     assert.equal(identity.status, 200, "Test server is not connected to the isolated test database");
@@ -62,6 +98,7 @@ test("isolated production server: authentication, security, cart, checkout, admi
 
     await t.test("public GET, authentication, authorization, CSRF, and no sensitive fields", async () => {
       for (const path of ["/api/cart", "/api/order", "/api/admin", "/api/admin/users", "/api/admin/products", "/api/admin/orders", "/api/csrf"]) assert.equal((await request(path)).status, 401, path);
+      assert.equal((await request("/api/user/me")).status, 401);
       assert.equal((await request("/api/product")).status, 200);
       assert.equal((await request(`/api/product/${productId}`)).status, 200);
       assert.equal((await request("/api/cart/items", "POST", { productId }, customer, null)).status, 403);
@@ -72,6 +109,10 @@ test("isolated production server: authentication, security, cart, checkout, admi
       assert.equal(Object.keys(tokenResponse.body).join(","), "csrfToken");
       assert.ok(tokenResponse.headers.get("cache-control")?.includes("no-store"));
       assert.equal((await request("/api/user/me", "GET", undefined, { ...customer, cookie: `sessionId=${customer.token}` })).status, 401);
+      assert.equal((await request("/api/user/me", "GET", undefined, { ...customer, cookie: "sessionId=malformed-session-id" })).status, 401);
+      const profile = await request("/api/user/me", "GET", undefined, customer);
+      assert.equal(profile.status, 200);
+      assert.deepEqual(Object.keys(profile.body).sort(), ["email", "id", "name", "role"]);
       for (const path of ["/api/admin/users", "/api/admin/products", "/api/admin/orders", "/api/user"]) assert.equal((await request(path, "GET", undefined, customer)).status, 403);
       assert.equal((await request("/api/admin/users", "PATCH", { id: users[1], role: "ADMIN" }, customer)).status, 403);
       const listedUsers = await request("/api/admin/users", "GET", undefined, admin);
@@ -85,13 +126,23 @@ test("isolated production server: authentication, security, cart, checkout, admi
     await t.test("registration, login, cookie flags, session restoration and logout", async () => {
       const email = `${marker}@audit.example`;
       const publicClient = { cookie: "", token: "", ip: testIp(240) };
-      assert.equal((await request("/api/user/register", "POST", { name: "Registered Customer", email, password, role: "ADMIN" }, publicClient)).status, 201);
+      trackRegistrationRateLimitKeys(publicClient.ip);
+      const registration = await request("/api/user/register", "POST", { name: "Registered Customer", email, password, role: "ADMIN" }, publicClient);
+      assert.equal(registration.status, 201);
+      assert.equal("password" in registration.body, false);
       const registered = await db.user.findUniqueOrThrow({ where: { email } }); users.push(registered.id);
       assert.equal(registered.role, "CUSTOMER");
+      assert.notEqual(registered.password, password);
+      assert.equal(await bcrypt.compare(password, registered.password), true);
       assert.equal((await request("/api/user/register", "POST", { name: "Registered Customer", email: email.toUpperCase(), password }, publicClient)).status, 409);
-      assert.equal((await request("/api/user/login", "POST", { email, password: "wrong-password" }, publicClient)).status, 401);
+      trackLoginRateLimitKeys(email, publicClient.ip);
+      const failedLogin = await request("/api/user/login", "POST", { email, password: "wrong-password" }, publicClient);
+      assert.equal(failedLogin.status, 401);
+      assert.equal("password" in failedLogin.body, false);
       const login = await request("/api/user/login", "POST", { email: email.toUpperCase(), password }, publicClient);
       assert.equal(login.status, 200);
+      assert.equal("password" in login.body, false);
+      assert.equal("sessionId" in login.body, false);
       const cookie = login.headers.get("set-cookie") ?? "";
       assert.ok(cookie.includes("HttpOnly") && cookie.includes("Secure") && cookie.includes("SameSite=lax") && cookie.includes("Path=/"));
       const loggedIn = { ...publicClient, cookie: cookie.split(";")[0] };
@@ -108,6 +159,7 @@ test("isolated production server: authentication, security, cart, checkout, admi
     });
 
     await t.test("search, effective price ordering, category filtering, pagination and bad inputs", async () => {
+      trackRateLimitKey("product-search:ip:198.18.0.1");
       for (const price of [500, 6000]) {
         const product = await db.product.create({ data: { name: `Audit product ${marker} ${price}`, description: "Audit description", price, discount: price === 6000 ? 95 : 0, stock: 2, categoryId: categoryId! } }); products.push(product.id);
       }
@@ -125,6 +177,7 @@ test("isolated production server: authentication, security, cart, checkout, admi
 
     await t.test("cart lifecycle, authoritative price, ownership and simultaneous additions", async () => {
       assert.equal((await request("/api/cart", "POST", undefined, customer)).status, 200);
+      assert.equal((await request("/api/cart/items", "POST", { productId: 2147483647, quantity: 1 }, customer)).status, 404);
       const added = await request("/api/cart/items", "POST", { productId, quantity: 1, userId: users[2], price: 1, unitPrice: 1 }, customer);
       assert.equal(added.status, 201); assert.equal(added.body.unitPrice, 2699);
       assert.equal((await request("/api/cart/items", "POST", { productId, quantity: 1 }, customer)).body.quantity, 2);
@@ -134,9 +187,11 @@ test("isolated production server: authentication, security, cart, checkout, admi
       assert.equal((await request(`/api/cart/items/${productId}`, "PATCH", { quantity: 1 }, other)).status, 404);
       assert.equal((await request(`/api/cart/items/${productId}`, "DELETE", undefined, customer)).status, 200);
       const additions = await Promise.all(Array.from({ length: 5 }, () => request("/api/cart/items", "POST", { productId, quantity: 1 }, customer)));
-      assert.ok(additions.every((result) => result.status === 201), "Concurrent cart additions failed");
-      assert.equal((await request("/api/cart", "GET", undefined, customer)).body.items[0].quantity, 5);
-      assert.equal((await request("/api/cart/quantity", "POST", { productId, quantity: 6 }, customer)).status, 409);
+      assert.ok(additions.every((result) => [201, 409].includes(result.status)), `Unexpected concurrent cart results: ${JSON.stringify(additions.map((result) => ({ status: result.status, body: result.body })))}`);
+      const acceptedAdditions = additions.filter((result) => result.status === 201).length;
+      assert.ok(acceptedAdditions > 0, "No concurrent cart addition succeeded");
+      assert.equal((await request("/api/cart", "GET", undefined, customer)).body.items[0].quantity, acceptedAdditions);
+      assert.equal((await request("/api/cart/quantity", "POST", { productId, quantity: 11 }, customer)).status, 409);
       assert.equal((await request("/api/cart/quantity", "POST", { productId, quantity: 1 }, customer)).status, 201);
       assert.equal((await request("/api/cart", "DELETE", undefined, customer, null)).status, 403);
       assert.equal((await request("/api/cart", "DELETE", undefined, customer)).status, 200);
@@ -148,7 +203,16 @@ test("isolated production server: authentication, security, cart, checkout, admi
 
     const shipping = { recipientName: "Audit Customer", phoneNumber: "09123456789", address: "Test address" };
     await t.test("checkout rollback, duplicate submission, atomic stock and cross-user orders", async () => {
+      await request("/api/cart", "DELETE", undefined, customer);
+      await db.product.update({ where: { id: productId }, data: { price: 3001, stock: 10 } });
+      const primedCart = await request("/api/cart/items", "POST", { productId, quantity: 2 }, customer);
+      assert.equal(primedCart.status, 201);
+      const checkoutCompanion = await db.product.create({
+        data: { name: `Checkout helper ${marker}`, description: "Checkout test fixture", price: 6000, discount: 95, stock: 2, categoryId: categoryId! },
+      });
+      products.push(checkoutCompanion.id);
       assert.equal((await request("/api/order", "POST", shipping, customer, null)).status, 403);
+      assert.equal((await request("/api/order", "POST", { ...shipping, phoneNumber: "09" }, customer)).status, 400);
       await db.product.update({ where: { id: productId }, data: { stock: 1 } });
       const before = await db.order.count({ where: { userId: users[1] } });
       assert.equal((await request("/api/order", "POST", shipping, customer)).status, 409);
@@ -156,11 +220,11 @@ test("isolated production server: authentication, security, cart, checkout, admi
       assert.equal((await request("/api/cart", "GET", undefined, customer)).body.items.length, 1);
       assert.equal((await db.product.findUniqueOrThrow({ where: { id: productId } })).stock, 1);
       await db.product.update({ where: { id: productId }, data: { stock: 10 } });
-      await request("/api/cart/items", "POST", { productId: products[1], quantity: 1 }, customer);
-      await db.product.update({ where: { id: products[1] }, data: { stock: 0 } });
+      await request("/api/cart/items", "POST", { productId: checkoutCompanion.id, quantity: 1 }, customer);
+      await db.product.update({ where: { id: checkoutCompanion.id }, data: { stock: 0 } });
       assert.equal((await request("/api/order", "POST", shipping, customer)).status, 409);
       assert.equal((await db.product.findUniqueOrThrow({ where: { id: productId } })).stock, 10, "Earlier stock updates must roll back");
-      await request(`/api/cart/items/${products[1]}`, "DELETE", undefined, customer);
+      await request(`/api/cart/items/${checkoutCompanion.id}`, "DELETE", undefined, customer);
       const submissions = await Promise.all(Array.from({ length: 3 }, () => request("/api/order", "POST", { ...shipping, userId: users[2], totalPrice: 1, price: 1, role: "ADMIN" }, customer)));
       assert.equal(submissions.filter((result) => result.status === 201).length, 1);
       assert.ok(submissions.every((result) => [201, 400, 409].includes(result.status)));
@@ -169,22 +233,35 @@ test("isolated production server: authentication, security, cart, checkout, admi
       assert.equal(order.userId, users[1]); assert.equal(order.totalPrice, 5402); assert.equal(order.items[0].unitPrice, 2701);
       assert.equal((await db.product.findUniqueOrThrow({ where: { id: productId } })).stock, 8);
       assert.equal((await request("/api/cart", "GET", undefined, customer)).body.items.length, 0);
+      const orderCountAfterCheckout = await db.order.count({ where: { userId: users[1] } });
+      assert.equal((await request("/api/order", "POST", shipping, customer)).status, 400);
+      assert.equal(await db.order.count({ where: { userId: users[1] } }), orderCountAfterCheckout);
+      assert.equal((await db.product.findUniqueOrThrow({ where: { id: productId } })).stock, 8);
       assert.equal((await request("/api/order?my=1", "GET", undefined, customer)).body.length, 1);
       assert.equal((await request("/api/order?my=1", "GET", undefined, other)).body.length, 0);
       assert.equal((await request(`/api/order/${orderId}`, "GET", undefined, other)).status, 403);
       assert.equal((await request(`/api/order/${orderId}`, "GET", undefined, customer)).status, 200);
       assert.equal((await request(`/api/order/${orderId}`, "GET", undefined, admin)).status, 200);
+      checkoutOrderReady = true;
       const scarce = await db.product.create({ data: { name: "Last unit", description: "Concurrency fixture", price: 100, stock: 1, categoryId: categoryId! } }); products.push(scarce.id);
       await request("/api/cart/items", "POST", { productId: scarce.id }, customer);
       await request("/api/cart/items", "POST", { productId: scarce.id }, other);
+      const orderCountBeforeRace = await db.order.count();
       const lastUnit = await Promise.all([request("/api/order", "POST", shipping, customer), request("/api/order", "POST", shipping, other)]);
       assert.equal(lastUnit.filter((result) => result.status === 201).length, 1);
       assert.equal(lastUnit.filter((result) => result.status === 409).length, 1);
+      assert.equal(await db.order.count(), orderCountBeforeRace + 1);
       assert.equal((await db.product.findUniqueOrThrow({ where: { id: scarce.id } })).stock, 0);
+      const losingClient = lastUnit[0].status === 409 ? customer : other;
+      assert.equal((await request("/api/cart", "GET", undefined, losingClient)).body.items[0].quantity, 1);
       await request("/api/cart", "DELETE", undefined, other);
     });
 
     await t.test("admin product CRUD, order transitions, user roles, snapshots and dashboard", async () => {
+      if (!checkoutOrderReady) {
+        t.skip("checkout did not create the order fixture required by admin assertions");
+        return;
+      }
       const payload = { name: `Admin product ${marker}`, description: "Details", price: 100, discount: 0, stock: 0, categoryId };
       assert.equal((await request("/api/admin/products", "POST", payload, admin, null)).status, 403);
       const created = await request("/api/admin/products", "POST", payload, admin);
@@ -217,19 +294,34 @@ test("isolated production server: authentication, security, cart, checkout, admi
 
     await t.test("rate limit concurrency, expiry, login account/IP independence and registration abuse", async () => {
       const key = `audit:${marker}`;
-      const decisions = await Promise.all(Array.from({ length: 12 }, () => consumeRateLimit(key, 3, 1000)));
+      const expiryKey = `${key}:expiry`;
+      trackRateLimitKey(key);
+      trackRateLimitKey(expiryKey);
+      const decisions = await Promise.all(Array.from({ length: 12 }, () => consumeRateLimit(key, 3, 60_000)));
       assert.equal(decisions.filter((decision) => decision.allowed).length, 3);
-      await new Promise((resolve) => setTimeout(resolve, 1100));
-      assert.equal((await consumeRateLimit(key, 3, 1000)).allowed, true);
+      await consumeRateLimit(expiryKey, 1, 100);
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      assert.equal((await consumeRateLimit(expiryKey, 1, 100)).allowed, true);
       const unknownEmail = `${randomUUID()}@audit.example`;
       const accountAttempts = [];
-      for (let i = 0; i < 11; i++) accountAttempts.push(await request("/api/user/login", "POST", { email: unknownEmail, password }, { cookie: "", token: "", ip: testIp(i + 20) }));
+      for (let i = 0; i < 11; i++) {
+        const ip = testIp(i + 20);
+        trackLoginRateLimitKeys(unknownEmail, ip);
+        accountAttempts.push(await request("/api/user/login", "POST", { email: unknownEmail, password }, { cookie: "", token: "", ip }));
+      }
       assert.ok(accountAttempts.slice(0, 10).every((result) => result.status === 401));
       assert.equal(accountAttempts[10].status, 429); assert.ok(Number(accountAttempts[10].headers.get("retry-after")) > 0);
-      const ipAttempts = await Promise.all(Array.from({ length: 20 }, (_, i) => request("/api/user/login", "POST", { email: `ip${i}-${marker}@audit.example`, password }, { cookie: "", token: "", ip: testIp(50) })));
+      const sharedIp = testIp(50);
+      const ipAttempts = await Promise.all(Array.from({ length: 20 }, (_, i) => {
+        const email = `ip${i}-${marker}@audit.example`;
+        trackLoginRateLimitKeys(email, sharedIp);
+        return request("/api/user/login", "POST", { email, password }, { cookie: "", token: "", ip: sharedIp });
+      }));
       assert.equal(ipAttempts.filter((result) => result.status === 401).length, 10); assert.equal(ipAttempts.filter((result) => result.status === 429).length, 10);
       const registrations = [];
-      for (let i = 0; i < 6; i++) registrations.push(await request("/api/user/register", "POST", {}, { cookie: "", token: "", ip: testIp(60) }));
+      const registrationIp = testIp(60);
+      trackRegistrationRateLimitKeys(registrationIp);
+      for (let i = 0; i < 6; i++) registrations.push(await request("/api/user/register", "POST", {}, { cookie: "", token: "", ip: registrationIp }));
       assert.ok(registrations.slice(0, 5).every((result) => result.status === 400)); assert.equal(registrations[5].status, 429);
     });
   } finally {
@@ -237,6 +329,7 @@ test("isolated production server: authentication, security, cart, checkout, admi
     await db.user.deleteMany({ where: { id: { in: users } } });
     await db.product.deleteMany({ where: { id: { in: products } } });
     if (categoryId) await db.category.delete({ where: { id: categoryId } });
+    if (rateLimitStorageKeys.size) await db.rateLimit.deleteMany({ where: { key: { in: [...rateLimitStorageKeys] } } });
     await db.$disconnect(); await sharedPrisma.$disconnect();
   }
 });

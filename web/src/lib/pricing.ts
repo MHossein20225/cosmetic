@@ -13,16 +13,20 @@ export function getProductPrice(product: {
   return getDiscountedPrice(product.price, product.discount);
 }
 
+export function formatToman(amount: number) {
+  return `${Math.round(amount).toLocaleString("fa-IR")} تومان`;
+}
+
 export function getStockLabel(stock: number) {
   if (stock <= 0) {
-    return "Out of stock";
+    return "ناموجود";
   }
 
   if (stock <= 5) {
-    return `Only ${stock} left`;
+    return `تنها ${stock.toLocaleString("fa-IR")} عدد باقی‌مانده`;
   }
 
-  return "In stock";
+  return "موجود";
 }
 
 export function isOutOfStock(stock: number) {

@@ -1,10 +1,10 @@
 import type { NavLink, Brand, CartItem } from "@/types";
 
 export const NAV_LINKS: NavLink[] = [
-  { label: "Home", href: "/" },
-  { label: "Shop", href: "/products" },
-  { label: "Brands", href: "/brands" },
-  { label: "About us", href: "/about_us" },
+  { label: "خانه", href: "/" },
+  { label: "فروشگاه", href: "/products" },
+  { label: "برندها", href: "/brands" },
+  { label: "درباره ما", href: "/about_us" },
 ];
 
 export const CART_ITEMS: CartItem[] = [

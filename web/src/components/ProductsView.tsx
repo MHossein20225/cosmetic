@@ -18,12 +18,12 @@ interface ProductsViewProps {
 }
 
 const SORT_OPTIONS: { value: ProductSort; label: string }[] = [
-  { value: "featured", label: "Featured" },
-  { value: "newest", label: "Newest" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "discount-desc", label: "Biggest Discount" },
-  { value: "name-asc", label: "Name: A to Z" },
+  { value: "featured", label: "منتخب" },
+  { value: "newest", label: "جدیدترین" },
+  { value: "price-asc", label: "قیمت: از کم به زیاد" },
+  { value: "price-desc", label: "قیمت: از زیاد به کم" },
+  { value: "discount-desc", label: "بیشترین تخفیف" },
+  { value: "name-asc", label: "نام: الف تا ی" },
 ];
 
 export default function ProductsView({
@@ -45,14 +45,14 @@ export default function ProductsView({
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-8 md:py-12">
       <nav className="flex items-center gap-1 text-gray-500 text-xs uppercase tracking-wider mb-6 flex-wrap">
         <Link href="/" className="hover:text-amber-800 transition-colors">
-          Home
+          خانه
         </Link>
         <ChevronRight size={12} />
         <Link
           href="/products"
           className="hover:text-amber-800 transition-colors"
         >
-          Shop
+          فروشگاه
         </Link>
         {categoryLabel && (
           <>
@@ -81,8 +81,8 @@ export default function ProductsView({
           <input
             value={search}
             onChange={(event) => onParamsChange({ search: event.target.value, page: 1 })}
-            placeholder="Search products"
-            aria-label="Search products"
+            placeholder="جست‌وجوی محصولات"
+            aria-label="جست‌وجوی محصولات"
             className="w-full bg-white pl-11 pr-10 py-2.5 text-sm text-gray-900 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-amber-800"
             type="search"
           />
@@ -90,7 +90,7 @@ export default function ProductsView({
           {search && (
             <button
               type="button"
-              aria-label="Clear search"
+              aria-label="پاک کردن جست‌وجو"
               onClick={() => onParamsChange({ search: "", page: 1 })}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-800 transition-colors"
             >
@@ -107,7 +107,7 @@ export default function ProductsView({
               page: 1,
             })
           }
-          aria-label="Sort products"
+          aria-label="مرتب‌سازی محصولات"
           className="bg-white px-4 py-2.5 text-sm text-gray-900 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-amber-800"
         >
           {SORT_OPTIONS.map((option) => (
@@ -119,14 +119,14 @@ export default function ProductsView({
       </div>
 
       <p className="text-sm text-gray-500 mb-6">
-        {total} {total === 1 ? "product" : "products"}
-        {search && ` matching "${search}"`}
-        {isFetching && <span className="ml-2 text-gray-400">updating...</span>}
+        {total.toLocaleString("fa-IR")} محصول
+        {search && ` برای «${search}»`}
+        {isFetching && <span className="ms-2 text-gray-400">در حال به‌روزرسانی…</span>}
       </p>
 
       {products.length === 0 ? (
         <p className="text-gray-500 text-sm py-12 text-center">
-          No products found.
+          محصولی پیدا نشد.
         </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -140,7 +140,7 @@ export default function ProductsView({
         <div className="flex items-center justify-center gap-2 mt-10">
           <button
             type="button"
-            aria-label="Previous page"
+            aria-label="صفحه قبل"
             disabled={page <= 1}
             onClick={() => onParamsChange({ page: page - 1 })}
             className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:border-amber-800 hover:text-amber-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-700"
@@ -166,7 +166,7 @@ export default function ProductsView({
 
           <button
             type="button"
-            aria-label="Next page"
+            aria-label="صفحه بعد"
             disabled={page >= totalPages}
             onClick={() => onParamsChange({ page: page + 1 })}
             className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:border-amber-800 hover:text-amber-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-700"

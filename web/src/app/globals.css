@@ -8,12 +8,19 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: Tahoma, Arial, var(--font-geist-sans), sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: Tahoma, Arial, var(--font-sans), sans-serif;
+}
+
+input[type="email"],
+input[type="tel"],
+input[type="url"] {
+  direction: ltr;
+  text-align: left;
 }

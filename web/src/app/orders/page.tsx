@@ -6,6 +6,7 @@ import { useMyOrders } from "@/hooks/orderHooks"
 import { useAuthUser } from "@/hooks/userHooks"
 import type { Order, OrderItem } from "@/types"
 import { Check, ArrowRight, Clock, MapPin, Package } from "lucide-react"
+import { formatToman } from "@/lib/pricing"
 
 export default function Orders() {
   const { user, isLoading: userLoading } = useAuthUser()
@@ -59,7 +60,7 @@ export default function Orders() {
           href="/cart"
           className="text-sm text-amber-800 hover:text-amber-900"
         >
-          <Check size={16} className="inline mr-1" />
+          <Check size={16} className="inline me-1" />
           سبد خرید
         </Link>
       </div>
@@ -126,7 +127,7 @@ export default function Orders() {
                       </p>
                       <div className="flex items-center gap-4">
                         <span className="font-semibold text-[#1f1b1a]">
-                          {order.totalPrice.toLocaleString()} تومان
+                          {formatToman(order.totalPrice)}
                         </span>
                         {selectedOrder === order.id && (
                           <Link
@@ -263,7 +264,7 @@ export default function Orders() {
                               </p>
                             </div>
                             <span className="font-sans text-sm font-semibold text-[#1f1b1a]">
-                              ${(item.unitPrice * item.quantity).toFixed(2)}
+                              {formatToman(item.unitPrice * item.quantity)}
                             </span>
                           </div>
                         ))}
@@ -276,7 +277,7 @@ export default function Orders() {
                           مجموع
                         </span>
                         <span className="font-serif text-2xl text-[#1f1b1a]">
-                          {order.totalPrice.toLocaleString()} تومان
+                          {formatToman(order.totalPrice)}
                         </span>
                       </div>
                     </div>

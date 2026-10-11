@@ -20,18 +20,17 @@ export default function HeroSection() {
         {/* Content */}
         <div className="relative z-10 mx-auto w-full max-w-5xl text-center text-white">
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.3em] sm:text-sm">
-            Botanical Formulation &amp; Intent
+            فرمولاسیون گیاهی با نگاهی هدفمند
           </p>
 
           <h1 className="mx-auto max-w-4xl font-serif text-4xl leading-[1.05] sm:text-5xl md:text-6xl lg:text-7xl">
-            Pure Rituals,
+            آیین‌های ناب،
             <br />
-            <span className="italic">Quiet Luxury.</span>
+            <span className="italic">زیباییِ آرام.</span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-white/90 sm:text-base sm:leading-8">
-            Discover carefully formulated beauty essentials designed around
-            thoughtful ingredients, refined textures, and everyday rituals.
+            محصولات مراقبت و زیبایی با فرمول‌های سنجیده، ترکیبات منتخب و بافتی دلپذیر؛ برای آیین‌های روزمره شما.
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -39,14 +38,14 @@ export default function HeroSection() {
               href="/products"
               className="w-full rounded-full bg-white px-7 py-3 text-sm font-medium text-black transition-all duration-300 hover:bg-black hover:text-white sm:w-auto"
             >
-              Explore Collection
+              مشاهده محصولات
             </Link>
 
             <Link
               href="/about_us"
               className="w-full rounded-full border border-white/70 px-7 py-3 text-sm font-medium text-white backdrop-blur-sm transition-all duration-300 hover:bg-white hover:text-black sm:w-auto"
             >
-              Our Philosophy
+              داستان ما
             </Link>
           </div>
         </div>

@@ -164,6 +164,6 @@ export const productSchema = z.object({
     } catch {
       return false;
     }
-  }, "Use a local image path or an allowed HTTPS image URL").nullable().optional(),
+  }, "از مسیر تصویر محلی یا نشانی HTTPS مجاز استفاده کنید").nullable().optional(),
   categoryId: z.number().int().positive().max(2147483647),
 }).strict();

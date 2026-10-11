@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   getProductPrice,
+  formatToman,
   getStockLabel,
   hasDiscount,
   isOutOfStock,
@@ -31,16 +32,16 @@ export default function ProductCard({
             }`}
           />
 
-          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col items-start gap-1.5">
+          <div className="absolute top-2 start-2 sm:top-3 sm:start-3 flex flex-col items-start gap-1.5">
             {discounted && (
               <span className="bg-amber-800 text-white text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-full">
-                -{product.discount}%
+                {product.discount.toLocaleString("fa-IR")}٪ تخفیف
               </span>
             )}
 
             {outOfStock && (
               <span className="bg-gray-900 text-white text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-full">
-                Out of stock
+                ناموجود
               </span>
             )}
           </div>
@@ -56,11 +57,10 @@ export default function ProductCard({
             </p>
             <div className="flex items-center justify-between mt-2">
               <span className="font-sans text-base sm:text-lg font-semibold text-[#1f1b1a]">
-                <span className="text-[#85736f]">$</span>
-                {getProductPrice(product).toFixed(2)}
+                {formatToman(getProductPrice(product))}
                 {discounted && (
-                  <span className="text-xs font-normal text-[#85736f] line-through ml-2">
-                    {product.price.toFixed(2)}
+                  <span className="ms-2 text-xs font-normal text-[#85736f] line-through">
+                    {formatToman(product.price)}
                   </span>
                 )}
               </span>

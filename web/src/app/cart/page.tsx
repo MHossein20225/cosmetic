@@ -7,6 +7,7 @@ import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/cartHooks
 import type { CartItem } from "@/types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { formatToman } from "@/lib/pricing";
 
 
 
@@ -27,19 +28,19 @@ export default function Cart() {
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-6 sm:mb-8 gap-2">
           <div className="flex items-baseline gap-3">
             <h1 className="font-serif text-3xl sm:text-4xl text-[#1f1b1a]">
-              Your Bag
+              سبد خرید
             </h1>
             <span className="font-sans text-sm text-[#534340] italic">
-              ({count} {count === 1 ? "item" : "items"})
+              ({count.toLocaleString("fa-IR")} کالا)
             </span>
           </div>
           <Link
             className="font-sans text-xs font-semibold uppercase tracking-wider text-[#8b4e40] hover:text-[#58261b] transition-colors flex items-center gap-1.5"
             href="/products"
-            aria-label="Continue browsing"
+            aria-label="ادامه خرید"
           >
             <ChevronLeft size={14} />
-            Continue browsing
+            ادامه خرید
           </Link>
         </div>
 
@@ -53,10 +54,10 @@ export default function Cart() {
                   <ShoppingBag size={22} className="text-rose-400" />
                 </div>
                 <h2 className="mt-4 font-serif text-lg text-[#1f1b1a]">
-                  Your bag is empty
+                  سبد خرید شما خالی است
                 </h2>
                 <p className="mt-1 text-sm text-[#534340]">
-                  Add a few products to see them here.
+                  چند محصول به سبد خرید خود اضافه کنید.
                 </p>
               </div>
             ) : (
@@ -89,7 +90,7 @@ export default function Cart() {
                       </p>
                     </div>
                     <button
-                      aria-label={`Remove ${item.product.name}`}
+                      aria-label={`حذف ${item.product.name}`}
                       onClick={() => removeCartItemMutate(item.product.id, { onError: (error) => toast.error(error.message) })}
                       disabled={updating || removing}
                       className="text-[#85736f] hover:text-[#b44a4a] transition-colors p-1 rounded shrink-0"
@@ -101,7 +102,7 @@ export default function Cart() {
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#f0e6e4]">
                     <div className="flex items-center bg-[#fcf1ef] rounded-lg p-1">
                       <button
-                        aria-label="Decrease quantity"
+                        aria-label="کاهش تعداد"
                         disabled={item.quantity <= 1 || updating || removing}
                         onClick={() =>
                           updateCartItemMutate({
@@ -118,7 +119,7 @@ export default function Cart() {
                         {item.quantity}
                       </span>
                       <button
-                        aria-label="Increase quantity"
+                        aria-label="افزایش تعداد"
                         disabled={item.quantity >= item.product.stock || updating || removing}
                         onClick={() =>
                           updateCartItemMutate({
@@ -133,7 +134,7 @@ export default function Cart() {
                       </button>
                     </div>
                     <span className="font-sans text-base sm:text-lg font-semibold text-[#1f1b1a]">
-                      ${(item.unitPrice * item.quantity).toFixed(2)}
+                      {formatToman(item.unitPrice * item.quantity)}
                     </span>
                   </div>
                 </div>
@@ -150,23 +151,23 @@ export default function Cart() {
               {/* Title */}
               <div className="flex items-center justify-between">
                 <h2 className="font-serif text-xl text-[#1f1b1a]">
-                  Order Summary
+                  خلاصه سفارش
                 </h2>
                 <span className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#85736f]">
-                  USD
+                  تومان
                 </span>
               </div>
 
               {/* Breakdown */}
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center font-sans text-sm text-[#534340]">
-                  <span>Subtotal</span>
+                  <span>جمع جزء</span>
                   <span className="font-sans text-sm font-semibold text-[#1f1b1a]">
-                    ${subtotal.toFixed(2)}
+                    {formatToman(subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center font-sans text-sm text-[#534340]">
-                  <span>Estimated Sales Tax</span>
+                  <span>مالیات</span>
                 </div>
 
                 {/* Promo */}
@@ -174,14 +175,14 @@ export default function Cart() {
                   <div className="flex gap-2">
                     <input
                       className="flex-1 bg-[#fcf1ef] px-4 py-2.5 text-[#1f1b1a] font-sans text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#8b4e40] placeholder:text-[#85736f]"
-                      placeholder="Gift card or code"
+                      placeholder="کارت هدیه یا کد تخفیف"
                       type="text"
                     />
                     <button
                       className="bg-[#f0e6e4] text-[#1f1b1a] px-4 py-2.5 font-sans text-xs font-semibold uppercase tracking-wider rounded hover:bg-[#fcf1ef] transition-colors shrink-0"
                       type="button"
                     >
-                      Apply
+                      اعمال
                     </button>
                   </div>
                 </div>
@@ -191,13 +192,13 @@ export default function Cart() {
 
               {/* Total */}
               <div className="flex justify-between items-baseline">
-                <span className="font-serif text-xl text-[#1f1b1a]">Total</span>
+                <span className="font-serif text-xl text-[#1f1b1a]">مبلغ نهایی</span>
                 <div className="text-right">
                   <span className="font-serif text-2xl text-[#1f1b1a]">
-                    ${subtotal.toFixed(2)}
+                    {formatToman(subtotal)}
                   </span>
                   <p className="font-sans text-[11px] text-[#85736f] mt-0.5">
-                    Including tax &amp; duties
+                    شامل مالیات و عوارض
                   </p>
                 </div>
               </div>
@@ -209,7 +210,7 @@ export default function Cart() {
                 onClick={() => router.push("/checkout")}
                 disabled={!items.length || updating || removing}
               >
-                Proceed to Checkout
+                ادامه و ثبت سفارش
                 <Check size={18} />
               </button>
 
@@ -219,10 +220,10 @@ export default function Cart() {
               <div className="flex items-center justify-center gap-3 text-[#85736f] font-sans text-[11px] uppercase tracking-wider">
                 <span className="flex items-center gap-1">
                   <ShieldCheck size={14} />
-                  256-Bit Encrypted
+                  پرداخت امن
                 </span>
                 <span>•</span>
-                <span>Ethical Sourcing</span>
+                <span>تأمین مسئولانه</span>
               </div>
             </div>
           </div>

@@ -10,16 +10,16 @@ export default function BrandsPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-4 border-b border-gray-200">
           <div>
             <span className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500 block mb-2">
-              The Collection
+              مجموعه ما
             </span>
 
             <h1 className="font-serif text-3xl md:text-4xl text-gray-900">
-              Cosmetic Brands
+              برندهای منتخب
             </h1>
           </div>
 
           <p className="text-sm text-gray-500 mt-3 md:mt-0">
-            8 Selected Brands · Modern Beauty
+            ۸ برند منتخب · زیبایی امروز
           </p>
         </div>
 
@@ -41,7 +41,7 @@ export default function BrandsPage() {
                 <div className="absolute inset-0 bg-black/10 transition-colors duration-500 group-hover:bg-black/20" />
 
                 {/* Bottom Content */}
-                <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between gap-4">
+                <div className="absolute inset-x-5 bottom-5 flex items-center justify-between gap-4">
                   {/* Brand Name */}
                   <h2 className="font-serif text-2xl md:text-3xl text-white drop-shadow-md">
                     {brand.name}
@@ -66,7 +66,7 @@ export default function BrandsPage() {
                     group-hover:pointer-events-auto
                     hover:bg-white"
                   >
-                    <span>Explore</span>
+                    <span>مشاهده</span>
 
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -95,16 +95,15 @@ export default function BrandsPage() {
         <div className="max-w-[1360px] mx-auto px-6 py-16 md:py-20">
           <div className="max-w-2xl">
             <span className="text-xs font-medium uppercase tracking-[0.2em] text-gray-400">
-              Curated Beauty
+              زیبایی گزیده
             </span>
 
             <h2 className="mt-3 font-serif text-3xl md:text-4xl text-gray-900 leading-tight">
-              Discover brands built around thoughtful beauty.
+              با برندهایی آشنا شوید که زیبایی را آگاهانه می‌آفرینند.
             </h2>
 
             <p className="mt-5 text-sm md:text-base leading-7 text-gray-500 max-w-xl">
-              Explore a carefully selected collection of cosmetic brands, from
-              everyday skincare to expressive color cosmetics. Each brand brings
+              مجموعه‌ای از برندهای منتخب محصولات آرایشی و بهداشتی را ببینید؛ از مراقبت روزانه پوست تا محصولات رنگی. هر برند
               its own approach to modern beauty and personal ritual.
             </p>
           </div>

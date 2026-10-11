@@ -4,6 +4,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState } from "react";
+import { formatToman } from "@/lib/pricing";
 
 type OrderStatus = "QUEUE" | "PREPARED" | "DELIVERED";
 
@@ -61,7 +62,7 @@ export default function OrderRow({
       </td>
 
       <td className="px-2 py-3 font-medium">
-        {order.totalPrice.toLocaleString("fa-IR")} تومان
+        {formatToman(order.totalPrice)}
       </td>
 
       <td className="px-2 py-3">
@@ -97,7 +98,7 @@ export default function OrderRow({
         </button>
 
         {open && (
-          <div className="ml-6 mt-2 space-y-2 text-xs text-[#85736f]">
+          <div className="ms-6 mt-2 space-y-2 text-xs text-[#85736f]">
             <p className="font-semibold">
               {order.items.length} آیتم
             </p>
@@ -113,7 +114,7 @@ export default function OrderRow({
 
                 <span className="shrink-0">
                   {item.quantity.toLocaleString("fa-IR")} ×{" "}
-                  {item.unitPrice.toLocaleString("fa-IR")}
+                  {formatToman(item.unitPrice)}
                 </span>
               </div>
             ))}

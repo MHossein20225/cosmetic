@@ -8,6 +8,7 @@ export async function runSerializable<T>(operation: (tx: Prisma.TransactionClien
     try {
       return await prisma.$transaction(operation, {
         isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        maxWait: 10_000,
       });
     } catch (error) {
       if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2034") throw error;

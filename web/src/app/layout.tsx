@@ -17,9 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Store Name Cosmetics",
-  description:
-    "Intentional beauty rituals and clean botanical formulas designed for skin wellness and quiet luxury.",
+  title: "فروشگاه محصولات آرایشی و بهداشتی",
+  description: "محصولات مراقبت از پوست و زیبایی با ترکیبات گیاهی و فرمول‌های سنجیده.",
 };
 
 export default function RootLayout({
@@ -30,14 +29,14 @@ export default function RootLayout({
   // const session = await getSession();
   // const user = session ? { id: session.user.id, name: session.user.name } : null;
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="[font-family:var(--font-geist-sans)] bg-rose-50/40 text-gray-900 antialiased min-h-screen flex flex-col selection:bg-rose-200 selection:text-gray-900">
+    <html lang="fa" dir="rtl" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="bg-rose-50/40 text-gray-900 antialiased min-h-screen flex flex-col selection:bg-rose-200 selection:text-gray-900">
         <QueryClientProvider>
           <Header />
           {children}
           <Footer />
         </QueryClientProvider>
-        <Toaster position="top-right"/>
+        <Toaster position="top-left" />
       </body>
     </html>
   );

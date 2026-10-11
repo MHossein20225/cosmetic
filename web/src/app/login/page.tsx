@@ -77,7 +77,7 @@ export default function Login() {
   return (
     <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-16 md:py-24 flex flex-col items-center">
       <h1 className="font-serif text-3xl text-gray-900 mb-8">
-        Welcome Back
+        خوش آمدید
       </h1>
 
       <form
@@ -90,13 +90,15 @@ export default function Login() {
             htmlFor="email"
             className="text-xs font-medium uppercase tracking-wider text-gray-700"
           >
-            Email
+            ایمیل
           </label>
 
           <input
             id="email"
             name="email"
             type="text"
+            dir="ltr"
+            autoComplete="email"
             onChange={clearEmailError}
             className="bg-white px-4 py-2.5 rounded border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-amber-800"
           />
@@ -114,7 +116,7 @@ export default function Login() {
             htmlFor="password"
             className="text-xs font-medium uppercase tracking-wider text-gray-700"
           >
-            Password
+            رمز عبور
           </label>
 
           <input
@@ -143,7 +145,7 @@ export default function Login() {
           disabled={isPending}
           className="w-full bg-amber-800 text-white py-3 rounded text-xs font-medium uppercase tracking-wider hover:bg-amber-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isPending ? "Wait..." : "Log In"}
+          {isPending ? "لطفاً صبر کنید..." : "ورود"}
         </button>
 
         <p className="text-sm text-gray-500 text-center">
@@ -152,7 +154,7 @@ export default function Login() {
             href="/register"
             className="text-amber-800 hover:underline"
           >
-            Register
+             ثبت‌نام
           </Link>
         </p>
       </form>

@@ -15,7 +15,7 @@ import NavLinkItem from "./NavLinkItems";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { getProductPrice } from "@/lib/pricing";
+import { formatToman, getProductPrice } from "@/lib/pricing";
 import { useAuthUser, useLogOut } from "@/hooks/userHooks";
 import { useCart } from "@/hooks/cartHooks";
 import { useSearchProducts } from "@/hooks/productHooks";
@@ -80,7 +80,7 @@ export default function Header() {
           </span>
 
           <span className="hidden font-serif text-xl tracking-tight text-gray-900 sm:block">
-            Store Name
+            فروشگاه زیبایی
           </span>
         </Link>
 
@@ -92,7 +92,7 @@ export default function Header() {
         </nav>
 
         {/* Search */}
-        <div className="relative ml-auto hidden min-w-0 flex-1 sm:block lg:max-w-[420px]">
+        <div className="relative ms-auto hidden min-w-0 flex-1 sm:block lg:max-w-[420px]">
           <form
             method="get"
             action="/products"
@@ -102,7 +102,7 @@ export default function Header() {
             <Search
               size={17}
               strokeWidth={1.8}
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-gray-400"
             />
 
             <input
@@ -110,15 +110,15 @@ export default function Header() {
               name="search"
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="Search products..."
-              aria-label="Search products"
+              placeholder="جست‌وجوی محصولات..."
+              aria-label="جست‌وجوی محصولات"
               className="h-10 w-full rounded-full border border-gray-200 bg-white/80 pl-10 pr-10 text-sm text-gray-900 shadow-sm outline-none transition-all placeholder:text-gray-400 focus:border-amber-700 focus:bg-white focus:ring-2 focus:ring-amber-800/10"
             />
 
             {search && (
               <button
                 type="button"
-                aria-label="Clear search"
+                aria-label="پاک کردن جست‌وجو"
                 onClick={clearSearch}
                 className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
               >
@@ -129,10 +129,10 @@ export default function Header() {
 
           {/* Search suggestions */}
           {search.trim() && (
-            <div className="absolute left-0 right-0 top-12 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl">
+            <div className="absolute inset-x-0 top-12 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl">
               {isFetching ? (
                 <div className="px-4 py-5 text-center text-sm text-gray-400">
-                  Searching...
+                  در حال جست‌وجو...
                 </div>
               ) : products && products.length > 0 ? (
                 <div className="py-2">
@@ -161,7 +161,7 @@ export default function Header() {
                         </p>
 
                         <p className="text-xs text-gray-500">
-                          {getProductPrice(product).toLocaleString()} تومان
+                          {formatToman(getProductPrice(product))}
                         </p>
                       </div>
                     </Link>
@@ -172,17 +172,17 @@ export default function Header() {
                     onClick={clearSearch}
                     className="block border-t border-gray-100 px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-amber-800 transition-colors hover:bg-rose-50"
                   >
-                    View all results
+                    مشاهده همه نتایج
                   </Link>
                 </div>
               ) : (
                 <div className="px-4 py-6 text-center">
                   <p className="text-sm text-gray-600">
-                    No products found
+                    محصولی پیدا نشد
                   </p>
 
                   <p className="mt-1 text-xs text-gray-400">
-                    Try a different search
+                    عبارت دیگری را جست‌وجو کنید
                   </p>
                 </div>
               )}
@@ -197,7 +197,7 @@ export default function Header() {
             href="/cart"
             aria-label={
               cartCount > 0
-                ? `Cart, ${cartCount} items`
+                ? `سبد خرید، ${cartCount} کالا`
                 : "Shopping cart"
             }
             className="relative flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-white hover:text-amber-800"
@@ -220,7 +220,7 @@ export default function Header() {
             >
               <button
                 type="button"
-                aria-label="Account menu"
+                aria-label="منوی حساب کاربری"
                 aria-expanded={isUserMenuOpen}
                 onClick={() =>
                   setIsUserMenuOpen((open) => !open)
@@ -258,10 +258,10 @@ export default function Header() {
                       onClick={() => setIsUserMenuOpen(false)}
                       className="block px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-rose-50"
                     >
-                      My Orders
+                      سفارش‌های من
                     </Link>
 
-                    {user.role === "ADMIN" && <Link href="/admin" onClick={closeMenus} className="block px-4 py-3 text-sm text-gray-700 hover:bg-rose-50">Admin dashboard</Link>}
+                    {user.role === "ADMIN" && <Link href="/admin" onClick={closeMenus} className="block px-4 py-3 text-sm text-gray-700 hover:bg-rose-50">مدیریت فروشگاه</Link>}
                     <div className="border-t border-gray-100" />
 
                     <button
@@ -271,8 +271,8 @@ export default function Header() {
                       className="w-full px-4 py-3 text-left text-sm text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
                     >
                       {isLoggingOut
-                        ? "Logging out..."
-                        : "Log Out"}
+                        ? "در حال خروج..."
+                        : "خروج از حساب"}
                     </button>
                   </div>
                 </div>
@@ -284,14 +284,14 @@ export default function Header() {
                 href="/login"
                 className="rounded-full px-3 py-2 text-xs font-medium uppercase tracking-wider text-gray-700 transition-colors hover:bg-white hover:text-amber-800"
               >
-                Login
+                ورود
               </Link>
 
               <Link
                 href="/register"
                 className="rounded-full bg-amber-800 px-4 py-2 text-xs font-medium uppercase tracking-wider text-white transition-colors hover:bg-amber-900"
               >
-                Register
+                ثبت‌نام
               </Link>
             </div>
           )}
@@ -299,7 +299,7 @@ export default function Header() {
           {/* Mobile menu */}
           <button
             type="button"
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-label={isMenuOpen ? "بستن منو" : "باز کردن منو"}
             aria-expanded={isMenuOpen}
             onClick={() => setIsMenuOpen((open) => !open)}
             className="flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-white hover:text-amber-800 md:hidden"
@@ -323,7 +323,7 @@ export default function Header() {
         >
           <Search
             size={17}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+            className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-gray-400"
           />
 
           <input
@@ -331,15 +331,15 @@ export default function Header() {
             name="search"
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search products..."
-            aria-label="Search products"
+              placeholder="جست‌وجوی محصولات..."
+              aria-label="جست‌وجوی محصولات"
             className="h-10 w-full rounded-full border border-gray-200 bg-white pl-10 pr-10 text-sm outline-none focus:border-amber-700 focus:ring-2 focus:ring-amber-800/10"
           />
 
           {search && (
             <button
               type="button"
-              aria-label="Clear search"
+              aria-label="پاک کردن جست‌وجو"
               onClick={clearSearch}
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-700"
             >
@@ -375,7 +375,7 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
                 className="rounded-xl border border-gray-200 bg-white py-2.5 text-center text-xs font-medium uppercase tracking-wider text-gray-700"
               >
-                Login
+                ورود
               </Link>
 
               <Link
@@ -383,7 +383,7 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
                 className="rounded-xl bg-amber-800 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-white"
               >
-                Register
+                ثبت‌نام
               </Link>
             </div>
           )}
