@@ -6,6 +6,7 @@ import { User, userSchema } from "@/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { localizeError } from "@/lib/localizeError";
 
 export default function Login() {
   const router = useRouter();
@@ -136,7 +137,7 @@ export default function Login() {
 
         {isError && (
           <span className="text-xs text-end text-red-600">
-            {error?.message}
+            {error ? localizeError(error) : null}
           </span>
         )}
 
@@ -149,7 +150,7 @@ export default function Login() {
         </button>
 
         <p className="text-sm text-gray-500 text-center">
-          Don&apos;t have an account?{" "}
+          حساب کاربری ندارید؟{" "}
           <Link
             href="/register"
             className="text-amber-800 hover:underline"

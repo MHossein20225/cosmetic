@@ -113,7 +113,7 @@ export default function Header() {
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="جست‌وجوی محصولات..."
               aria-label="جست‌وجوی محصولات"
-              className="h-10 w-full rounded-full border border-gray-200 bg-white/80 pl-10 pr-10 text-sm text-gray-900 shadow-sm outline-none transition-all placeholder:text-gray-400 focus:border-amber-700 focus:bg-white focus:ring-2 focus:ring-amber-800/10"
+              className="h-10 w-full rounded-full border border-gray-200 bg-white/80 ps-10 pe-10 text-sm text-gray-900 shadow-sm outline-none transition-all placeholder:text-gray-400 focus:border-amber-700 focus:bg-white focus:ring-2 focus:ring-amber-800/10"
             />
 
             {search && (
@@ -121,7 +121,7 @@ export default function Header() {
                 type="button"
                 aria-label="پاک کردن جست‌وجو"
                 onClick={clearSearch}
-                className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                className="absolute end-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
               >
                 <X size={15} />
               </button>
@@ -192,7 +192,7 @@ export default function Header() {
         </div>
 
         {/* Actions */}
-        <div className="ml-auto flex shrink-0 items-center gap-3 sm:ml-0 sm:gap-4">
+        <div className="ms-auto flex shrink-0 items-center gap-3 sm:ms-0 sm:gap-4">
           <ThemeToggle />
 
           {/* Cart */}
@@ -201,14 +201,14 @@ export default function Header() {
             aria-label={
               cartCount > 0
                 ? `سبد خرید، ${cartCount} کالا`
-                : "Shopping cart"
+                : "سبد خرید"
             }
             className="relative flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-white hover:text-amber-800"
           >
             <ShoppingBag size={19} strokeWidth={1.8} />
 
             {cartCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-800 px-1 text-[9px] font-semibold leading-none text-white">
+              <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-800 px-1 text-[9px] font-semibold leading-none text-white">
                 {cartCount > 99 ? "99+" : cartCount}
               </span>
             )}
@@ -241,7 +241,7 @@ export default function Header() {
               </button>
 
               {isUserMenuOpen && (
-                <div className="absolute right-0 top-full pt-2">
+                <div className="absolute end-0 top-full pt-2">
                   <div className="w-60 overflow-hidden rounded-2xl border border-rose-100 bg-white shadow-xl">
                     {/* User info */}
                     <div className="px-4 py-4">
@@ -249,7 +249,7 @@ export default function Header() {
                         {user.name}
                       </p>
 
-                      <p className="mt-0.5 truncate text-xs text-gray-500">
+                      <p dir="ltr" className="mt-0.5 truncate text-start text-xs text-gray-500">
                         {user.email}
                       </p>
                     </div>
@@ -271,7 +271,7 @@ export default function Header() {
                       type="button"
                       onClick={() => logOutMutate()}
                       disabled={isLoggingOut}
-                      className="w-full px-4 py-3 text-left text-sm text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
+                      className="w-full px-4 py-3 text-start text-sm text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
                     >
                       {isLoggingOut
                         ? "در حال خروج..."
@@ -336,7 +336,7 @@ export default function Header() {
             onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="جست‌وجوی محصولات..."
               aria-label="جست‌وجوی محصولات"
-            className="h-10 w-full rounded-full border border-gray-200 bg-white pl-10 pr-10 text-sm outline-none focus:border-amber-700 focus:ring-2 focus:ring-amber-800/10"
+            className="h-10 w-full rounded-full border border-gray-200 bg-white ps-10 pe-10 text-sm outline-none focus:border-amber-700 focus:ring-2 focus:ring-amber-800/10"
           />
 
           {search && (
@@ -344,7 +344,7 @@ export default function Header() {
               type="button"
               aria-label="پاک کردن جست‌وجو"
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-700"
+              className="absolute end-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-700"
             >
               <X size={15} />
             </button>

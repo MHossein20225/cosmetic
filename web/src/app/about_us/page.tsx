@@ -29,8 +29,7 @@ export default function AboutUs() {
 
           <p className="mt-5 max-w-2xl text-lg text-[#534340] leading-relaxed mx-auto">
             باور داریم محصولات آرایشی باید همان‌قدر که زیبایی می‌آفرینند، از پوست نیز مراقبت کنند. فرمول‌های ما با ترکیبات گیاهی و
-            designed in small batches — so you get the full ritual, not just
-            the product.
+            در دسته‌های کوچک تولید می‌شوند تا تجربه‌ای کامل از مراقبت روزانه را برایتان فراهم کنند.
           </p>
         </div>
 

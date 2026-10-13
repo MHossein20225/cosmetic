@@ -1,5 +1,6 @@
 import { BRANDS } from "@/data";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function BrandsPage() {
   return (
@@ -48,22 +49,18 @@ export default function BrandsPage() {
                   </h2>
 
                   {/* Explore Button */}
-                  <button
-                    type="button"
+                  <Link
+                    href="/products"
                     className="
                     shrink-0
                     inline-flex items-center gap-2
                     bg-white/95 backdrop-blur-sm
                     px-4 py-3
-                    text-xs font-medium uppercase tracking-[0.15em]
+                    text-xs font-medium
                     text-gray-900
-                    opacity-0
-                    translate-y-2
-                    pointer-events-none
                     transition-all duration-300
-                    group-hover:opacity-100
-                    group-hover:translate-y-0
-                    group-hover:pointer-events-auto
+                    group-hover:bg-white
+                    focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white
                     hover:bg-white"
                   >
                     <span>مشاهده</span>
@@ -82,7 +79,7 @@ export default function BrandsPage() {
                         d="M5 12h14M13 6l6 6-6 6"
                       />
                     </svg>
-                  </button>
+                  </Link>
                 </div>
               </div>
             </article>
@@ -103,8 +100,7 @@ export default function BrandsPage() {
             </h2>
 
             <p className="mt-5 text-sm md:text-base leading-7 text-gray-500 max-w-xl">
-              مجموعه‌ای از برندهای منتخب محصولات آرایشی و بهداشتی را ببینید؛ از مراقبت روزانه پوست تا محصولات رنگی. هر برند
-              its own approach to modern beauty and personal ritual.
+              مجموعه‌ای از برندهای منتخب محصولات آرایشی و بهداشتی را ببینید؛ از مراقبت روزانه پوست تا محصولات رنگی. هر برند، رویکرد ویژه‌ای به زیبایی امروزی و آیین‌های مراقبتی دارد.
             </p>
           </div>
         </div>

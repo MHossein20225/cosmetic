@@ -5,8 +5,10 @@ import Link from "next/link"
 import { useMyOrders } from "@/hooks/orderHooks"
 import { useAuthUser } from "@/hooks/userHooks"
 import type { Order, OrderItem } from "@/types"
-import { Check, ArrowRight, Clock, MapPin, Package } from "lucide-react"
+import { Check, ArrowLeft, Clock, MapPin, Package } from "lucide-react"
 import { formatToman } from "@/lib/pricing"
+import { localizeError } from "@/lib/localizeError"
+import { getOrderStatusLabel } from "@/lib/orderPresentation"
 
 export default function Orders() {
   const { user, isLoading: userLoading } = useAuthUser()
@@ -41,7 +43,7 @@ export default function Orders() {
     return (
       <div className="text-center py-12">
         <p className="text-red-600 font-semibold">خطا در دریافت سفارشات</p>
-        <p className="text-sm text-[#85736f]">{error?.message || "خطای ناشناخته"}</p>
+        <p className="text-sm text-[#85736f]">{localizeError(error, "دریافت سفارش‌ها انجام نشد.")}</p>
         <button
           onClick={() => window.location.reload()}
           className="text-sm text-amber-800 hover:underline mt-2"
@@ -93,7 +95,7 @@ export default function Orders() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="font-serif text-lg text-[#1f1b1a]">
-                        {order.id}
+                        <bdi dir="ltr">{order.id}</bdi>
                       </h3>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -104,11 +106,7 @@ export default function Orders() {
                             : "bg-green-800/15 text-green-800"
                         }`}
                       >
-                        {order.status === "QUEUE"
-                          ? "در صف"
-                          : order.status === "PREPARED"
-                          ? "پردازش شد"
-                          : "تحویل داده شد"}
+                        {getOrderStatusLabel(order.status)}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-[#85736f]">
@@ -134,7 +132,7 @@ export default function Orders() {
                             href={`/orders/${order.id}`}
                             className="inline-flex items-center gap-1 text-xs text-amber-800 hover:text-amber-900"
                           >
-                            جزئیات <ArrowRight size={12} />
+                            جزئیات <ArrowLeft size={12} />
                           </Link>
                         )}
                       </div>
@@ -236,11 +234,7 @@ export default function Orders() {
                             : "bg-green-800/15 text-green-800"
                           }`}
                         >
-                          {order.status === "QUEUE"
-                            ? "در صف"
-                            : order.status === "PREPARED"
-                            ? "پردازش شد"
-                            : "تحویل داده شده"}
+                          {getOrderStatusLabel(order.status)}
                         </span>
                       </div>
                     </div>

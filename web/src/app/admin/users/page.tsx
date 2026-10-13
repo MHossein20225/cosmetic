@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminUsers, useAdminAuth } from "@/hooks/adminHooks";
 import { Key, Loader2 } from "lucide-react";
+import { localizeError } from "@/lib/localizeError";
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function AdminUsersPage() {
     return (
       <div className="text-center py-12">
         <p className="text-red-600 font-semibold">خطا در دریافت کاربران</p>
-        <p className="text-sm text-[#85736f]">{error?.message || "خطای ناشناس"}</p>
+        <p className="text-sm text-[#85736f]">{localizeError(error, "دریافت کاربران انجام نشد.")}</p>
       </div>
     );
   }
@@ -74,7 +75,7 @@ export default function AdminUsersPage() {
                 {users.map((u) => (
                   <tr key={u.id} className="border-b border-[#f0e6e4]">
                     <td className="py-3 px-2 font-medium">{u.name}</td>
-                    <td className="py-3 px-2 text-[#85736f]">{u.email}</td>
+                    <td dir="ltr" className="py-3 px-2 text-start text-[#85736f]">{u.email}</td>
                     <td className="py-3 px-2">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -91,7 +92,7 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="py-3 px-2">
                       {u.id === admin?.id ? (
-                        <span className="text-xs text-[#85736f]">شما خودتون هستید</span>
+                        <span className="text-xs text-[#85736f]">این حساب کاربری شماست</span>
                       ) : selectingId === u.id ? (
                         <select
                           value={role}

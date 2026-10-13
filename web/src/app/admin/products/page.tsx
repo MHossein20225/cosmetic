@@ -8,6 +8,7 @@ import { productSchema, ProductWithCategory } from "@/types";
 import { Plus, Loader2 } from "lucide-react";
 import { formatToman } from "@/lib/pricing";
 import { toast } from "sonner";
+import { localizeError } from "@/lib/localizeError";
 
 export default function AdminProductsPage() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function AdminProductsPage() {
       if (editingId === id) resetForm();
       toast.success("محصول حذف شد");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "حذف محصول انجام نشد");
+      toast.error(localizeError(error, "حذف محصول انجام نشد."));
     } finally { setSaving(false); }
   }
 
@@ -57,7 +58,7 @@ export default function AdminProductsPage() {
       categoryId: Number(categoryId), imageUrl: imageUrl || null,
     });
     if (!result.success) {
-      toast.error(result.error.issues[0]?.message || "اطلاعات محصول معتبر نیست");
+      toast.error(localizeError(result.error.issues[0]?.message, "اطلاعات محصول معتبر نیست."));
       return;
     }
 
@@ -68,7 +69,7 @@ export default function AdminProductsPage() {
       resetForm();
       toast.success("محصول ذخیره شد");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "ثبت محصول انجام نشد");
+      toast.error(localizeError(error, "ثبت محصول انجام نشد."));
     } finally {
       setSaving(false);
     }
@@ -80,7 +81,7 @@ export default function AdminProductsPage() {
     return (
       <div className="text-center py-12">
         <p className="text-red-600 font-semibold">خطا در دریافت محصولات</p>
-        <p className="text-sm text-[#85736f]">{error?.message || "خطای ناشناخته"}</p>
+        <p className="text-sm text-[#85736f]">{localizeError(error, "دریافت محصولات انجام نشد.")}</p>
       </div>
     );
   }

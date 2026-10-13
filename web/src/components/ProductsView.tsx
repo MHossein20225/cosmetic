@@ -47,7 +47,7 @@ export default function ProductsView({
         <Link href="/" className="hover:text-amber-800 transition-colors">
           خانه
         </Link>
-        <ChevronRight size={12} />
+        <ChevronLeft size={12} />
         <Link
           href="/products"
           className="hover:text-amber-800 transition-colors"
@@ -56,7 +56,7 @@ export default function ProductsView({
         </Link>
         {categoryLabel && (
           <>
-            <ChevronRight size={12} />
+            <ChevronLeft size={12} />
             <span className="text-gray-900">{categoryLabel}</span>
           </>
         )}
@@ -75,7 +75,7 @@ export default function ProductsView({
         <div className="relative flex-1">
           <Search
             size={16}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
+            className="absolute start-4 top-1/2 -translate-y-1/2 text-gray-500"
           />
 
           <input
@@ -83,7 +83,7 @@ export default function ProductsView({
             onChange={(event) => onParamsChange({ search: event.target.value, page: 1 })}
             placeholder="جست‌وجوی محصولات"
             aria-label="جست‌وجوی محصولات"
-            className="w-full bg-white pl-11 pr-10 py-2.5 text-sm text-gray-900 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-amber-800"
+            className="w-full bg-white ps-11 pe-10 py-2.5 text-sm text-gray-900 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-amber-800"
             type="search"
           />
 
@@ -92,7 +92,7 @@ export default function ProductsView({
               type="button"
               aria-label="پاک کردن جست‌وجو"
               onClick={() => onParamsChange({ search: "", page: 1 })}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-800 transition-colors"
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-amber-800 transition-colors"
             >
               <X size={16} />
             </button>
@@ -145,7 +145,7 @@ export default function ProductsView({
             onClick={() => onParamsChange({ page: page - 1 })}
             className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:border-amber-800 hover:text-amber-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-700"
           >
-            <ChevronLeft size={16} />
+            <ChevronRight size={16} />
           </button>
 
           {Array.from({ length: totalPages }).map((_, index) => (
@@ -171,7 +171,7 @@ export default function ProductsView({
             onClick={() => onParamsChange({ page: page + 1 })}
             className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:border-amber-800 hover:text-amber-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-700"
           >
-            <ChevronRight size={16} />
+            <ChevronLeft size={16} />
           </button>
         </div>
       )}

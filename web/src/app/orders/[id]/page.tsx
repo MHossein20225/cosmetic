@@ -4,14 +4,10 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import { useOrder } from "@/hooks/orderHooks"
 import { useAuthUser } from "@/hooks/userHooks"
-import { ArrowLeft, Check } from "lucide-react"
+import { ArrowRight, Check } from "lucide-react"
 import { formatToman } from "@/lib/pricing"
-
-const STATUS_LABELS: Record<string, string> = {
-  QUEUE: "در صف",
-  PREPARED: "پردازش شد",
-  DELIVERED: "تحویل داده شده",
-}
+import { orderStatusLabels } from "@/lib/orderPresentation"
+import { localizeError } from "@/lib/localizeError"
 
 const STATUS_COLORS: Record<string, string> = {
   QUEUE: "bg-yellow-800/15 text-yellow-800",
@@ -61,7 +57,7 @@ export default function OrderDetail() {
   if (error || !order) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 font-semibold">{error || "سفارش یافت نشد"}</p>
+        <p className="text-red-600 font-semibold">{error ? localizeError(error) : "سفارش یافت نشد"}</p>
         <Link
           href="/orders"
           className="text-sm text-amber-800 hover:underline mt-2"
@@ -79,7 +75,7 @@ export default function OrderDetail() {
           href="/orders"
           className="text-sm text-[#85736f] hover:text-[#1f1b1a]"
         >
-          <ArrowLeft size={18} />
+          <ArrowRight size={18} />
           برگشت به سفارشات
         </Link>
       </div>
@@ -90,15 +86,15 @@ export default function OrderDetail() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="font-serif text-2xl text-[#1f1b1a]">
-                  شماره سفارش #{order.id}
+                  شماره سفارش <bdi dir="ltr">#{order.id}</bdi>
                 </h1>
                 <span
                   className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[order.status]}`}
                 >
-                  {STATUS_LABELS[order.status]}
+                  {orderStatusLabels[order.status as keyof typeof orderStatusLabels] ?? "وضعیت نامشخص"}
                 </span>
               </div>
-              <div className="text-right">
+              <div className="text-start">
                 <p className="text-xs text-[#85736f] uppercase tracking-wider">
                   تاریخ سفارش
                 </p>
@@ -124,7 +120,7 @@ export default function OrderDetail() {
                   شماره شیرو
                 </p>
                 <p className="font-sans text-sm text-[#1f1b1a]">
-                  {order.phoneNumber}
+                        <bdi dir="ltr">{order.phoneNumber}</bdi>
                 </p>
               </div>
               <div className="bg-[#faf6f3] p-4 rounded-lg">
@@ -165,7 +161,7 @@ export default function OrderDetail() {
                         حجم: {item.quantity}
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-start">
                       <p className="font-sans text-sm text-[#1f1b1a]">
                         {formatToman(item.unitPrice * item.quantity)}
                       </p>

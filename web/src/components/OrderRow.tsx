@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { formatToman } from "@/lib/pricing";
+import { orderStatusLabels } from "@/lib/orderPresentation";
 
 type OrderStatus = "QUEUE" | "PREPARED" | "DELIVERED";
 
@@ -32,11 +33,6 @@ type OrderRowProps = {
   updatingId: string | null;
 };
 
-const statusLabels: Record<OrderStatus, string> = {
-  QUEUE: "در صف پردازش",
-  PREPARED: "آماده ارسال",
-  DELIVERED: "تحویل داده شد",
-};
 
 export default function OrderRow({
   order,
@@ -75,7 +71,7 @@ export default function OrderRow({
                 : "bg-green-800/15 text-green-800"
           }`}
         >
-          {statusLabels[order.status]}
+              {orderStatusLabels[order.status]}
         </span>
       </td>
 

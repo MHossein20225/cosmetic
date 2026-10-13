@@ -1,7 +1,7 @@
 ﻿"use client";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, ChevronRight, MapPin } from "lucide-react";
+import { Check, ChevronRight, LockKeyhole, MapPin } from "lucide-react";
 import { useCart } from "@/hooks/cartHooks";
 import { CartItem, orderSchema } from "@/types";
 import { useCreateOrder } from "@/hooks/orderHooks";
@@ -11,6 +11,7 @@ import Loading from "@/components/Loading";
 
 import { toast } from "sonner";
 import { formatToman } from "@/lib/pricing";
+import { localizeError } from "@/lib/localizeError";
 
 export default function Checkout() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function Checkout() {
         toast.success("سفارش با موفقیت ثبت شد");
         router.push("/orders");
       },
-      onError: (error) => toast.error(error.message),
+      onError: (error) => toast.error(localizeError(error, "ثبت سفارش انجام نشد. لطفاً دوباره تلاش کنید.")),
     });
   }
 
@@ -294,9 +295,7 @@ export default function Checkout() {
 
               <div className="flex items-center justify-center gap-3 text-[#85736f] font-sans text-[11px] uppercase tracking-wider">
                 <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-xs">
-                    lock
-                  </span>
+                  <LockKeyhole size={14} aria-hidden="true" />
                   پرداخت امن
                 </span>
                 <span>•</span>

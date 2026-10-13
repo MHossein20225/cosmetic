@@ -39,7 +39,7 @@ export default function CategoriedProduct({ params }: CategoriedProductProps) {
     return (
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 w-full py-16 flex flex-col items-center gap-4 text-center">
         <h1 className="text-2xl font-serif text-gray-900">
-          Couldn&apos;t load products
+          دریافت محصولات ممکن نشد
         </h1>
 
         <p className="text-sm text-gray-500 max-w-md">

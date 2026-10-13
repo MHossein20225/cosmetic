@@ -10,13 +10,13 @@ import {
   ShoppingBag,
   Check,
   ChevronDown,
-  ChevronRight,
+  ChevronLeft,
+  ArrowLeft,
   Maximize2,
   Sprout,
   ShieldCheck,
   Recycle,
   Leaf,
-  ArrowRight,
 } from "lucide-react";
 
 import { useCategoriedProducts, useProduct } from "@/hooks/productHooks";
@@ -30,6 +30,7 @@ import {
   isOutOfStock,
 } from "@/lib/pricing";
 import { toast } from "sonner";
+import { localizeError } from "@/lib/localizeError";
 
 export default function ProductPage({
   params,
@@ -71,7 +72,7 @@ export default function ProductPage({
           setJustAdded(true);
           setTimeout(() => setJustAdded(false), 1800);
         },
-        onError: (error) => toast.error(error.message),
+        onError: (error) => toast.error(localizeError(error, "افزودن محصول به سبد خرید انجام نشد.")),
       },
     );
 
@@ -132,7 +133,7 @@ export default function ProductPage({
         <Link href="/" className="hover:text-amber-800 transition-colors">
           خانه
         </Link>
-        <ChevronRight size={12} />
+        <ChevronLeft size={12} />
         <Link
           href={`/products/${encodeURIComponent(product.category.name)}`}
           className="hover:text-amber-800 transition-colors"
@@ -140,7 +141,7 @@ export default function ProductPage({
           {product.category.name}
         </Link>
 
-        <ChevronRight size={12} />
+        <ChevronLeft size={12} />
 
         <span className="text-gray-900">{product.name}</span>
       </nav>
@@ -206,7 +207,7 @@ export default function ProductPage({
               <Sprout size={20} className="text-amber-800" />
 
               <span className="text-[11px] sm:text-xs font-medium uppercase tracking-wider text-gray-900">
-                100% Botanical
+                کاملاً گیاهی
               </span>
 
               <span className="text-xs text-gray-500 hidden sm:block">
@@ -234,7 +235,7 @@ export default function ProductPage({
               </span>
 
               <span className="text-xs text-gray-500 hidden sm:block">
-                100% recyclable
+                کاملاً بازیافت‌پذیر
               </span>
             </div>
           </div>
@@ -262,12 +263,9 @@ export default function ProductPage({
 
                 <span className="text-sm font-semibold">4.9</span>
 
-                <a
-                  href="#reviews"
-                  className="text-xs text-gray-500 hover:text-amber-800 transition-colors ms-1"
-                >
+                <span className="text-xs text-gray-500 ms-1">
                   (۱۲۴ دیدگاه)
-                </a>
+                </span>
               </div>
             </div>
 
@@ -383,7 +381,7 @@ export default function ProductPage({
                       : "bg-amber-800 text-white hover:bg-amber-900"
                   }`}
                 >
-                  {isPending ? "Adding..." : justAdded ? (
+                  {isPending ? "در حال افزودن…" : justAdded ? (
                     <>
                       <Check size={18} />
                       به سبد خرید افزوده شد
@@ -414,60 +412,49 @@ export default function ProductPage({
           {/* Accordions */}
           <div className="flex flex-col bg-white rounded-lg p-4 shadow-sm divide-y divide-gray-100">
             {/* Ingredients */}
-            <div className="py-3 first:pt-0">
-              <button
-                type="button"
-                className="w-full flex items-center justify-between text-right group"
-              >
+            <details open className="py-3 first:pt-0 group">
+              <summary className="w-full flex items-center justify-between text-start list-none cursor-pointer group">
                 <span className="font-serif text-lg text-gray-900 group-hover:text-amber-800 transition-colors">
                   مشخصات محصول
                 </span>
 
-                <ChevronDown size={18} className="text-gray-500" />
-              </button>
+                <ChevronDown size={18} className="text-gray-500 transition-transform group-open:rotate-180" />
+              </summary>
 
               <p className="text-sm text-gray-500 leading-relaxed mt-3">
                 {product.description}
               </p>
-            </div>
+            </details>
 
             {/* Usage */}
-            <div className="py-3">
-              <button
-                type="button"
-                className="w-full flex items-center justify-between text-right group"
-              >
+            <details open className="py-3 group">
+              <summary className="w-full flex items-center justify-between text-start list-none cursor-pointer group">
                 <span className="font-serif text-lg text-gray-900 group-hover:text-amber-800 transition-colors">
                   آیین روزانه
                 </span>
 
-                <ChevronDown size={18} className="text-gray-500" />
-              </button>
+                <ChevronDown size={18} className="text-gray-500 transition-transform group-open:rotate-180" />
+              </summary>
 
               <p className="text-sm text-gray-500 leading-relaxed mt-3">
-                Use the product according to its intended purpose. Follow the
-                product instructions provided with your order.
+                محصول را مطابق کاربرد آن مصرف کنید و دستورالعمل درج‌شده روی بسته‌بندی را دنبال کنید.
               </p>
-            </div>
+            </details>
 
             {/* Shipping */}
-            <div className="py-3 last:pb-0">
-              <button
-                type="button"
-                className="w-full flex items-center justify-between text-right group"
-              >
+            <details open className="py-3 last:pb-0 group">
+              <summary className="w-full flex items-center justify-between text-start list-none cursor-pointer group">
                 <span className="font-serif text-lg text-gray-900 group-hover:text-amber-800 transition-colors">
                   ارسال و بازگشت کالا
                 </span>
 
-                <ChevronDown size={18} className="text-gray-500" />
-              </button>
+                <ChevronDown size={18} className="text-gray-500 transition-transform group-open:rotate-180" />
+              </summary>
 
               <p className="text-sm text-gray-500 leading-relaxed mt-3">
-                Standard shipping is available on all orders. Please check your
-                store&apos;s shipping and return policy for details.
+                ارسال سفارش‌ها طبق روش‌های موجود فروشگاه انجام می‌شود. برای اطلاع از جزئیات، با پشتیبانی فروشگاه تماس بگیرید.
               </p>
-            </div>
+            </details>
           </div>
         </div>
       </div>
@@ -492,7 +479,7 @@ export default function ProductPage({
             className="text-xs font-medium uppercase tracking-wider text-amber-800 hover:text-amber-900 transition-colors inline-flex items-center gap-1"
           >
             مشاهده همه محصولات
-            <ArrowRight size={14} />
+            <ArrowLeft size={14} />
           </Link>
         </div>
 

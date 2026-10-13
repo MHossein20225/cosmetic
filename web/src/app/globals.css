@@ -58,14 +58,28 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: Tahoma, Arial, var(--font-geist-sans), sans-serif;
+  --font-sans: var(--font-vazirmatn), Tahoma, Arial, sans-serif;
+  --font-serif: var(--font-vazirmatn), Tahoma, Arial, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Tahoma, Arial, var(--font-sans), sans-serif;
+  font-family: var(--font-vazirmatn), Tahoma, Arial, sans-serif;
+  line-height: 1.8;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* Letter spacing that suits Latin text makes Persian letters harder to read. */
+html[lang="fa"] [class*="tracking-"] {
+  letter-spacing: normal !important;
 }
 
 /* Existing screens use Tailwind color utilities; remap their palette centrally. */

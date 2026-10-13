@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Vazirmatn } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -18,6 +18,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const vazirmatn = Vazirmatn({
+  variable: "--font-vazirmatn",
+  subsets: ["arabic", "latin"],
+  weight: "variable",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "فروشگاه محصولات آرایشی و بهداشتی",
   description: "محصولات مراقبت از پوست و زیبایی با ترکیبات گیاهی و فرمول‌های سنجیده.",
@@ -29,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="fa" dir="rtl" suppressHydrationWarning className={`${vazirmatn.variable} ${geistSans.variable} ${geistMono.variable}`}>
       <body className="bg-rose-50/40 text-gray-900 antialiased min-h-screen flex flex-col selection:bg-rose-200 selection:text-gray-900">
         <Script
           id="theme-initialization"

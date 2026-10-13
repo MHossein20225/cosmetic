@@ -5,6 +5,7 @@ import { useAdminOrders } from "@/hooks/adminHooks";
 import OrderRow from "@/components/OrderRow";
 import { toast } from "sonner";
 import type { Status } from "@/types";
+import { localizeError } from "@/lib/localizeError";
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -12,13 +13,13 @@ export default function AdminOrdersPage() {
 
   function handleStatus(id: string, status: Status) {
     updateOrderStatus.mutate({ id, status }, {
-      onError: (error) => toast.error(error.message),
+      onError: (error) => toast.error(localizeError(error, "به‌روزرسانی سفارش انجام نشد.")),
       onSuccess: () => toast.success("وضعیت سفارش به‌روزرسانی شد"),
     });
   }
 
   if (isLoading) return <p className="text-sm text-[#85736f]">در حال بارگذاری...</p>;
-  if (isError) return <p role="alert" className="text-red-600">{error?.message || "دریافت سفارشات انجام نشد"}</p>;
+  if (isError) return <p role="alert" className="text-red-600">{localizeError(error, "دریافت سفارش‌ها انجام نشد.")}</p>;
 
 
   return (

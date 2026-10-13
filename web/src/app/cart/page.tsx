@@ -8,6 +8,7 @@ import type { CartItem } from "@/types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatToman } from "@/lib/pricing";
+import { localizeError } from "@/lib/localizeError";
 
 
 
@@ -91,7 +92,7 @@ export default function Cart() {
                     </div>
                     <button
                       aria-label={`حذف ${item.product.name}`}
-                      onClick={() => removeCartItemMutate(item.product.id, { onError: (error) => toast.error(error.message) })}
+                      onClick={() => removeCartItemMutate(item.product.id, { onError: (error) => toast.error(localizeError(error)) })}
                       disabled={updating || removing}
                       className="text-[#85736f] hover:text-[#b44a4a] transition-colors p-1 rounded shrink-0"
                       type="button"
@@ -108,7 +109,7 @@ export default function Cart() {
                           updateCartItemMutate({
                             productId: item.product.id,
                             quantity: item.quantity - 1,
-                          }, { onError: (error) => toast.error(error.message) })
+                          }, { onError: (error) => toast.error(localizeError(error)) })
                         }
                         className="w-8 h-8 flex items-center justify-center text-[#1f1b1a] hover:bg-white rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         type="button"
@@ -125,7 +126,7 @@ export default function Cart() {
                           updateCartItemMutate({
                             productId: item.product.id,
                             quantity: item.quantity + 1,
-                          }, { onError: (error) => toast.error(error.message) })
+                          }, { onError: (error) => toast.error(localizeError(error)) })
                         }
                         className="w-8 h-8 flex items-center justify-center text-[#1f1b1a] hover:bg-white rounded transition-colors"
                         type="button"
@@ -193,7 +194,7 @@ export default function Cart() {
               {/* Total */}
               <div className="flex justify-between items-baseline">
                 <span className="font-serif text-xl text-[#1f1b1a]">مبلغ نهایی</span>
-                <div className="text-right">
+                <div className="text-start">
                   <span className="font-serif text-2xl text-[#1f1b1a]">
                     {formatToman(subtotal)}
                   </span>
